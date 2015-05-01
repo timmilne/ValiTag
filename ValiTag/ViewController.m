@@ -29,6 +29,10 @@ extern DataClass *data;
     
     // Grab the data class
     if (data == nil) data = [DataClass getInstance:FALSE];
+    
+    // Set the status bar to white (iOS bug)
+    // Also had to add the statusBarStyle entry to info.plist
+    self.navigationController.navigationBar.BarStyle = UIStatusBarStyleLightContent;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -39,7 +43,6 @@ extern DataClass *data;
 - (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
     // Update the labels
     [self.barcode_fld setText:data.barcode];
-    
 }
 
 @end
