@@ -43,6 +43,7 @@ extern DataClass *data;
 - (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
     // Update the labels
     [self.barcode_fld setText:data.barcode];
+    [self.rfid_fld setText:data.rfid];
 }
 
 @end

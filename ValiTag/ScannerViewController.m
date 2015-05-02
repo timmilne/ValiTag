@@ -12,8 +12,9 @@
 #import <AVFoundation/AVFoundation.h>
 #import "ScannerViewController.h"
 #import "DataClass.h" // Singleton data class
+#import "Ugi.h"
 
-@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate>
+@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate>
 {
     BOOL _barcodeFound;
     BOOL _rfidFound;
@@ -26,6 +27,8 @@
     
     UIView *_highlightView;
     UILabel *_barcode;
+    
+    UgiInventory *_inventory;
 }
 
 @end
@@ -43,7 +46,7 @@ extern DataClass *data;
     
     // Reset
     _barcodeFound = FALSE;
-    _rfidFound = TRUE;  // TPM Leave this as TRUE until the RFID scanner is implmented
+    _rfidFound = FALSE;
 
     _highlightView = [[UIView alloc] init];
     _highlightView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
@@ -86,6 +89,30 @@ extern DataClass *data;
     
     [self.view bringSubviewToFront:_highlightView];
     [self.view bringSubviewToFront:_barcode];
+
+    
+/*
+    // Register with the default NotificationCenter
+    // TPM this was a typo in the online documentation
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                        selector:@selector(connectionStateChanged:)
+//                                        name:UGROKIT_NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
+//                                        object:nil];
+    // This one compiled, I'm not getting any messages...
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(connectionStateChanged:)
+                                            name:[Ugi singleton].NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
+                                            object:nil];
+*/
+    
+    // Now, in the background, start scanning for RFID tags
+    [[Ugi singleton] openConnection];
+
+
+    // When a tag is found, the inventoryTagFound delegate will be called
+    _inventory = [[Ugi singleton] startInventory:self    // delegate object
+                    withConfiguration:[UgiRfidConfiguration
+                    configWithInventoryType:UGI_INVENTORY_TYPE_LOCATE_DISTANCE]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -125,12 +152,109 @@ extern DataClass *data;
     }
     
     _highlightView.frame = highlightViewRect;
+    
+    // Check to see if an RFID reader is connected
+    if (![Ugi singleton].isConnected) {
+        // Just ignore the RFID reads
+        [data.rfid setString:@"No Reader Found"];
+        _rfidFound = TRUE;
+    }
 
     // If we have a barcode and an RFID tag read, unwind and compare the results
     if (_barcodeFound && _rfidFound) {
         [self performSegueWithIdentifier:@"unwindToContainerVC" sender:self];
     }
 }
+
+// Here are the uGrokit delegates that can be implemented
+
+// New tag found
+- (void) inventoryTagFound:(UgiTag *)tag
+   withDetailedPerReadData:(NSArray *)detailedPerReadData {
+    // tag was found for the first time
+    
+    // Stop the RFID reader
+    [[Ugi singleton].activeInventory stopInventory];
+    
+    // Get the RFID tag2
+    [data.rfid setString:[tag.epc toString]];
+    
+    // Close the connection
+    [[Ugi singleton] closeConnection];
+    
+    _rfidFound = TRUE;
+  
+    // If we have a barcode and an RFID tag read, unwind and compare the results
+    if (_barcodeFound && _rfidFound) {
+        [self performSegueWithIdentifier:@"unwindToContainerVC" sender:self];
+    }
+}
+
+// TPM This isn't being called....
+// See the registration code in viewDidLoad...
+/*
+// State changed method
+- (void)connectionStateChanged:(NSNotification *) notification {
+    // Listen for one of the following:
+    //    UGI_CONNECTION_STATE_NOT_CONNECTED,        //!< Nothing connected to audio port
+    //    UGI_CONNECTION_STATE_CONNECTING,           //!< Something connected to audio port, trying to connect
+    //    UGI_CONNECTION_STATE_INCOMPATIBLE_READER,  //!< Connected to an reader with incompatible firmware
+    //    UGI_CONNECTION_STATE_CONNECTED             //!< Connected to reader
+    NSNumber *n = notification.object;
+    UgiConnectionStates connectionState = n.intValue;
+    if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
+        // Connection was established...
+    }
+    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ||
+        connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
+        // Just ignore the RFID reads
+        [data.rfid setString:@"No Reader Found"];
+        _rfidFound = TRUE;
+    }
+}
+*/
+
+/*
+// Subsequent finds of previously found tag
+- (void) inventoryTagSubsequentFinds:(UgiTag *)tag numFinds:(int)num
+             withDetailedPerReadData:(NSArray *)detailedPerReadData {
+    // tag found count more times
+}
+*/
+
+/*
+// Tag visibility changed
+- (void) inventoryTagChanged:(UgiTag *)tag isFirstFind:(BOOL)firstFind {
+    if (firstFind) {
+        // tag was found for the first time
+    } else if (tag.isVisible) {
+        // tag was not visible, is now visible again
+    } else {
+        // tag is no longer visible
+    }
+}
+*/
+
+/*
+// Tag filtering
+- (BOOL) inventoryFilterTag:(UgiTag *)tag {
+    if (this tag should be ignored) {
+        return YES;
+    } else {
+        return NO;
+    }
+}
+*/
+
+/*
+// List of found tags
+// While inventory is running, the app can access the list of found tags via the tags property of the UgiInventory object.
+// @property (readonly, retain) NSArray *tags;
+// Usage is typically:
+for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
+    // do something with tag
+}
+*/
 
 /*
 #pragma mark - Navigation
