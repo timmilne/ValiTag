@@ -1,3 +1,4 @@
+
 //
 //  ScannerViewController.m
 //  ValiTag
@@ -5,17 +6,28 @@
 //  Created by Tim.Milne on 4/28/15.
 //  Copyright (c) 2015 Tim.Milne. All rights reserved.
 //
-//  This from:
+//  Barcode scanner code from:
 //  http://www.infragistics.com/community/blogs/torrey-betts/archive/2013/10/10/scanning-barcodes-with-ios-7-objective-c.aspx
 //
+//  RFID scanner code from:
+//  http://dev.ugrokit.com/ios.html
+//
 
-#import <AVFoundation/AVFoundation.h>
+#import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "ScannerViewController.h"
-#import "DataClass.h" // Singleton data class
-#import "Ugi.h"
+#import "DataClass.h"                   // Singleton data class
+#import "Ugi.h"                         // uGrokit goodies
+#import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
+#import "EPCConverter.h"                // To convert to binary for comparison
+
+#pragma mark -
+#pragma mark AVFoundationScanSetup
 
 @interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate>
 {
+    __weak IBOutlet UIImageView *_matchView;
+    __weak IBOutlet UIImageView *_noMatchView;
+    
     BOOL _barcodeFound;
     BOOL _rfidFound;
     
@@ -26,93 +38,165 @@
     AVCaptureVideoPreviewLayer *_prevLayer;
     
     UIView *_highlightView;
-    UILabel *_barcode;
+    UILabel *_barcodeLbl;
+    UILabel *_rfidLbl;
+    UILabel *_batteryLifeLbl;
+    UIProgressView *_batteryLifeView;
     
-    UgiInventory *_inventory;
+    EPCEncoder *_encode;
+    EPCConverter *_convert;
+    
+    UgiRfidConfiguration *_config;
 }
 
 @end
 
-// The global data class
+// The singleton data class
 extern DataClass *data;
 
 @implementation ScannerViewController
 
+#define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:0.65]
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Grab the data class
-    if (data == nil) data = [DataClass getInstance:TRUE];
+    // Set the status bar to white (iOS bug)
+    // Also had to add the statusBarStyle entry to info.plist
+    self.navigationController.navigationBar.BarStyle = UIStatusBarStyleLightContent;
+    
+    // Initialize and grab the data class
+    data = [DataClass singleton:TRUE];
     
     // Reset
     _barcodeFound = FALSE;
     _rfidFound = FALSE;
-
+   
+    // TPM: The barcode scanner example built the UI from scratch.  This made it easier to deal with all
+    // the setting programatically, so I've continued with that here...
+    // Barcode highlight view
     _highlightView = [[UIView alloc] init];
     _highlightView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
     _highlightView.layer.borderColor = [UIColor greenColor].CGColor;
     _highlightView.layer.borderWidth = 3;
     [self.view addSubview:_highlightView];
     
-    _barcode = [[UILabel alloc] init];
-    _barcode.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
-    _barcode.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-    _barcode.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-    _barcode.textColor = [UIColor whiteColor];
-    _barcode.textAlignment = NSTextAlignmentCenter;
-    _barcode.text = @"(none)";
-    [self.view addSubview:_barcode];
+    // Barcode label view
+    _barcodeLbl = [[UILabel alloc] init];
+    _barcodeLbl.frame = CGRectMake(0, self.view.bounds.size.height - 120, self.view.bounds.size.width, 40);
+    _barcodeLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _barcodeLbl.textColor = [UIColor whiteColor];
+    _barcodeLbl.textAlignment = NSTextAlignmentCenter;
+    _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
+    [self.view addSubview:_barcodeLbl];
     
+    // RFID label view
+    _rfidLbl = [[UILabel alloc] init];
+    _rfidLbl.frame = CGRectMake(0, self.view.bounds.size.height - 80, self.view.bounds.size.width, 40);
+    _rfidLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _rfidLbl.textColor = [UIColor whiteColor];
+    _rfidLbl.textAlignment = NSTextAlignmentCenter;
+    _rfidLbl.text = @"RFID: (connecting to reader)";
+    [self.view addSubview:_rfidLbl];
+    
+    // Initialize the bar code scanner session, device, input, output, and preview layer
     _session = [[AVCaptureSession alloc] init];
     _device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     NSError *error = nil;
-    
     _input = [AVCaptureDeviceInput deviceInputWithDevice:_device error:&error];
     if (_input) {
         [_session addInput:_input];
     } else {
         NSLog(@"Error: %@", error);
     }
-    
     _output = [[AVCaptureMetadataOutput alloc] init];
     [_output setMetadataObjectsDelegate:self queue:dispatch_get_main_queue()];
     [_session addOutput:_output];
-    
     _output.metadataObjectTypes = [_output availableMetadataObjectTypes];
-    
     _prevLayer = [AVCaptureVideoPreviewLayer layerWithSession:_session];
     _prevLayer.frame = self.view.bounds;
     _prevLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.view.layer addSublayer:_prevLayer];
     
+    // Start scanning for barcodes
     [_session startRunning];
-    
-    [self.view bringSubviewToFront:_highlightView];
-    [self.view bringSubviewToFront:_barcode];
 
+    // Pop the subviews to the front
+    [self.view bringSubviewToFront:_highlightView];
+    [self.view bringSubviewToFront:_barcodeLbl];
     
-/*
+    // Initiliaze the encoder and convert
+    if (_encode == nil) _encode = [EPCEncoder alloc];
+    if (_convert == nil) _convert = [EPCConverter alloc];
+    
     // Register with the default NotificationCenter
-    // TPM this was a typo in the online documentation
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                        selector:@selector(connectionStateChanged:)
-//                                        name:UGROKIT_NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
-//                                        object:nil];
-    // This one compiled, I'm not getting any messages...
+    // TPM there was a typo in the online documentation fixed here
     [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(connectionStateChanged:)
                                             name:[Ugi singleton].NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
                                             object:nil];
-*/
     
-    // Now, in the background, start scanning for RFID tags
+    // Connect to the scanner
     [[Ugi singleton] openConnection];
+    
+    // RFID label
+    _batteryLifeLbl = [[UILabel alloc] init];
+    _batteryLifeLbl.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
+    _batteryLifeLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _batteryLifeLbl.textColor = [UIColor whiteColor];
+    _batteryLifeLbl.textAlignment = NSTextAlignmentCenter;
+    _batteryLifeLbl.text = @"RFID Battery Life";
+    [self.view addSubview:_batteryLifeLbl];
+    
+// TPM this battery life view just doesn't work...
+    // Battery life label
+    _batteryLifeView = [[UIProgressView alloc] init];
+    _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
+    _batteryLifeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _batteryLifeView.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    UgiBatteryInfo batteryInfo;
+    if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
+        _batteryLifeView.progress = batteryInfo.percentRemaining;
+    }
+    [self.view addSubview:_batteryLifeView];
+    
+    // Pop the subviews to the front
+    [self.view bringSubviewToFront:_rfidLbl];
+    [self.view bringSubviewToFront:_batteryLifeLbl];
+    [self.view bringSubviewToFront:_batteryLifeView];
+    
+    // Scanner configuration
+    _config = [UgiRfidConfiguration configWithInventoryType:UGI_INVENTORY_TYPE_INVENTORY_SHORT_RANGE];
+    [_config setVolume:.2];
+    
+    // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
+    [[Ugi singleton] startInventory:self withConfiguration:_config];   // delegate object
+}
 
+- (IBAction)reset:(id)sender {
+    // Reset
+    data = [DataClass singleton:TRUE];
+    _barcodeFound = FALSE;
+    _rfidFound = FALSE;
+    _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
+    _rfidLbl.text = @"RFID: (connecting to reader)";
+    _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
 
-    // When a tag is found, the inventoryTagFound delegate will be called
-    _inventory = [[Ugi singleton] startInventory:self    // delegate object
-                    withConfiguration:[UgiRfidConfiguration
-                    configWithInventoryType:UGI_INVENTORY_TYPE_LOCATE_DISTANCE]];
+// TPM test this
+//    [self.view sendSubviewToBack:_matchView];
+//    [self.view sendSubviewToBack:_noMatchView];
+    [_matchView setHidden:YES];
+    [_noMatchView setHidden:YES];
+    
+    // If no connection open, open it now and start scanning for RFID tags
+    [[Ugi singleton].activeInventory stopInventory];
+    [[Ugi singleton] closeConnection];
+    [[Ugi singleton] openConnection];
+    [[Ugi singleton] startInventory:self withConfiguration:_config];   // delegate object
 }
 
 - (void)didReceiveMemoryWarning {
@@ -142,27 +226,79 @@ extern DataClass *data;
         
         if (detectionString != nil)
         {
-            _barcode.text = detectionString;
-            [data.barcode setString:detectionString];
+            // Grab the barcode
+            _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
+            _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+            
+            // Now, take the dpt, cls and itm, and encode a reference
+            NSString *barcode;
+            barcode = detectionString;
+
+            if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
+            if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
+            NSString *mnf = [barcode substringToIndex:2];
+            if (barcode.length == 12 && [mnf isEqualToString:@"49"]) {
+                NSRange dptRange = {2, 3};
+                NSRange clsRange = {5, 2};
+                NSRange itmRange = {7, 4};
+                NSString *dpt = [barcode substringWithRange:dptRange];
+                NSString *cls = [barcode substringWithRange:clsRange];
+                NSString *itm = [barcode substringWithRange:itmRange];
+                NSString *ser = @"0";
+                
+                [_encode withDpt:dpt cls:cls itm:itm ser:ser];
+                
+                [data.barcode setString:detectionString];
+                [data.encodedBarcode setString:[_encode gid_hex]];
+                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+                [data.dpt setString:dpt];
+                [data.cls setString:cls];
+                [data.itm setString:itm];
+            }
+            else {
+                //Unsupported barcode
+                [data.barcode setString:@"unsupported barcode"];
+                [data.encodedBarcode setString:@"unsupported barcode"];
+                [data.encodedBarcodeBin setString:@"unsupported barcode"];
+                [data.dpt setString:@""];
+                [data.cls setString:@""];
+                [data.itm setString:@""];
+            }
+            
             _barcodeFound = TRUE;
-            break;
         }
         else
-            _barcode.text = @"(none)";
+            _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     }
     
     _highlightView.frame = highlightViewRect;
-    
-    // Check to see if an RFID reader is connected
-    if (![Ugi singleton].isConnected) {
-        // Just ignore the RFID reads
-        [data.rfid setString:@"No Reader Found"];
-        _rfidFound = TRUE;
-    }
 
-    // If we have a barcode and an RFID tag read, unwind and compare the results
-    if (_barcodeFound && _rfidFound) {
-        [self performSegueWithIdentifier:@"unwindToContainerVC" sender:self];
+    // If we have a barcode and an RFID tag read, compare the results
+    if (_barcodeFound && _rfidFound) [self checkForMatch];
+}
+
+- (void)checkForMatch {
+    // Compare the binary formats
+    if ([data.rfidBin length] > 60 && [data.encodedBarcodeBin length] > 60 &&
+        [[data.rfidBin substringToIndex:59] isEqualToString:[data.encodedBarcodeBin substringToIndex:59]]) {
+        // Match: hide the no match and show the match
+// TPM test this
+//        [self.view bringSubviewToFront:_matchView];
+//        [self.view sendSubviewToBack:_noMatchView];
+        [_matchView setHidden:NO];
+        [_noMatchView setHidden:YES];
+        _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+    }
+    else {
+        // No match: hide the match and show the no match
+// TPM test this
+//        [self.view bringSubviewToFront:_noMatchView];
+//        [self.view sendSubviewToBack:_matchView];
+        [_matchView setHidden:YES];
+        [_noMatchView setHidden:NO];
+        _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
     }
 }
 
@@ -178,21 +314,23 @@ extern DataClass *data;
     
     // Get the RFID tag2
     [data.rfid setString:[tag.epc toString]];
+    [data.rfidBin setString:[_convert Hex2Bin:data.rfid]];
+    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
+    _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+
+// TPM Test this
+    // Get the serial number from the tag read
+    [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
     
     // Close the connection
     [[Ugi singleton] closeConnection];
     
     _rfidFound = TRUE;
   
-    // If we have a barcode and an RFID tag read, unwind and compare the results
-    if (_barcodeFound && _rfidFound) {
-        [self performSegueWithIdentifier:@"unwindToContainerVC" sender:self];
-    }
+    // If we have a barcode and an RFID tag read, compare the results
+    if (_barcodeFound && _rfidFound) [self checkForMatch];
 }
 
-// TPM This isn't being called....
-// See the registration code in viewDidLoad...
-/*
 // State changed method
 - (void)connectionStateChanged:(NSNotification *) notification {
     // Listen for one of the following:
@@ -203,16 +341,34 @@ extern DataClass *data;
     NSNumber *n = notification.object;
     UgiConnectionStates connectionState = n.intValue;
     if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
-        // Connection was established...
+        _rfidLbl.text = @"RFID: (scanning for tags)";
+        
+// TPM this just doesn't work, no matter where I try it...
+        // Update the battery life with a new connection
+        UgiBatteryInfo batteryInfo;
+        if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
+            _batteryLifeView.progress = batteryInfo.percentRemaining;
+        }
+        return;
     }
-    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ||
-        connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
-        // Just ignore the RFID reads
-        [data.rfid setString:@"No Reader Found"];
+    if (connectionState == UGI_CONNECTION_STATE_CONNECTING) {
+        _rfidLbl.text = @"RFID: (connecting to reader)";
+        return;
+    }
+    if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
+        // With no reader, just ignore the RFID reads
+        [data.rfid setString:@"RFID: no reader found"];
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidFound = TRUE;
+        return;
+    }
+    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ) {
+        // This gets called after a tag is read and the connection closed
+        // The label and the rfid flag have already been set in inventoryTagFound
+        // Don't do anything here
+        return;
     }
 }
-*/
 
 /*
 // Subsequent finds of previously found tag
@@ -263,7 +419,10 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     // Get the new view controller using [segue destinationViewController].
     // Pass the selected object to the new view controller.
+    
+    // Stop the RFID reader
+    [[Ugi singleton].activeInventory stopInventory];
 }
-*/
+ */
 
 @end

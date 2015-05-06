@@ -11,8 +11,15 @@
 @interface DataClass : NSObject
 
 @property (nonatomic, retain) NSMutableString *barcode;
+@property (nonatomic, retain) NSMutableString *encodedBarcode;
+@property (nonatomic, retain) NSMutableString *encodedBarcodeBin;
 @property (nonatomic, retain) NSMutableString *rfid;
+@property (nonatomic, retain) NSMutableString *rfidBin;
+@property (nonatomic, retain) NSMutableString *dpt;
+@property (nonatomic, retain) NSMutableString *cls;
+@property (nonatomic, retain) NSMutableString *itm;
+@property (nonatomic, retain) NSMutableString *ser;
 
-+(DataClass*)getInstance:(BOOL)reset;
++(DataClass*)singleton:(BOOL)reset;
 
 @end
