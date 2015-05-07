@@ -184,6 +184,8 @@ extern DataClass *data;
     
     [self.view sendSubviewToBack:_matchView];
     [self.view sendSubviewToBack:_noMatchView];
+    _matchView.hidden = YES;
+    _noMatchView.hidden = YES;
     
     // If no connection open, open it now and start scanning for RFID tags
     [[Ugi singleton].activeInventory stopInventory];
@@ -278,6 +280,8 @@ extern DataClass *data;
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
+        _matchView.hidden = NO;
+        _noMatchView.hidden = YES;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     }
@@ -285,6 +289,8 @@ extern DataClass *data;
         // No match: hide the match and show the no match
         [self.view bringSubviewToFront:_noMatchView];
         [self.view sendSubviewToBack:_matchView];
+        _matchView.hidden = YES;
+        _noMatchView.hidden = NO;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
     }
