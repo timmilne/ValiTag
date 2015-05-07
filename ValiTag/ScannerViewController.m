@@ -176,9 +176,12 @@ extern DataClass *data;
     _rfidFound = FALSE;
     _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     _rfidLbl.text = @"RFID: (connecting to reader)";
+    _batteryLifeLbl.text = @"RFID Battery Life";
     _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _batteryLifeView.progress = 0.;
+    
     [self.view sendSubviewToBack:_matchView];
     [self.view sendSubviewToBack:_noMatchView];
     
@@ -328,11 +331,13 @@ extern DataClass *data;
         // Update the battery life with a new connection before starting an inventory
         UgiBatteryInfo batteryInfo;
         if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
-            _batteryLifeView.progress = batteryInfo.percentRemaining;
+            _batteryLifeView.progress = (batteryInfo.percentRemaining)/100.;
             _batteryLifeLbl.backgroundColor =
-                (batteryInfo.percentRemaining > .2)? UIColorFromRGB(0xA4CD39):
-                (batteryInfo.percentRemaining > .05)?UIColorFromRGB(0xCC9900):
-                                                     UIColorFromRGB(0xCC0000);
+                (batteryInfo.percentRemaining > 20)?UIColorFromRGB(0xA4CD39):
+                (batteryInfo.percentRemaining > 5 )?UIColorFromRGB(0xCC9900):
+                                                    UIColorFromRGB(0xCC0000);
+            
+            _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", batteryInfo.percentRemaining];
         }
         
         // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
