@@ -68,26 +68,31 @@
 
 - (NSString *)Dec2Hex:(NSString *)dec {
     // TPM: This did not work with a number longer than 32 bits...
-    //    return [NSString stringWithFormat:@"%X",[dec intValue]];
-    // TPM: So switched to a 64 bit long - watch out if you go longer than that...
+    // So switched to a 64 bit long - watch out if you go longer than that...
     return [NSString stringWithFormat:@"%llX",[dec longLongValue]];
 }
 
 - (NSString *)Hex2Dec:(NSString *)hex {
     NSScanner *scanner = [NSScanner scannerWithString:hex];
-    unsigned int tmpDec;
-    [scanner scanHexInt:&tmpDec];
-    return [NSString stringWithFormat:@"%d",tmpDec];
+    // TPM: This did not work with a number longer than 32 bits...
+    // So switched to a 64 bit long - watch out if you go longer than that...
+    unsigned long long tmpDec;
+    [scanner scanHexLongLong:&tmpDec];
+    return [NSString stringWithFormat:@"%lld",tmpDec];
 }
 
 - (NSString *)Bin2Hex:(NSString *)bin {
     NSString *hex = @"";
+    NSString *paddedBin = bin;
     
     if (_dictBin2Hex == nil) [self initDictionaries];
     
-    for (int i = 0;i < [bin length]; i+=4)
+    // Pad to 4 bit bytes
+    while((paddedBin.length % 4) != 0) paddedBin = [NSString stringWithFormat:@"0%@", paddedBin];
+    
+    for (int i = 0;i < [paddedBin length]; i+=4)
     {
-        NSString *binKey = [bin substringWithRange: NSMakeRange(i, 4)];
+        NSString *binKey = [paddedBin substringWithRange: NSMakeRange(i, 4)];
         hex = [NSString stringWithFormat:@"%@%@",hex,[_dictBin2Hex valueForKey:binKey]];
     }
     return hex;

@@ -139,6 +139,7 @@ extern DataClass *data;
                                             object:nil];
     
     // Connect to the scanner
+    // When notified that the connection is established, get the battery life, and start a scan
     [[Ugi singleton] openConnection];
     
     // RFID label
@@ -151,16 +152,11 @@ extern DataClass *data;
     _batteryLifeLbl.text = @"RFID Battery Life";
     [self.view addSubview:_batteryLifeLbl];
     
-// TPM this battery life view just doesn't work...
     // Battery life label
     _batteryLifeView = [[UIProgressView alloc] init];
-    _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
+    _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 8, self.view.bounds.size.width, 40);
     _batteryLifeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
     _batteryLifeView.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-    UgiBatteryInfo batteryInfo;
-    if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
-        _batteryLifeView.progress = batteryInfo.percentRemaining;
-    }
     [self.view addSubview:_batteryLifeView];
     
     // Pop the subviews to the front
@@ -168,12 +164,9 @@ extern DataClass *data;
     [self.view bringSubviewToFront:_batteryLifeLbl];
     [self.view bringSubviewToFront:_batteryLifeView];
     
-    // Scanner configuration
+    // Set scanner configuration used in startInventory
     _config = [UgiRfidConfiguration configWithInventoryType:UGI_INVENTORY_TYPE_INVENTORY_SHORT_RANGE];
     [_config setVolume:.2];
-    
-    // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
-    [[Ugi singleton] startInventory:self withConfiguration:_config];   // delegate object
 }
 
 - (IBAction)reset:(id)sender {
@@ -185,18 +178,14 @@ extern DataClass *data;
     _rfidLbl.text = @"RFID: (connecting to reader)";
     _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-
-// TPM test this
-//    [self.view sendSubviewToBack:_matchView];
-//    [self.view sendSubviewToBack:_noMatchView];
-    [_matchView setHidden:YES];
-    [_noMatchView setHidden:YES];
+    _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    [self.view sendSubviewToBack:_matchView];
+    [self.view sendSubviewToBack:_noMatchView];
     
     // If no connection open, open it now and start scanning for RFID tags
     [[Ugi singleton].activeInventory stopInventory];
     [[Ugi singleton] closeConnection];
     [[Ugi singleton] openConnection];
-    [[Ugi singleton] startInventory:self withConfiguration:_config];   // delegate object
 }
 
 - (void)didReceiveMemoryWarning {
@@ -226,6 +215,8 @@ extern DataClass *data;
         
         if (detectionString != nil)
         {
+            // Tell the uGrokit to beep...
+            
             // Grab the barcode
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -282,21 +273,15 @@ extern DataClass *data;
     if ([data.rfidBin length] > 60 && [data.encodedBarcodeBin length] > 60 &&
         [[data.rfidBin substringToIndex:59] isEqualToString:[data.encodedBarcodeBin substringToIndex:59]]) {
         // Match: hide the no match and show the match
-// TPM test this
-//        [self.view bringSubviewToFront:_matchView];
-//        [self.view sendSubviewToBack:_noMatchView];
-        [_matchView setHidden:NO];
-        [_noMatchView setHidden:YES];
+        [self.view bringSubviewToFront:_matchView];
+        [self.view sendSubviewToBack:_noMatchView];
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     }
     else {
         // No match: hide the match and show the no match
-// TPM test this
-//        [self.view bringSubviewToFront:_noMatchView];
-//        [self.view sendSubviewToBack:_matchView];
-        [_matchView setHidden:YES];
-        [_noMatchView setHidden:NO];
+        [self.view bringSubviewToFront:_noMatchView];
+        [self.view sendSubviewToBack:_matchView];
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
     }
@@ -318,7 +303,6 @@ extern DataClass *data;
     _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
     _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
 
-// TPM Test this
     // Get the serial number from the tag read
     [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
     
@@ -341,14 +325,19 @@ extern DataClass *data;
     NSNumber *n = notification.object;
     UgiConnectionStates connectionState = n.intValue;
     if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
-        _rfidLbl.text = @"RFID: (scanning for tags)";
-        
-// TPM this just doesn't work, no matter where I try it...
-        // Update the battery life with a new connection
+        // Update the battery life with a new connection before starting an inventory
         UgiBatteryInfo batteryInfo;
         if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
             _batteryLifeView.progress = batteryInfo.percentRemaining;
+            _batteryLifeLbl.backgroundColor =
+                (batteryInfo.percentRemaining > .2)? UIColorFromRGB(0xA4CD39):
+                (batteryInfo.percentRemaining > .05)?UIColorFromRGB(0xCC9900):
+                                                     UIColorFromRGB(0xCC0000);
         }
+        
+        // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
+        _rfidLbl.text = @"RFID: (scanning for tags)";
+        [[Ugi singleton] startInventory:self withConfiguration:_config];
         return;
     }
     if (connectionState == UGI_CONNECTION_STATE_CONNECTING) {
@@ -424,5 +413,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     [[Ugi singleton].activeInventory stopInventory];
 }
  */
+
+- (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
+    // Used for swipe gestures, but can't get this working with my new VC    
+}
 
 @end

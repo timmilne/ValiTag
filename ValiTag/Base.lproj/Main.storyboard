@@ -41,7 +41,7 @@
                                 <rect key="frame" x="100" y="50" width="400" height="400"/>
                             </imageView>
                             <imageView userInteractionEnabled="NO" alpha="0.64999999999999969" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="NoMatchImage" translatesAutoresizingMaskIntoConstraints="NO" id="RG5-V8-l3A">
-                                <rect key="frame" x="100" y="50" width="400" height="400"/>
+                                <rect key="frame" x="100" y="44" width="400" height="400"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -146,6 +146,7 @@
                             </label>
                         </subviews>
                         <color key="backgroundColor" red="0.80000000000000004" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="bGU-aw-6of" secondAttribute="centerX" id="8ce-u2-Naq"/>
                             <constraint firstAttribute="centerX" secondItem="4nj-NI-mk9" secondAttribute="centerX" id="Da7-q6-n0p"/>
@@ -168,9 +169,11 @@
                         <outlet property="scannedBarcodeLbl" destination="OIA-qN-XhF" id="ftJ-Cb-vHt"/>
                         <outlet property="scannedRFIDLbl" destination="07F-Nh-sWc" id="h52-eR-i0R"/>
                         <outlet property="serialLbl" destination="uqC-pr-d2f" id="BUx-E1-oIM"/>
+                        <segue destination="I6q-ON-eg7" kind="unwind" identifier="unwindToContainerVC" unwindAction="unwindToContainerVC:" id="u2n-pj-SdE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="H0a-T4-eGX" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <exit id="I6q-ON-eg7" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
             <point key="canvasLocation" x="264" y="274"/>
         </scene>

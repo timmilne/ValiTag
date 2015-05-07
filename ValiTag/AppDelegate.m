@@ -22,6 +22,10 @@
     // Explicitly create the singleton for the uGrokit reader
     // We'll open the connection when the ScannerViewController is active
     [Ugi createSingleton];
+    
+// TPM - uncomment this for useful debugging info
+//    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
+    
     return YES;
 }
 
