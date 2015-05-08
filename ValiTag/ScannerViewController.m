@@ -27,6 +27,11 @@
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
+    __weak IBOutlet UILabel *_dptLbl;
+    __weak IBOutlet UILabel *_clsLbl;
+    __weak IBOutlet UILabel *_itmLbl;
+    __weak IBOutlet UILabel *_serLbl;
+    __weak IBOutlet UILabel *_encodedBarcodeLbl;
     
     BOOL _barcodeFound;
     BOOL _rfidFound;
@@ -64,6 +69,9 @@ extern DataClass *data;
     // Set the status bar to white (iOS bug)
     // Also had to add the statusBarStyle entry to info.plist
     self.navigationController.navigationBar.BarStyle = UIStatusBarStyleLightContent;
+    
+    // Set the default background color
+    [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
     
     // Initialize and grab the data class
     data = [DataClass singleton:TRUE];
@@ -182,6 +190,15 @@ extern DataClass *data;
     _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _batteryLifeView.progress = 0.;
     
+    // Landscape labels
+    _dptLbl.text = @"Department: ";
+    _clsLbl.text = @"Class: ";
+    _itmLbl.text = @"Item: ";
+    _serLbl.text = @"Serial Num: ";
+    _encodedBarcodeLbl.text = @"(scanning for barcodes)";
+    [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
+    
+    //Match images
     [self.view sendSubviewToBack:_matchView];
     [self.view sendSubviewToBack:_noMatchView];
     _matchView.hidden = YES;
@@ -261,6 +278,11 @@ extern DataClass *data;
                 [data.itm setString:@""];
             }
             
+            // Landscape labels
+            _dptLbl.text = [NSString stringWithFormat:@"Department: %@", data.dpt];
+            _clsLbl.text = [NSString stringWithFormat:@"Class: %@", data.cls];
+            _itmLbl.text = [NSString stringWithFormat:@"Item: %@", data.itm];
+            _encodedBarcodeLbl.text = data.encodedBarcode;
             _barcodeFound = TRUE;
         }
         else
@@ -284,6 +306,7 @@ extern DataClass *data;
         _noMatchView.hidden = YES;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+        [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
     }
     else {
         // No match: hide the match and show the no match
@@ -293,6 +316,7 @@ extern DataClass *data;
         _noMatchView.hidden = NO;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
+        [self.view setBackgroundColor:UIColorFromRGB(0xCC0000)];
     }
 }
 
@@ -314,6 +338,9 @@ extern DataClass *data;
 
     // Get the serial number from the tag read
     [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
+    
+    // Landscape label
+    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
     
     // Close the connection
     [[Ugi singleton] closeConnection];

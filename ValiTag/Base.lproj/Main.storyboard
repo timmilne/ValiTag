@@ -37,14 +37,50 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" alpha="0.64999999999999969" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="MatchImage" translatesAutoresizingMaskIntoConstraints="NO" id="4et-0T-lnu">
+                            <imageView hidden="YES" userInteractionEnabled="NO" alpha="0.64999999999999969" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="MatchImage" translatesAutoresizingMaskIntoConstraints="NO" id="4et-0T-lnu">
                                 <rect key="frame" x="100" y="50" width="400" height="400"/>
                             </imageView>
-                            <imageView userInteractionEnabled="NO" alpha="0.64999999999999969" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="NoMatchImage" translatesAutoresizingMaskIntoConstraints="NO" id="RG5-V8-l3A">
+                            <imageView hidden="YES" userInteractionEnabled="NO" alpha="0.64999999999999969" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" image="NoMatchImage" translatesAutoresizingMaskIntoConstraints="NO" id="RG5-V8-l3A">
                                 <rect key="frame" x="100" y="44" width="400" height="400"/>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="(scanning barcode)" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JwA-zH-Ml1">
+                                <rect key="frame" x="293" y="249" width="268" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Encoded Barcode (hex): " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oUn-hQ-a96">
+                                <rect key="frame" x="328" y="220" width="233" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Department: " textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RR2-P9-QzN">
+                                <rect key="frame" x="344" y="72" width="217" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Class:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hrl-oI-aAS">
+                                <rect key="frame" x="344" y="101" width="217" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Serial Num:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Cnp-MY-G1g">
+                                <rect key="frame" x="344" y="159" width="217" height="24"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Item:" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZSb-qc-GsN">
+                                <rect key="frame" x="344" y="130" width="217" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="backgroundColor" red="0.80000000000000004" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstAttribute="centerX" secondItem="4et-0T-lnu" secondAttribute="centerX" id="vUn-3X-GcU"/>
@@ -64,8 +100,13 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="_clsLbl" destination="Hrl-oI-aAS" id="EyJ-cR-gHn"/>
+                        <outlet property="_dptLbl" destination="RR2-P9-QzN" id="WU0-HI-Kq7"/>
+                        <outlet property="_encodedBarcodeLbl" destination="JwA-zH-Ml1" id="Sjd-W6-2RT"/>
+                        <outlet property="_itmLbl" destination="ZSb-qc-GsN" id="40R-oY-QES"/>
                         <outlet property="_matchView" destination="4et-0T-lnu" id="Xq2-Ss-Ly7"/>
                         <outlet property="_noMatchView" destination="RG5-V8-l3A" id="YGS-2O-Nk2"/>
+                        <outlet property="_serLbl" destination="Cnp-MY-G1g" id="xvs-xZ-fz3"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="BGu-eU-pR5" userLabel="First Responder" sceneMemberID="firstResponder"/>
