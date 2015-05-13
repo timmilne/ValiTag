@@ -13,8 +13,8 @@
 //  http://dev.ugrokit.com/ios.html
 //
 
-#import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "ScannerViewController.h"
+#import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "DataClass.h"                   // Singleton data class
 #import "Ugi.h"                         // uGrokit goodies
 #import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
@@ -27,31 +27,31 @@
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
-    __weak IBOutlet UILabel *_dptLbl;
-    __weak IBOutlet UILabel *_clsLbl;
-    __weak IBOutlet UILabel *_itmLbl;
-    __weak IBOutlet UILabel *_serLbl;
-    __weak IBOutlet UILabel *_encodedBarcodeLbl;
+    __weak IBOutlet UILabel     *_dptLbl;
+    __weak IBOutlet UILabel     *_clsLbl;
+    __weak IBOutlet UILabel     *_itmLbl;
+    __weak IBOutlet UILabel     *_serLbl;
+    __weak IBOutlet UILabel     *_encodedBarcodeLbl;
     
-    BOOL _barcodeFound;
-    BOOL _rfidFound;
+    BOOL                        _barcodeFound;
+    BOOL                        _rfidFound;
     
-    AVCaptureSession *_session;
-    AVCaptureDevice *_device;
-    AVCaptureDeviceInput *_input;
-    AVCaptureMetadataOutput *_output;
-    AVCaptureVideoPreviewLayer *_prevLayer;
+    AVCaptureSession            *_session;
+    AVCaptureDevice             *_device;
+    AVCaptureDeviceInput        *_input;
+    AVCaptureMetadataOutput     *_output;
+    AVCaptureVideoPreviewLayer  *_prevLayer;
     
-    UIView *_highlightView;
-    UILabel *_barcodeLbl;
-    UILabel *_rfidLbl;
-    UILabel *_batteryLifeLbl;
-    UIProgressView *_batteryLifeView;
+    UIView                      *_highlightView;
+    UILabel                     *_barcodeLbl;
+    UILabel                     *_rfidLbl;
+    UILabel                     *_batteryLifeLbl;
+    UIProgressView              *_batteryLifeView;
     
-    EPCEncoder *_encode;
-    EPCConverter *_convert;
+    EPCEncoder                  *_encode;
+    EPCConverter                *_convert;
     
-    UgiRfidConfiguration *_config;
+    UgiRfidConfiguration        *_config;
 }
 
 @end
@@ -135,7 +135,7 @@ extern DataClass *data;
     [self.view bringSubviewToFront:_highlightView];
     [self.view bringSubviewToFront:_barcodeLbl];
     
-    // Initiliaze the encoder and convert
+    // Initiliaze the encoder and converter
     if (_encode == nil) _encode = [EPCEncoder alloc];
     if (_convert == nil) _convert = [EPCConverter alloc];
     
