@@ -8,6 +8,7 @@
 
 #import "DataViewController.h"
 #import "DataClass.h"                   // Singleton data class
+#import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
 
 @interface DataViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *scannedBarcodeLbl;
@@ -32,7 +33,7 @@ extern DataClass *data;
 
     // Set the status bar to white (iOS bug)
     // Also had to add the statusBarStyle entry to info.plist
-    self.navigationController.navigationBar.BarStyle = UIStatusBarStyleLightContent;
+    self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
     
     // We better not have gotten here without doing this, but just in case...
     data = [DataClass singleton:FALSE];
@@ -49,6 +50,18 @@ extern DataClass *data;
     // Compare the binary formats
     if ([data.rfidBin length] > 60 && [data.encodedBarcodeBin length] > 60 &&
         [[data.rfidBin substringToIndex:59] isEqualToString:[data.encodedBarcodeBin substringToIndex:59]]) {
+        // Match: hide the no match and show the match
+        [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
+    }
+    else {
+        // No match: hide the match and show the no match
+        [self.view setBackgroundColor:UIColorFromRGB(0xCC0000)];
+    }
+    
+    // Compare the binary formats: SGTIN = 58, GID = 60
+    int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    if ([data.rfidBin length] > length && [data.encodedBarcodeBin length] > length &&
+        [[data.rfidBin substringToIndex:(length-1)] isEqualToString:[data.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
     }

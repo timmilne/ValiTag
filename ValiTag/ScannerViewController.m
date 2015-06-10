@@ -68,7 +68,7 @@ extern DataClass *data;
     
     // Set the status bar to white (iOS bug)
     // Also had to add the statusBarStyle entry to info.plist
-    self.navigationController.navigationBar.BarStyle = UIStatusBarStyleLightContent;
+    self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
     
     // Set the default background color
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
@@ -242,21 +242,18 @@ extern DataClass *data;
             // Grab the barcode
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
-            
-            // Now, take the dpt, cls and itm, and encode a reference
             NSString *barcode;
             barcode = detectionString;
 
+            // Quick length checks, chop to 12 for now (remove leading zeros)
             if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
             if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
-            NSString *mnf = [barcode substringToIndex:2];
-            if (barcode.length == 12 && [mnf isEqualToString:@"49"]) {
-                NSRange dptRange = {2, 3};
-                NSRange clsRange = {5, 2};
-                NSRange itmRange = {7, 4};
-                NSString *dpt = [barcode substringWithRange:dptRange];
-                NSString *cls = [barcode substringWithRange:clsRange];
-                NSString *itm = [barcode substringWithRange:itmRange];
+            
+            // Owned brand, check against the DPCI encoded in a GID
+            if (barcode.length == 12 && [[barcode substringToIndex:2] isEqualToString:@"49"]) {
+                NSString *dpt = [barcode substringWithRange:NSMakeRange(2,3)];
+                NSString *cls = [barcode substringWithRange:NSMakeRange(5,2)];
+                NSString *itm = [barcode substringWithRange:NSMakeRange(7,4)];
                 NSString *ser = @"0";
                 
                 [_encode withDpt:dpt cls:cls itm:itm ser:ser];
@@ -268,8 +265,24 @@ extern DataClass *data;
                 [data.cls setString:cls];
                 [data.itm setString:itm];
             }
+            
+            // National brand, check against GTIN (barcode) encoded in SGTIN
+            else if (([data.rfidBin length] > 0) &&
+                     ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
+                     ((barcode.length == 12) || (barcode.length == 14))) {
+                
+                [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
+                
+                [data.barcode setString:detectionString];
+                [data.encodedBarcode setString:[_encode sgtin_hex]];
+                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+                [data.dpt setString:@""];
+                [data.cls setString:@""];
+                [data.itm setString:@""];
+            }
+            
+            //Unsupported barcode
             else {
-                //Unsupported barcode
                 [data.barcode setString:@"unsupported barcode"];
                 [data.encodedBarcode setString:@"unsupported barcode"];
                 [data.encodedBarcodeBin setString:@"unsupported barcode"];
@@ -296,9 +309,10 @@ extern DataClass *data;
 }
 
 - (void)checkForMatch {
-    // Compare the binary formats
-    if ([data.rfidBin length] > 60 && [data.encodedBarcodeBin length] > 60 &&
-        [[data.rfidBin substringToIndex:59] isEqualToString:[data.encodedBarcodeBin substringToIndex:59]]) {
+    // Compare the binary formats: SGTIN = 58, GID = 60
+    int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    if ([data.rfidBin length] > length && [data.encodedBarcodeBin length] > length &&
+        [[data.rfidBin substringToIndex:(length-1)] isEqualToString:[data.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
