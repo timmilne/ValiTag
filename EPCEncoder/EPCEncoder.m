@@ -168,7 +168,7 @@
     // SGTIN - e.g. urn:epc:tag:sgtin-96:1.04928100.08570.12345
     //              3030259932085E8000003039
     //
-    // A UPC 12 can be promoted to an EAN14 by right shifting and adding to zeros to the front.
+    // A UPC 12 can be promoted to an EAN14 by right shifting and adding two zeros to the front.
     // One of these zeroes is an indicator digit, which is '0' for items, and this will be moved
     // to the front of the item reference.  The other is the country code, and can be omitted
     // for US and Canada, as those country codes are '0'.
@@ -176,7 +176,7 @@
     // Here is how to pack the SGTIN-96 into the EPC
     // 8 bits are the header: 00110000 or 0x30 (SGTIN-96)
     // 3 bits are the Filter: 001 (1 POS Item)
-    // 3 bits are the Partition: See above (from the RFID tag)
+    // 3 bits are the Partition: See above (from the scanned RFID tag)
     // 20-40 bits are the manager number: 0 + digits 3-x of gtin
     // 24-4 bits are the 0 prefixed Item: 0 + digits x-13 of gtin (NO CHECK DIGIT)
     // 38 bits are the serial number (guaranteed 11 digits)
@@ -206,6 +206,7 @@
     //    NSString *GSTIN_Bin_Ken_str = [self Hex2Bin:SGTIN_Hex_Ken_str];
 }
 
+// Quick Check Digit calculator
 - (NSString *)calculateCheckDigit:(NSString *)upc {
     int sumOdd = 0;
     int sumEven = 0;
