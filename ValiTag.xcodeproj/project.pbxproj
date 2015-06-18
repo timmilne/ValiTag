@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
 		B7191BCD1AF6C9500086DB7E /* EPCConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* EPCConverter.m */; };
 		B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */; };
 		B71C5C5B1AF000C700D28341 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5A1AF000C700D28341 /* main.m */; };
@@ -37,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B7117D3B1B31FFF900968426 /* NavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavigationController.h; sourceTree = "<group>"; };
+		B7117D3C1B31FFF900968426 /* NavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
 		B7191BC91AF6C9500086DB7E /* EPCConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCConverter.h; sourceTree = "<group>"; };
 		B7191BCA1AF6C9500086DB7E /* EPCConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCConverter.m; sourceTree = "<group>"; };
 		B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCEncoder.h; sourceTree = "<group>"; };
@@ -153,6 +156,8 @@
 				B79B20121AFA6FD800B7900D /* DataViewController.m */,
 				B71C5C801AF0108C00D28341 /* ScannerViewController.h */,
 				B71C5C811AF0108C00D28341 /* ScannerViewController.m */,
+				B7117D3B1B31FFF900968426 /* NavigationController.h */,
+				B7117D3C1B31FFF900968426 /* NavigationController.m */,
 				B71C5C621AF000C700D28341 /* Main.storyboard */,
 				B71C5C651AF000C700D28341 /* Images.xcassets */,
 				B71C5C671AF000C700D28341 /* LaunchScreen.xib */,
@@ -314,6 +319,7 @@
 				B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */,
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
 				B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */,
+				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
 				B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */,
 			);
