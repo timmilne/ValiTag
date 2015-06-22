@@ -59,7 +59,7 @@ extern DataClass *data;
     }
     
     // Compare the binary formats: SGTIN = 58, GID = 60
-    int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    int length = ([data.rfidBin length] > 0 && [[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
     if ([data.rfidBin length] > length && [data.encodedBarcodeBin length] > length &&
         [[data.rfidBin substringToIndex:(length-1)] isEqualToString:[data.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
