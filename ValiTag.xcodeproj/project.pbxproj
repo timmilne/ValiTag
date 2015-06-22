@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
+		B7117D501B38A5E900968426 /* include in Resources */ = {isa = PBXBuildFile; fileRef = B7117D4F1B38A5E900968426 /* include */; };
+		B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D511B38A7A800968426 /* libUGrokItApi.a */; };
 		B7191BCD1AF6C9500086DB7E /* EPCConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* EPCConverter.m */; };
 		B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */; };
 		B71C5C5B1AF000C700D28341 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5A1AF000C700D28341 /* main.m */; };
@@ -17,10 +19,9 @@
 		B71C5C691AF000C700D28341 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B71C5C671AF000C700D28341 /* LaunchScreen.xib */; };
 		B71C5C751AF000C700D28341 /* ValiTagTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C741AF000C700D28341 /* ValiTagTests.m */; };
 		B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */; };
-		B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.m */; };
+		B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.mm */; };
 		B71C5C851AF0254800D28341 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C841AF0254800D28341 /* DataClass.m */; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
-		B7B18C231AF423AE00025761 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C221AF423AE00025761 /* libUGrokItApi.a */; };
 		B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C341AF425B100025761 /* AudioToolbox.framework */; };
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
@@ -40,6 +41,8 @@
 /* Begin PBXFileReference section */
 		B7117D3B1B31FFF900968426 /* NavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavigationController.h; sourceTree = "<group>"; };
 		B7117D3C1B31FFF900968426 /* NavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
+		B7117D4F1B38A5E900968426 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = uGrokit/include; sourceTree = "<group>"; };
+		B7117D511B38A7A800968426 /* libUGrokItApi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libUGrokItApi.a; path = uGrokit/libUGrokItApi.a; sourceTree = "<group>"; };
 		B7191BC91AF6C9500086DB7E /* EPCConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCConverter.h; sourceTree = "<group>"; };
 		B7191BCA1AF6C9500086DB7E /* EPCConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCConverter.m; sourceTree = "<group>"; };
 		B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCEncoder.h; sourceTree = "<group>"; };
@@ -57,27 +60,11 @@
 		B71C5C741AF000C700D28341 /* ValiTagTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ValiTagTests.m; sourceTree = "<group>"; };
 		B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		B71C5C801AF0108C00D28341 /* ScannerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScannerViewController.h; sourceTree = "<group>"; };
-		B71C5C811AF0108C00D28341 /* ScannerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerViewController.m; sourceTree = "<group>"; };
+		B71C5C811AF0108C00D28341 /* ScannerViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ScannerViewController.mm; sourceTree = "<group>"; };
 		B71C5C831AF0254800D28341 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataClass.h; sourceTree = "<group>"; };
 		B71C5C841AF0254800D28341 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataClass.m; sourceTree = "<group>"; };
 		B79B20111AFA6FD800B7900D /* DataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataViewController.h; sourceTree = "<group>"; };
 		B79B20121AFA6FD800B7900D /* DataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataViewController.m; sourceTree = "<group>"; };
-		B7B18C221AF423AE00025761 /* libUGrokItApi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libUGrokItApi.a; sourceTree = "<group>"; };
-		B7B18C251AF423B900025761 /* Ugi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi.h; sourceTree = "<group>"; };
-		B7B18C261AF423B900025761 /* Ugi_antennaTuning.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi_antennaTuning.h; sourceTree = "<group>"; };
-		B7B18C271AF423B900025761 /* Ugi_firmwareUpdate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi_firmwareUpdate.h; sourceTree = "<group>"; };
-		B7B18C281AF423B900025761 /* Ugi_regions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi_regions.h; sourceTree = "<group>"; };
-		B7B18C291AF423B900025761 /* UgiConfigurationDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiConfigurationDelegate.h; sourceTree = "<group>"; };
-		B7B18C2A1AF423B900025761 /* UgiDefaultConfigurationUi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiDefaultConfigurationUi.h; sourceTree = "<group>"; };
-		B7B18C2B1AF423B900025761 /* UgiEpc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiEpc.h; sourceTree = "<group>"; };
-		B7B18C2C1AF423B900025761 /* UgiInventory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiInventory.h; sourceTree = "<group>"; };
-		B7B18C2D1AF423B900025761 /* UgiInventoryDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiInventoryDelegate.h; sourceTree = "<group>"; };
-		B7B18C2E1AF423B900025761 /* UgiJson.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiJson.h; sourceTree = "<group>"; };
-		B7B18C2F1AF423B900025761 /* UgiRfidConfiguration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiRfidConfiguration.h; sourceTree = "<group>"; };
-		B7B18C301AF423B900025761 /* UgiTag.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiTag.h; sourceTree = "<group>"; };
-		B7B18C311AF423B900025761 /* UgiTagReadState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiTagReadState.h; sourceTree = "<group>"; };
-		B7B18C321AF423B900025761 /* UgiUiUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiUiUtil.h; sourceTree = "<group>"; };
-		B7B18C331AF423B900025761 /* UgiUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UgiUtil.h; sourceTree = "<group>"; };
 		B7B18C341AF425B100025761 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B7B18C361AF425BC00025761 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		B7B18C381AF425C900025761 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -89,11 +76,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7B18C231AF423AE00025761 /* libUGrokItApi.a in Frameworks */,
 				B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */,
 				B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */,
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
+				B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */,
 				B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -108,6 +95,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B7117D411B38920E00968426 /* uGrokit */ = {
+			isa = PBXGroup;
+			children = (
+				B7117D511B38A7A800968426 /* libUGrokItApi.a */,
+				B7117D4F1B38A5E900968426 /* include */,
+				B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */,
+				B7B18C341AF425B100025761 /* AudioToolbox.framework */,
+				B7B18C361AF425BC00025761 /* MediaPlayer.framework */,
+				B7B18C381AF425C900025761 /* SystemConfiguration.framework */,
+				B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */,
+			);
+			name = uGrokit;
+			sourceTree = "<group>";
+		};
 		B7191BC81AF6C9500086DB7E /* EPCEncoder */ = {
 			isa = PBXGroup;
 			children = (
@@ -126,13 +127,7 @@
 				B7191BC81AF6C9500086DB7E /* EPCEncoder */,
 				B71C5C711AF000C700D28341 /* ValiTagTests */,
 				B71C5C561AF000C700D28341 /* Products */,
-				B7B18C221AF423AE00025761 /* libUGrokItApi.a */,
-				B7B18C241AF423B900025761 /* include */,
-				B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */,
-				B7B18C341AF425B100025761 /* AudioToolbox.framework */,
-				B7B18C361AF425BC00025761 /* MediaPlayer.framework */,
-				B7B18C381AF425C900025761 /* SystemConfiguration.framework */,
-				B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */,
+				B7117D411B38920E00968426 /* uGrokit */,
 			);
 			sourceTree = "<group>";
 		};
@@ -155,7 +150,7 @@
 				B79B20111AFA6FD800B7900D /* DataViewController.h */,
 				B79B20121AFA6FD800B7900D /* DataViewController.m */,
 				B71C5C801AF0108C00D28341 /* ScannerViewController.h */,
-				B71C5C811AF0108C00D28341 /* ScannerViewController.m */,
+				B71C5C811AF0108C00D28341 /* ScannerViewController.mm */,
 				B7117D3B1B31FFF900968426 /* NavigationController.h */,
 				B7117D3C1B31FFF900968426 /* NavigationController.m */,
 				B71C5C621AF000C700D28341 /* Main.storyboard */,
@@ -190,28 +185,6 @@
 				B71C5C731AF000C700D28341 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		B7B18C241AF423B900025761 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				B7B18C251AF423B900025761 /* Ugi.h */,
-				B7B18C261AF423B900025761 /* Ugi_antennaTuning.h */,
-				B7B18C271AF423B900025761 /* Ugi_firmwareUpdate.h */,
-				B7B18C281AF423B900025761 /* Ugi_regions.h */,
-				B7B18C291AF423B900025761 /* UgiConfigurationDelegate.h */,
-				B7B18C2A1AF423B900025761 /* UgiDefaultConfigurationUi.h */,
-				B7B18C2B1AF423B900025761 /* UgiEpc.h */,
-				B7B18C2C1AF423B900025761 /* UgiInventory.h */,
-				B7B18C2D1AF423B900025761 /* UgiInventoryDelegate.h */,
-				B7B18C2E1AF423B900025761 /* UgiJson.h */,
-				B7B18C2F1AF423B900025761 /* UgiRfidConfiguration.h */,
-				B7B18C301AF423B900025761 /* UgiTag.h */,
-				B7B18C311AF423B900025761 /* UgiTagReadState.h */,
-				B7B18C321AF423B900025761 /* UgiUiUtil.h */,
-				B7B18C331AF423B900025761 /* UgiUtil.h */,
-			);
-			path = include;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -297,6 +270,7 @@
 				B71C5C641AF000C700D28341 /* Main.storyboard in Resources */,
 				B71C5C691AF000C700D28341 /* LaunchScreen.xib in Resources */,
 				B71C5C661AF000C700D28341 /* Images.xcassets in Resources */,
+				B7117D501B38A5E900968426 /* include in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -321,7 +295,7 @@
 				B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */,
 				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
-				B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */,
+				B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -450,10 +424,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
+					"$(PROJECT_DIR)/uGrokit",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/**";
 			};
 			name = Debug;
 		};
@@ -466,10 +442,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
+					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
+					"$(PROJECT_DIR)/uGrokit",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/**";
 			};
 			name = Release;
 		};

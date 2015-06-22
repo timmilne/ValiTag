@@ -1,4 +1,3 @@
-
 //
 //  ScannerViewController.m
 //  ValiTag
@@ -16,7 +15,8 @@
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "DataClass.h"                   // Singleton data class
-#import "Ugi.h"                         // uGrokit goodies
+#import "Ugi.h"                         // uGrokit reader
+//#import "RcpApi2.h"                     // Arete reader
 #import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
 #import "EPCConverter.h"                // To convert to binary for comparison
 
@@ -68,7 +68,11 @@ extern DataClass *data;
     
     // Set the status bar to white (iOS bug)
     // Also had to add the statusBarStyle entry to info.plist
+#ifdef __cplusplus
+    self.navigationController.navigationBar.barStyle = static_cast<UIBarStyle>(UIStatusBarStyleLightContent);
+#else
     self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
+#endif
     
     // Set the default background color
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
@@ -355,6 +359,8 @@ extern DataClass *data;
     }
 }
 
+#pragma mark - uGrokit
+
 // Here are the uGrokit delegates that can be implemented
 
 // New tag found
@@ -394,7 +400,11 @@ extern DataClass *data;
     //    UGI_CONNECTION_STATE_INCOMPATIBLE_READER,  //!< Connected to an reader with incompatible firmware
     //    UGI_CONNECTION_STATE_CONNECTED             //!< Connected to reader
     NSNumber *n = notification.object;
+#ifdef __cplusplus
+    UgiConnectionStates connectionState = static_cast<UgiConnectionStates>(n.intValue);
+#else
     UgiConnectionStates connectionState = n.intValue;
+#endif
     if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
         // Update the battery life with a new connection before starting an inventory
         UgiBatteryInfo batteryInfo;

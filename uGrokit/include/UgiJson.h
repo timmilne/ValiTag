@@ -27,7 +27,7 @@
 @property (nonatomic, retain) NSDictionary *properties;
 @property (nonatomic, retain) NSArray *idFieldNames;
 
-+ (UgiJsonClassInfo *) infoForClass:(Class)class;
++ (UgiJsonClassInfo *) infoForClass:(Class)_class;
 
 @end
 
@@ -93,7 +93,7 @@ static const NSString *UGI_CONTEXT_PROPERTY_NAME = @"_ugi_propertyName";
 // Parse object from JSON stream
 //
 + (id) fromJsonStream:(NSInputStream *)stream
-                class:(Class)class
+                class:(Class)_class
               context:(NSDictionary *)context
                 error:(NSError **)error;
 
@@ -101,7 +101,7 @@ static const NSString *UGI_CONTEXT_PROPERTY_NAME = @"_ugi_propertyName";
 // Parse object from JSON data
 //
 + (id) fromJson:(NSData *)data
-          class:(Class)class
+          class:(Class)_class
         context:(NSDictionary *)context
           error:(NSError **)error;
 
@@ -109,7 +109,7 @@ static const NSString *UGI_CONTEXT_PROPERTY_NAME = @"_ugi_propertyName";
 // Parse object from JSON string
 //
 + (id) fromJsonString:(NSString *)string
-                class:(Class)class
+                class:(Class)_class
               context:(NSDictionary *)context
                 error:(NSError **)error;
 
