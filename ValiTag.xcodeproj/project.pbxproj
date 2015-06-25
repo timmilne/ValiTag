@@ -10,7 +10,8 @@
 		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
 		B7117D501B38A5E900968426 /* include in Resources */ = {isa = PBXBuildFile; fileRef = B7117D4F1B38A5E900968426 /* include */; };
 		B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D511B38A7A800968426 /* libUGrokItApi.a */; };
-		B7191BCD1AF6C9500086DB7E /* EPCConverter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* EPCConverter.m */; };
+		B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D551B38BCAF00968426 /* libAreteAudio.a */; };
+		B7191BCD1AF6C9500086DB7E /* Converter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* Converter.m */; };
 		B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */; };
 		B71C5C5B1AF000C700D28341 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5A1AF000C700D28341 /* main.m */; };
 		B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5D1AF000C700D28341 /* AppDelegate.m */; };
@@ -43,8 +44,12 @@
 		B7117D3C1B31FFF900968426 /* NavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
 		B7117D4F1B38A5E900968426 /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = uGrokit/include; sourceTree = "<group>"; };
 		B7117D511B38A7A800968426 /* libUGrokItApi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libUGrokItApi.a; path = uGrokit/libUGrokItApi.a; sourceTree = "<group>"; };
-		B7191BC91AF6C9500086DB7E /* EPCConverter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCConverter.h; sourceTree = "<group>"; };
-		B7191BCA1AF6C9500086DB7E /* EPCConverter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCConverter.m; sourceTree = "<group>"; };
+		B7117D551B38BCAF00968426 /* libAreteAudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAreteAudio.a; path = Arete/libAreteAudio.a; sourceTree = "<group>"; };
+		B7117D571B38BCBB00968426 /* RcpApi2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RcpApi2.h; path = Arete/include/RcpApi2.h; sourceTree = "<group>"; };
+		B7117D581B38BCC300968426 /* AudioMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioMgr.h; path = Arete/include/AudioMgr.h; sourceTree = "<group>"; };
+		B7117D5B1B38FE5300968426 /* EpcConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EpcConverter.h; path = Arete/include/EpcConverter.h; sourceTree = "<group>"; };
+		B7191BC91AF6C9500086DB7E /* Converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Converter.h; sourceTree = "<group>"; };
+		B7191BCA1AF6C9500086DB7E /* Converter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Converter.m; sourceTree = "<group>"; };
 		B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCEncoder.h; sourceTree = "<group>"; };
 		B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoder.m; sourceTree = "<group>"; };
 		B71C5C551AF000C700D28341 /* ValiTag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValiTag.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,6 +84,7 @@
 				B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */,
 				B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */,
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
+				B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
 				B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */,
 				B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */,
@@ -109,11 +115,30 @@
 			name = uGrokit;
 			sourceTree = "<group>";
 		};
+		B7117D591B38BCCB00968426 /* Arete */ = {
+			isa = PBXGroup;
+			children = (
+				B7117D551B38BCAF00968426 /* libAreteAudio.a */,
+				B7117D5A1B38BCD400968426 /* include */,
+			);
+			name = Arete;
+			sourceTree = "<group>";
+		};
+		B7117D5A1B38BCD400968426 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				B7117D571B38BCBB00968426 /* RcpApi2.h */,
+				B7117D581B38BCC300968426 /* AudioMgr.h */,
+				B7117D5B1B38FE5300968426 /* EpcConverter.h */,
+			);
+			name = include;
+			sourceTree = "<group>";
+		};
 		B7191BC81AF6C9500086DB7E /* EPCEncoder */ = {
 			isa = PBXGroup;
 			children = (
-				B7191BC91AF6C9500086DB7E /* EPCConverter.h */,
-				B7191BCA1AF6C9500086DB7E /* EPCConverter.m */,
+				B7191BC91AF6C9500086DB7E /* Converter.h */,
+				B7191BCA1AF6C9500086DB7E /* Converter.m */,
 				B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */,
 				B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */,
 			);
@@ -128,6 +153,7 @@
 				B71C5C711AF000C700D28341 /* ValiTagTests */,
 				B71C5C561AF000C700D28341 /* Products */,
 				B7117D411B38920E00968426 /* uGrokit */,
+				B7117D591B38BCCB00968426 /* Arete */,
 			);
 			sourceTree = "<group>";
 		};
@@ -288,7 +314,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7191BCD1AF6C9500086DB7E /* EPCConverter.m in Sources */,
+				B7191BCD1AF6C9500086DB7E /* Converter.m in Sources */,
 				B71C5C851AF0254800D28341 /* DataClass.m in Sources */,
 				B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */,
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
@@ -426,6 +452,7 @@
 					"$(PROJECT_DIR)",
 					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
+					"$(PROJECT_DIR)/Arete",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -444,6 +471,7 @@
 					"$(PROJECT_DIR)",
 					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
+					"$(PROJECT_DIR)/Arete",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

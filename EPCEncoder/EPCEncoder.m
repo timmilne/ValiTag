@@ -16,10 +16,10 @@
 @import Foundation;
 
 // Convert
-#import "EPCConverter.h"
+#import "Converter.h"
 
 @implementation EPCEncoder {
-    EPCConverter *_convert;
+    Converter *_convert;
 }
 
 // Encode with DPCI
@@ -29,7 +29,7 @@
         ser:(NSString *)ser {
     
     // Have we done this?
-    if (_convert == nil) _convert = [EPCConverter alloc];
+    if (_convert == nil) _convert = [Converter alloc];
     
     // Set the inputs
     [self setDpt:dpt];
@@ -95,7 +95,7 @@
         partBin:(NSString *)partBin{
     
     // Have we done this?
-    if (_convert == nil) _convert = [EPCConverter alloc];
+    if (_convert == nil) _convert = [Converter alloc];
     
     // Set the inputs
     [self setDpt:@""];
