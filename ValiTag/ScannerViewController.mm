@@ -17,9 +17,9 @@
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "DataClass.h"                   // Singleton data class
-#import "Ugi.h"                         // uGrokit reader
 #import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
 #import "Converter.h"                   // To convert to binary for comparison
+#import "Ugi.h"                         // uGrokit reader
 #import "RcpApi2.h"                     // Arete reader
 #import "AudioMgr.h"                    // Arete reader
 #import "EpcConverter.h"                // Arete reader - converter
@@ -79,7 +79,7 @@ extern DataClass *data;
     
     // Set the status bar to white (iOS bug)
     // Also had to add the statusBarStyle entry to info.plist
-// cplusplus stuff for Arete, and C++ compiler
+// cplusplus stuff for Arete, and its C++ compiler
 #ifdef __cplusplus
     self.navigationController.navigationBar.barStyle = static_cast<UIBarStyle>(UIStatusBarStyleLightContent);
 #else
@@ -96,8 +96,9 @@ extern DataClass *data;
     _barcodeFound = FALSE;
     _rfidFound = FALSE;
    
-    // TPM: The barcode scanner example built the UI from scratch.  This made it easier to deal with all
-    // the setting programatically, so I've continued with that here...
+// TPM: The barcode scanner example built the UI from scratch.  This made it easier to deal with all
+// the settings programatically, so I've continued with that here...
+    
     // Barcode highlight view
     _highlightView = [[UIView alloc] init];
     _highlightView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin|UIViewAutoresizingFlexibleBottomMargin;
@@ -226,7 +227,7 @@ extern DataClass *data;
 {
     [super viewDidAppear:animated];
     
-    // I can skip the rest, but this line is key
+    // You can skip the rest, but this line is key
     [RcpApi2 sharedInstance].delegate = self;
     
 #ifndef __IPHONE_7_0
@@ -265,6 +266,11 @@ extern DataClass *data;
     }
 }
 
+/**
+ Reset the interface and reader and begin reading.
+ 
+ Press the reset button after reading the first tag to read another.
+ */
 - (IBAction)reset:(id)sender {
     // Reset
     data = [DataClass singleton:TRUE];
@@ -291,22 +297,30 @@ extern DataClass *data;
     [self.view sendSubviewToBack:_noMatchView];
     _matchView.hidden = YES;
     _noMatchView.hidden = YES;
-
-// TPM - do I need to do something special here based on which reader is connected?
-// No, if I disable this here, there is no way to force the reader to connect and scan a tag, and set itself.
+    
+// TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
+// to the other.  If you change readers, restart the app.  The first reader to scan a tag sets the
+// reader flags for that session.  Until then, both protocols are attempted until a tag is found.
+    
     // If no connection open, open it now and start scanning for RFID tags
-    // uGrokit Reader
-    _ugiReaderConnected = FALSE;
-    [[Ugi singleton].activeInventory stopInventory];
-    [[Ugi singleton] closeConnection];
-    [[Ugi singleton] openConnection];
+    
+    // Arete Reader (do this first to suppress a uGrokit bug)
+    if (!_ugiReaderConnected) {
+        [[RcpApi2 sharedInstance] stopReadTags];
+        [[RcpApi2 sharedInstance] close];
+        [[RcpApi2 sharedInstance] open];
+        if ([[RcpApi2 sharedInstance] startReadTags:_stopTagCount mtime:_stopTime repeatCycle:_stopCycle]) {
+            _rfidLbl.text = @"RFID: (scanning for tags)";
+        }
+    }
 
-    // Arete Reader
-    _areteReaderConnected = FALSE;
-    [[RcpApi2 sharedInstance] stopReadTags];
-    [[RcpApi2 sharedInstance] close];
-    [[RcpApi2 sharedInstance] open];
-    [[RcpApi2 sharedInstance] startReadTags:_stopTagCount mtime:_stopTime repeatCycle:_stopCycle];
+    // uGrokit Reader
+    if (!_areteReaderConnected) {
+        [[Ugi singleton].activeInventory stopInventory];
+        [[Ugi singleton] closeConnection];
+        [[Ugi singleton] openConnection];  // Once the reader is connected, this triggers the tag reads
+        _rfidLbl.text = @"RFID: (connecting to reader)";
+    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -314,6 +328,11 @@ extern DataClass *data;
     // Dispose of any resources that can be recreated.
 }
 
+/**
+ Check the barcode and RFID tag for a match.
+ 
+ Only called after both have been scanned.
+ */
 - (void)checkForMatch {
     // Compare the binary formats: SGTIN = 58, GID = 60
     int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
@@ -439,7 +458,11 @@ extern DataClass *data;
 // uGrokit delegates
 #pragma mark - uGrokit
 
-// New tag found
+/**
+ New tag found with uGrokit reader.
+ 
+ Display the tag, stop the reader, disable the other reader, and check for a match.
+ */
 - (void) inventoryTagFound:(UgiTag *)tag
    withDetailedPerReadData:(NSArray *)detailedPerReadData {
     // tag was found for the first time
@@ -464,6 +487,10 @@ extern DataClass *data;
     
     // After the first read, we know which reader
     _rfidFound = TRUE;
+    if (!_ugiReaderConnected) {
+        [[RcpApi2 sharedInstance] stopReadTags];
+        [[RcpApi2 sharedInstance] close];
+    }
     _ugiReaderConnected = TRUE;
     _areteReaderConnected = FALSE;
   
@@ -471,9 +498,13 @@ extern DataClass *data;
     if (_barcodeFound && _rfidFound) [self checkForMatch];
 }
 
-// State changed method
+/**
+ State changed with uGrokit reader.
+ 
+ Adjust to the new state, ignore if Arete reader being used.
+ */
 - (void)connectionStateChanged:(NSNotification *) notification {
-    // This method conflicts with Arete's plugged call
+    // This delegate conflicts with Arete's plugged call
     // If we are using the Arete reader, skip this
     if (_areteReaderConnected) return;
     
@@ -572,6 +603,11 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 // Arete delegates
 #pragma mark - Arete
 
+/**
+ New tag found with Arete reader.
+ 
+ Display the tag, stop the reader, disable the other reader, and check for a match.
+ */
 - (void)tagReceived:(NSData*)pcEpc
 {
     dispatch_async(dispatch_get_main_queue(),
@@ -595,10 +631,14 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
                        
                        // Close the connection
-                       [[Ugi singleton] closeConnection];
+                       if ([[RcpApi2 sharedInstance] isOpened]) [[RcpApi2 sharedInstance] close];
                        
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
+                       if (!_areteReaderConnected) {
+                           [[Ugi singleton].activeInventory stopInventory];
+                           [[Ugi singleton] closeConnection];
+                       }
                        _ugiReaderConnected = FALSE;
                        _areteReaderConnected = TRUE;
                        
@@ -639,6 +679,11 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 }
  */
 
+/**
+ Reset received for Arete reader.
+ 
+ This will be called by both readers until Arete disabled.
+ */
 - (void)resetReceived
 {
     NSLog(@"resetReceived");
@@ -659,7 +704,11 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     NSLog(@"err_received [%02X]\n", ((const uint8_t *)errCode.bytes)[0]);
 }
 
-
+/**
+ Set the battery life of the Arete reader.
+ 
+ This delegate is called at random intervals.
+ */
 - (void)batteryStateReceived:(NSData*)data
 {
     Byte *b = (Byte*) [data bytes];
@@ -692,9 +741,14 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    });
 }
 
+/**
+ Somthing was plugged into the audio jack (Arete reader).
+ 
+ Start reading tags, ignore if Arete reader being used.
+ */
 - (void)plugged:(BOOL)plug
 {
-    // This method conflicts with uGrokit's connectionStateChanged call
+    // This delegate conflicts with uGrokit's connectionStateChanged call
     // If we are using the uGrokit reader, skip this
     if (_ugiReaderConnected) return;
     
