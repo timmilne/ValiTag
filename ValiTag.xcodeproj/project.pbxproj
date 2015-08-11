@@ -27,6 +27,10 @@
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
 		B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */; };
+		B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */; };
+		B7DA2FCA1B79950800F4C2FC /* include in Resources */ = {isa = PBXBuildFile; fileRef = B7DA2FC91B79950800F4C2FC /* include */; };
+		B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */; };
+		B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +78,10 @@
 		B7B18C361AF425BC00025761 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		B7B18C381AF425C900025761 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = usr/lib/libz.1.2.5.dylib; sourceTree = SDKROOT; };
+		B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libsymbolrfid-sdk.a"; path = "Zebra/libsymbolrfid-sdk.a"; sourceTree = "<group>"; };
+		B7DA2FC91B79950800F4C2FC /* include */ = {isa = PBXFileReference; lastKnownFileType = folder; name = include; path = Zebra/include; sourceTree = "<group>"; };
+		B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +96,9 @@
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
 				B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */,
 				B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */,
+				B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */,
+				B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */,
+				B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,6 +165,7 @@
 				B71C5C561AF000C700D28341 /* Products */,
 				B7117D411B38920E00968426 /* uGrokit */,
 				B7117D591B38BCCB00968426 /* Arete */,
+				B7DA2FC61B7994D100F4C2FC /* Zebra */,
 			);
 			sourceTree = "<group>";
 		};
@@ -211,6 +223,17 @@
 				B71C5C731AF000C700D28341 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		B7DA2FC61B7994D100F4C2FC /* Zebra */ = {
+			isa = PBXGroup;
+			children = (
+				B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */,
+				B7DA2FC91B79950800F4C2FC /* include */,
+				B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */,
+				B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */,
+			);
+			name = Zebra;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -296,6 +319,7 @@
 				B71C5C641AF000C700D28341 /* Main.storyboard in Resources */,
 				B71C5C691AF000C700D28341 /* LaunchScreen.xib in Resources */,
 				B71C5C661AF000C700D28341 /* Images.xcassets in Resources */,
+				B7DA2FCA1B79950800F4C2FC /* include in Resources */,
 				B7117D501B38A5E900968426 /* include in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -453,10 +477,11 @@
 					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Arete",
+					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/** Zebra/include/**";
 			};
 			name = Debug;
 		};
@@ -472,10 +497,11 @@
 					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Arete",
+					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/** Zebra/include/**";
 			};
 			name = Release;
 		};
