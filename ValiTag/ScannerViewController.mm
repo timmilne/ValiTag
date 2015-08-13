@@ -15,7 +15,7 @@
 //  http://arete-mobile.com/arete_down.html
 //
 //  Zebra RFID scanner code from:
-//
+//  http://compass.motorolasolutions.com
 
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
@@ -59,7 +59,6 @@
     EPCEncoder                  *_encode;
     Converter                   *_convert;
     
-    
     BOOL                        _ugiReaderConnected;
     UgiRfidConfiguration        *_ugiConfig;
     
@@ -71,10 +70,10 @@
     BOOL                        _zebraReaderConnected;
     id <srfidISdkApi>           _rfidSdkApi;
     int                         _readerID;
-    srfidStartTriggerConfig     *_start_trigger_cfg;
-    srfidStopTriggerConfig      *_stop_trigger_cfg;
-    srfidReportConfig           *_report_cfg;
-    srfidAccessConfig           *_access_cfg;
+    srfidStartTriggerConfig     *_startTriggerConfig;
+    srfidStopTriggerConfig      *_stopTriggerConfig;
+    srfidReportConfig           *_reportConfig;
+    srfidAccessConfig           *_accessConfig;
 }
 
 @end
@@ -290,47 +289,47 @@ extern DataClass *data;
     [_rfidSdkApi srfidSetDelegate:self];
     
     int notifications_mask = SRFID_EVENT_READER_APPEARANCE |
-        SRFID_EVENT_READER_DISAPPEARANCE | // Not needed
+        SRFID_EVENT_READER_DISAPPEARANCE | // Not really needed
         SRFID_EVENT_SESSION_ESTABLISHMENT |
-        SRFID_EVENT_SESSION_TERMINATION; // Not needed
+        SRFID_EVENT_SESSION_TERMINATION; // Not really needed
     [_rfidSdkApi srfidSetOperationalMode:SRFID_OPMODE_MFI];
     [_rfidSdkApi srfidSubsribeForEvents:notifications_mask];
     [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_READ | SRFID_EVENT_MASK_STATUS)]; // Event mask not needed
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_PROXIMITY)]; // Not needed
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_TRIGGER)]; // Not needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_PROXIMITY)]; // Not really needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_TRIGGER)]; // Not really needed
     [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_BATTERY)];
     [_rfidSdkApi srfidEnableAvailableReadersDetection:YES];
     [_rfidSdkApi srfidEnableAutomaticSessionReestablishment:YES];
     
-    _start_trigger_cfg  = [[srfidStartTriggerConfig alloc] init];
-    _stop_trigger_cfg   = [[srfidStopTriggerConfig alloc] init];
-    _report_cfg         = [[srfidReportConfig alloc] init];
-    _access_cfg         = [[srfidAccessConfig alloc] init];
+    _startTriggerConfig = [[srfidStartTriggerConfig alloc] init];
+    _stopTriggerConfig  = [[srfidStopTriggerConfig alloc] init];
+    _reportConfig       = [[srfidReportConfig alloc] init];
+    _accessConfig       = [[srfidAccessConfig alloc] init];
     
     // Configure start and stop triggers parameters to start and stop actual
     // operation immediately on a corresponding response
-    [_start_trigger_cfg setStartOnHandheldTrigger:NO];
-    [_start_trigger_cfg setStartDelay:0];
-    [_start_trigger_cfg setRepeatMonitoring:NO];
-    [_stop_trigger_cfg setStopOnHandheldTrigger:NO];
-    [_stop_trigger_cfg setStopOnTimeout:NO];
-    [_stop_trigger_cfg setStopOnTagCount:NO];
-    [_stop_trigger_cfg setStopOnInventoryCount:NO];
-    [_stop_trigger_cfg setStopOnAccessCount:NO];
+    [_startTriggerConfig setStartOnHandheldTrigger:NO];
+    [_startTriggerConfig setStartDelay:0];
+    [_startTriggerConfig setRepeatMonitoring:NO];
+    [_stopTriggerConfig setStopOnHandheldTrigger:NO];
+    [_stopTriggerConfig setStopOnTimeout:NO];
+    [_stopTriggerConfig setStopOnTagCount:NO];
+    [_stopTriggerConfig setStopOnInventoryCount:NO];
+    [_stopTriggerConfig setStopOnAccessCount:NO];
     
     // Configure report parameters to report RSSI, Channel Index, Phase and PC fields
-    [_report_cfg setIncPC:YES];
-    [_report_cfg setIncPhase:YES];
-    [_report_cfg setIncChannelIndex:YES];
-    [_report_cfg setIncRSSI:YES];
-    [_report_cfg setIncTagSeenCount:NO];
-    [_report_cfg setIncFirstSeenTime:NO];
-    [_report_cfg setIncLastSeenTime:NO];
+    [_reportConfig setIncPC:YES];
+    [_reportConfig setIncPhase:YES];
+    [_reportConfig setIncChannelIndex:YES];
+    [_reportConfig setIncRSSI:YES];
+    [_reportConfig setIncTagSeenCount:NO];
+    [_reportConfig setIncFirstSeenTime:NO];
+    [_reportConfig setIncLastSeenTime:NO];
     
     // Configure access parameters to perform the operation with 27.0 dbm antenna
     // power level without application of pre-filters
-    [_access_cfg setPower:270];
-    [_access_cfg setDoSelect:NO];
+    [_accessConfig setPower:270];
+    [_accessConfig setDoSelect:NO];
     
     // See if a reader is already connected and try and read a tag
     [self zebraRapidRead];
@@ -351,7 +350,6 @@ extern DataClass *data;
         {
             SRFID_RESULT result = [_rfidSdkApi srfidEstablishCommunicationSession:[reader getReaderID]];
             if (result == SRFID_RESULT_SUCCESS) {
-                _readerID = [reader getReaderID];
                 break;
             }
         }
@@ -366,7 +364,7 @@ extern DataClass *data;
             // Set start trigger parameters
             SRFID_RESULT result = [_rfidSdkApi
                                    srfidSetStartTriggerConfiguration:_readerID
-                                   aStartTriggeConfig:_start_trigger_cfg
+                                   aStartTriggeConfig:_startTriggerConfig
                                    aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
                 // Start trigger configuration applied
@@ -378,8 +376,8 @@ extern DataClass *data;
             
             // Set stop trigger parameters
             result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_readerID
-                                                 aStopTriggeConfig:_stop_trigger_cfg
-                                                    aStatusMessage:&error_response];
+                                                 aStopTriggeConfig:_stopTriggerConfig
+                                                 aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
                 // Stop trigger configuration applied
                 NSLog(@"Zebra Stop trigger configuration has been set\n");
@@ -393,9 +391,9 @@ extern DataClass *data;
             
             // Request performing of rapid read operation
             result = [_rfidSdkApi srfidStartRapidRead:_readerID
-                                        aReportConfig:_report_cfg
-                                        aAccessConfig:_access_cfg
-                                       aStatusMessage:&error_response];
+                                        aReportConfig:_reportConfig
+                                        aAccessConfig:_accessConfig
+                                        aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
                 NSLog(@"Zebra Request succeed\n");
                 
@@ -1034,7 +1032,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 }
 
 /**
- None of these are needed
+ None of these are really needed
  */
 - (void)srfidEventReaderDisappeared:(int)readerID
 {
@@ -1043,7 +1041,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 - (void)srfidEventCommunicationSessionTerminated:(int)readerID
 {
     NSLog(@"Zebra Reader Session Terminated - ID: %d", readerID);
-}- (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event
+}
+- (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event
 {
     NSLog(@"Zebra Reader - Event status notify: %d", event);
 }
