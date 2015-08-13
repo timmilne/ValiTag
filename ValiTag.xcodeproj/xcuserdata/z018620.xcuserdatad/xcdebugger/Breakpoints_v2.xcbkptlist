@@ -10,13 +10,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1016"
-            endingLineNumber = "1016"
-            landmarkName = "-srfidEventBatteryNotity:aBatteryEvent:"
-            landmarkType = "5">
+            startingLineNumber = "1020"
+            endingLineNumber = "1020"
+            landmarkName = "@implementation ScannerViewController"
+            landmarkType = "3">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "359"
-            endingLineNumber = "359"
+            startingLineNumber = "351"
+            endingLineNumber = "351"
             landmarkName = "-zebraRapidRead"
             landmarkType = "5">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "401"
-            endingLineNumber = "401"
+            startingLineNumber = "393"
+            endingLineNumber = "393"
             landmarkName = "-zebraRapidRead"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "976"
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "483"
-            endingLineNumber = "483"
+            startingLineNumber = "475"
+            endingLineNumber = "475"
             landmarkName = "-reset:"
             landmarkType = "5">
          </BreakpointContent>
@@ -90,12 +90,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ValiTag/ScannerViewController.mm"
-            timestampString = "461143392.14177"
+            timestampString = "461170875.542691"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
-            landmarkName = "-zebraRapidRead"
+            startingLineNumber = "336"
+            endingLineNumber = "336"
+            landmarkName = "-initializeZebraRfidSdkWithAppSettings"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ValiTag/ScannerViewController.mm"
+            timestampString = "461170699.241127"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1037"
+            endingLineNumber = "1037"
+            landmarkName = "-srfidEventBatteryNotity:aBatteryEvent:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

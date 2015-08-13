@@ -647,9 +647,13 @@ extern DataClass *data;
     
     // After the first read, we know which reader
     _rfidFound = TRUE;
-    if (!_ugiReaderConnected) {
+    if (!_ugiReaderConnected && !_zebraReaderConnected) { // Disable Arete
         [[RcpApi2 sharedInstance] stopReadTags];
         [[RcpApi2 sharedInstance] close];
+    }
+    if (!_ugiReaderConnected && !_areteReaderConnected) { // Disable Zebra
+        [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+        [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
     }
     _ugiReaderConnected = TRUE;
     _areteReaderConnected = FALSE;
@@ -796,9 +800,13 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
-                       if (!_areteReaderConnected) {
+                       if (!_areteReaderConnected && !_zebraReaderConnected) { // Disable Ugi
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
+                       }
+                       if (!_ugiReaderConnected && !_areteReaderConnected) { // Disable Zebra
+                           [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+                           [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
                        }
                        _ugiReaderConnected = FALSE;
                        _areteReaderConnected = TRUE;
@@ -895,9 +903,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    ^{
                        _batteryLifeView.progress = battery/100.;
                        _batteryLifeLbl.backgroundColor =
-                       (battery > 20)?UIColorFromRGB(0xA4CD39):
-                       (battery > 5 )?UIColorFromRGB(0xCC9900):
-                       UIColorFromRGB(0xCC0000);
+                            (battery > 20)?UIColorFromRGB(0xA4CD39):
+                            (battery > 5 )?UIColorFromRGB(0xCC9900):
+                                           UIColorFromRGB(0xCC0000);
                        
                        _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
                    });
@@ -991,9 +999,13 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
-                       if (!_ugiReaderConnected) {
+                       if (!_ugiReaderConnected && !_zebraReaderConnected) { // Disable Arete
                            [[RcpApi2 sharedInstance] stopReadTags];
                            [[RcpApi2 sharedInstance] close];
+                       }
+                       if (!_areteReaderConnected && !_zebraReaderConnected) { // Disable Ugi
+                           [[Ugi singleton].activeInventory stopInventory];
+                           [[Ugi singleton] closeConnection];
                        }
                        _ugiReaderConnected = FALSE;
                        _areteReaderConnected = FALSE;
@@ -1023,9 +1035,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    ^{
                        _batteryLifeView.progress = battery/100.;
                        _batteryLifeLbl.backgroundColor =
-                       (battery > 20)?UIColorFromRGB(0xA4CD39):
-                       (battery > 5 )?UIColorFromRGB(0xCC9900):
-                       UIColorFromRGB(0xCC0000);
+                            (battery > 20)?UIColorFromRGB(0xA4CD39):
+                            (battery > 5 )?UIColorFromRGB(0xCC9900):
+                                           UIColorFromRGB(0xCC0000);
                        
                        _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
                    });
