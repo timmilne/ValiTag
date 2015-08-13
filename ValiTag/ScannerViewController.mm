@@ -314,7 +314,8 @@ extern DataClass *data;
     [_stopTriggerConfig setStopOnHandheldTrigger:NO];
     [_stopTriggerConfig setStopOnTimeout:NO];
     [_stopTriggerConfig setStopOnTagCount:NO];
-    [_stopTriggerConfig setStopOnInventoryCount:NO];
+    [_stopTriggerConfig setStopOnInventoryCount:YES];
+    [_stopTriggerConfig setStopTagCount:1];
     [_stopTriggerConfig setStopOnAccessCount:NO];
     
     // Configure report parameters to report RSSI, Channel Index, Phase and PC fields
@@ -325,18 +326,14 @@ extern DataClass *data;
     [_reportConfig setIncTagSeenCount:NO];
     [_reportConfig setIncFirstSeenTime:NO];
     [_reportConfig setIncLastSeenTime:NO];
-    
-    // Configure access parameters to perform the operation with 27.0 dbm antenna
-    // power level without application of pre-filters
-    [_accessConfig setPower:270];
+
+    // Configure access parameters to perform the operation with 12.0 dbm antenna
+    // power level without application of pre-filters for close proximity
+    [_accessConfig setPower:120];
     [_accessConfig setDoSelect:NO];
     
     // See if a reader is already connected and try and read a tag
     [self zebraRapidRead];
-}
-- (void)zebraReaderProblem
-{
-    NSLog(@"%@", @"Zebra Problem with the reader connection");
 }
 
 - (void)zebraRapidRead
@@ -362,10 +359,9 @@ extern DataClass *data;
         
         do {
             // Set start trigger parameters
-            SRFID_RESULT result = [_rfidSdkApi
-                                   srfidSetStartTriggerConfiguration:_readerID
-                                   aStartTriggeConfig:_startTriggerConfig
-                                   aStatusMessage:&error_response];
+            SRFID_RESULT result = [_rfidSdkApi srfidSetStartTriggerConfiguration:_readerID
+                                                 aStartTriggeConfig:_startTriggerConfig
+                                                 aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
                 // Start trigger configuration applied
                 NSLog(@"Zebra Start trigger configuration has been set\n");
@@ -395,7 +391,7 @@ extern DataClass *data;
                                         aAccessConfig:_accessConfig
                                         aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
-                NSLog(@"Zebra Request succeed\n");
+                NSLog(@"Zebra Request succeeded\n");
                 
                 _rfidLbl.text = @"RFID: (scanning for tags)";
                 _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
@@ -453,8 +449,8 @@ extern DataClass *data;
 // reader flags for that session.  Until then, all protocols are attempted until a tag is found.
     
     // If no connection open, open it now and start scanning for RFID tags
+    // Before we know what reader, we try all, so test the double negative
 
-// TPM now that this is three way, test this carefully with all readers...
     // Arete Reader (do this first to suppress a uGrokit bug)
     if (!_ugiReaderConnected && !_zebraReaderConnected) {
         [[RcpApi2 sharedInstance] stopReadTags];
@@ -491,9 +487,12 @@ extern DataClass *data;
 /**
  Check the barcode and RFID tag for a match.
  
- Only called after both have been scanned.
+ Only proceed if both scanned and available.
  */
 - (void)checkForMatch {
+    // Are we ready to check?
+    if (!_barcodeFound || !_rfidFound) return;
+    
     // Compare the binary formats: SGTIN = 58, GID = 60
     int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
     if ([data.rfidBin length] > length && [data.encodedBarcodeBin length] > length &&
@@ -544,8 +543,6 @@ extern DataClass *data;
         
         if (detectionString != nil)
         {
-            // Tell the uGrokit to beep...
-            
             // Grab the barcode
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -611,8 +608,8 @@ extern DataClass *data;
     
     _highlightView.frame = highlightViewRect;
 
-    // If we have a barcode and an RFID tag read, compare the results
-    if (_barcodeFound && _rfidFound) [self checkForMatch];
+    // Check for match
+    [self checkForMatch];
 }
 
 // uGrokit delegates
@@ -647,11 +644,9 @@ extern DataClass *data;
     
     // After the first read, we know which reader
     _rfidFound = TRUE;
-    if (!_ugiReaderConnected && !_zebraReaderConnected) { // Disable Arete
+    if (!_ugiReaderConnected) {
         [[RcpApi2 sharedInstance] stopReadTags];
         [[RcpApi2 sharedInstance] close];
-    }
-    if (!_ugiReaderConnected && !_areteReaderConnected) { // Disable Zebra
         [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
         [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
     }
@@ -659,8 +654,8 @@ extern DataClass *data;
     _areteReaderConnected = FALSE;
     _zebraReaderConnected = FALSE;
   
-    // If we have a barcode and an RFID tag read, compare the results
-    if (_barcodeFound && _rfidFound) [self checkForMatch];
+    // Check for match
+    [self checkForMatch];
 }
 
 /**
@@ -800,11 +795,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
-                       if (!_areteReaderConnected && !_zebraReaderConnected) { // Disable Ugi
+                       if (!_areteReaderConnected) {
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
-                       }
-                       if (!_ugiReaderConnected && !_areteReaderConnected) { // Disable Zebra
                            [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
                            [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
                        }
@@ -812,8 +805,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _areteReaderConnected = TRUE;
                        _zebraReaderConnected = FALSE;
                        
-                       // If we have a barcode and an RFID tag read, compare the results
-                       if (_barcodeFound && _rfidFound) [self checkForMatch];
+                       // Check for match
+                       [self checkForMatch];
                    });
 }
 
@@ -856,7 +849,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
  */
 - (void)resetReceived
 {
-    NSLog(@"resetReceived");
+    NSLog(@"Arete Reader Reset Received");
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        self->_rfidLbl.text = @"RFID: (scanning for tags)";
@@ -866,12 +859,12 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 
 - (void)successReceived:(uint8_t)commandCode
 {
-    NSLog(@"ack_received [%02X]\n",commandCode);
+    NSLog(@"Arete Reader Acknowledgement Received [%02X]\n",commandCode);
 }
 
 - (void)failureReceived:(NSData*)errCode
 {
-    NSLog(@"err_received [%02X]\n", ((const uint8_t *)errCode.bytes)[0]);
+    NSLog(@"Arete Reader Error Received [%02X]\n", ((const uint8_t *)errCode.bytes)[0]);
 }
 
 /**
@@ -999,11 +992,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
-                       if (!_ugiReaderConnected && !_zebraReaderConnected) { // Disable Arete
+                       if (!_zebraReaderConnected) {
                            [[RcpApi2 sharedInstance] stopReadTags];
                            [[RcpApi2 sharedInstance] close];
-                       }
-                       if (!_areteReaderConnected && !_zebraReaderConnected) { // Disable Ugi
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
                        }
@@ -1011,8 +1002,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _areteReaderConnected = FALSE;
                        _zebraReaderConnected = TRUE;
     
-                       // If we have a barcode and an RFID tag read, compare the results
-                       if (_barcodeFound && _rfidFound) [self checkForMatch];
+                       // Check for match
+                       [self checkForMatch];
                    });
 }
 

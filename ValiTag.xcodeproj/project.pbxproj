@@ -474,7 +474,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Arete",
 					"$(PROJECT_DIR)/Zebra",
@@ -494,7 +493,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"/Users/z018620/Dev/RFID/Arete/DevKits/ARETE+POP_SDK+Material%28above+iOS+7.0+and+above+Android+2.3.3%29_20150325/iPhone/AretePopSDK/AretePop",
 					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Arete",
 					"$(PROJECT_DIR)/Zebra",
