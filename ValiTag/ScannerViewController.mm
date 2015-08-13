@@ -13,6 +13,9 @@
 //
 //  Arete RFID scanner code from:
 //  http://arete-mobile.com/arete_down.html
+//
+//  Zebra RFID scanner code from:
+//
 
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
@@ -23,11 +26,12 @@
 #import "RcpApi2.h"                     // Arete reader
 #import "AudioMgr.h"                    // Arete reader
 #import "EpcConverter.h"                // Arete reader - converter
+#import "RfidSdkFactory.h"              // Zebra reader
 
 #pragma mark -
 #pragma mark AVFoundationScanSetup
 
-@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate, RcpDelegate2>
+@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate, RcpDelegate2, srfidISdkApiDelegate>
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
@@ -63,6 +67,14 @@
     int                         _stopTagCount;
     int                         _stopTime;
     int                         _stopCycle;
+    
+    BOOL                        _zebraReaderConnected;
+    id <srfidISdkApi>           _rfidSdkApi;
+    int                         _readerID;
+    srfidStartTriggerConfig     *_start_trigger_cfg;
+    srfidStopTriggerConfig      *_stop_trigger_cfg;
+    srfidReportConfig           *_report_cfg;
+    srfidAccessConfig           *_access_cfg;
 }
 
 @end
@@ -199,6 +211,11 @@ extern DataClass *data;
     _stopTagCount = 1;
     _stopTime = 0;
     _stopCycle = 0;
+    
+    // Set Zebra scanner configurations used in srfidStartRapidRead
+    _zebraReaderConnected = FALSE;
+    _readerID = -1;
+    [self initializeZebraRfidSdkWithAppSettings];
 }
 
 // Adjust the preview layer on orientation changes
@@ -266,6 +283,141 @@ extern DataClass *data;
     }
 }
 
+// This for Zebra
+- (void)initializeZebraRfidSdkWithAppSettings
+{
+    _rfidSdkApi = [srfidSdkFactory createRfidSdkApiInstance];
+    [_rfidSdkApi srfidSetDelegate:self];
+    
+    int notifications_mask = SRFID_EVENT_READER_APPEARANCE |
+        SRFID_EVENT_READER_DISAPPEARANCE | // Not needed
+        SRFID_EVENT_SESSION_ESTABLISHMENT |
+        SRFID_EVENT_SESSION_TERMINATION; // Not needed
+    [_rfidSdkApi srfidSetOperationalMode:SRFID_OPMODE_MFI];
+    [_rfidSdkApi srfidSubsribeForEvents:notifications_mask];
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_READ | SRFID_EVENT_MASK_STATUS)]; // Event mask not needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_PROXIMITY)]; // Not needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_TRIGGER)]; // Not needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_BATTERY)];
+    [_rfidSdkApi srfidEnableAvailableReadersDetection:YES];
+    [_rfidSdkApi srfidEnableAutomaticSessionReestablishment:YES];
+    
+    _start_trigger_cfg  = [[srfidStartTriggerConfig alloc] init];
+    _stop_trigger_cfg   = [[srfidStopTriggerConfig alloc] init];
+    _report_cfg         = [[srfidReportConfig alloc] init];
+    _access_cfg         = [[srfidAccessConfig alloc] init];
+    
+    // Configure start and stop triggers parameters to start and stop actual
+    // operation immediately on a corresponding response
+    [_start_trigger_cfg setStartOnHandheldTrigger:NO];
+    [_start_trigger_cfg setStartDelay:0];
+    [_start_trigger_cfg setRepeatMonitoring:NO];
+    [_stop_trigger_cfg setStopOnHandheldTrigger:NO];
+    [_stop_trigger_cfg setStopOnTimeout:NO];
+    [_stop_trigger_cfg setStopOnTagCount:NO];
+    [_stop_trigger_cfg setStopOnInventoryCount:NO];
+    [_stop_trigger_cfg setStopOnAccessCount:NO];
+    
+    // Configure report parameters to report RSSI, Channel Index, Phase and PC fields
+    [_report_cfg setIncPC:YES];
+    [_report_cfg setIncPhase:YES];
+    [_report_cfg setIncChannelIndex:YES];
+    [_report_cfg setIncRSSI:YES];
+    [_report_cfg setIncTagSeenCount:NO];
+    [_report_cfg setIncFirstSeenTime:NO];
+    [_report_cfg setIncLastSeenTime:NO];
+    
+    // Configure access parameters to perform the operation with 27.0 dbm antenna
+    // power level without application of pre-filters
+    [_access_cfg setPower:270];
+    [_access_cfg setDoSelect:NO];
+    
+    // See if a reader is already connected and try and read a tag
+    [self zebraRapidRead];
+}
+- (void)zebraReaderProblem
+{
+    NSLog(@"%@", @"Zebra Problem with the reader connection");
+}
+
+- (void)zebraRapidRead
+{
+    if (_readerID < 0) {
+        // Get an available reader (must connect with bluetooth settings outside of app)
+        NSMutableArray *readers = [[NSMutableArray alloc] init];
+        [_rfidSdkApi srfidGetAvailableReadersList:&readers];
+
+        for (srfidReaderInfo *reader in readers)
+        {
+            SRFID_RESULT result = [_rfidSdkApi srfidEstablishCommunicationSession:[reader getReaderID]];
+            if (result == SRFID_RESULT_SUCCESS) {
+                _readerID = [reader getReaderID];
+                break;
+            }
+        }
+    }
+    else {
+        [_rfidSdkApi srfidRequestBatteryStatus:_readerID];
+        _zebraReaderConnected = TRUE;
+        
+        NSString *error_response = nil;
+        
+        do {
+            // Set start trigger parameters
+            SRFID_RESULT result = [_rfidSdkApi
+                                   srfidSetStartTriggerConfiguration:_readerID
+                                   aStartTriggeConfig:_start_trigger_cfg
+                                   aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                // Start trigger configuration applied
+                NSLog(@"Zebra Start trigger configuration has been set\n");
+            } else {
+                NSLog(@"Zebra Failed to set start trigger parameters\n");
+                break;
+            }
+            
+            // Set stop trigger parameters
+            result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_readerID
+                                                 aStopTriggeConfig:_stop_trigger_cfg
+                                                    aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                // Stop trigger configuration applied
+                NSLog(@"Zebra Stop trigger configuration has been set\n");
+            } else {
+                NSLog(@"Zebra Failed to set stop trigger parameters\n");
+                break;
+            }
+            
+            // Start and stop triggers have been configured
+            error_response = nil;
+            
+            // Request performing of rapid read operation
+            result = [_rfidSdkApi srfidStartRapidRead:_readerID
+                                        aReportConfig:_report_cfg
+                                        aAccessConfig:_access_cfg
+                                       aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                NSLog(@"Zebra Request succeed\n");
+                
+                _rfidLbl.text = @"RFID: (scanning for tags)";
+                _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+                
+                // Stop an operation after 1 minute
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 *
+                                                                          NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+                });
+            }
+            else if (SRFID_RESULT_RESPONSE_ERROR == result) {
+                NSLog(@"Zebra Error response from RFID reader: %@\n", error_response);
+            }
+            else {
+                NSLog(@"Zebra Request failed\n");
+            }
+        } while (0);
+    }
+}
+
 /**
  Reset the interface and reader and begin reading.
  
@@ -299,13 +451,14 @@ extern DataClass *data;
     _noMatchView.hidden = YES;
     
 // TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
-// to the other.  If you change readers, restart the app.  The first reader to scan a tag sets the
-// reader flags for that session.  Until then, both protocols are attempted until a tag is found.
+// to another.  If you change readers, restart the app.  The first reader to scan a tag sets the
+// reader flags for that session.  Until then, all protocols are attempted until a tag is found.
     
     // If no connection open, open it now and start scanning for RFID tags
-    
+
+// TPM now that this is three way, test this carefully with all readers...
     // Arete Reader (do this first to suppress a uGrokit bug)
-    if (!_ugiReaderConnected) {
+    if (!_ugiReaderConnected && !_zebraReaderConnected) {
         [[RcpApi2 sharedInstance] stopReadTags];
         [[RcpApi2 sharedInstance] close];
         [[RcpApi2 sharedInstance] open];
@@ -315,11 +468,20 @@ extern DataClass *data;
     }
 
     // uGrokit Reader
-    if (!_areteReaderConnected) {
+    if (!_areteReaderConnected && !_zebraReaderConnected) {
         [[Ugi singleton].activeInventory stopInventory];
         [[Ugi singleton] closeConnection];
         [[Ugi singleton] openConnection];  // Once the reader is connected, this triggers the tag reads
         _rfidLbl.text = @"RFID: (connecting to reader)";
+    }
+    
+    // Zebra Reader
+    if (!_ugiReaderConnected && !_areteReaderConnected) {
+        [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+        [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
+        _readerID = -1;
+        _rfidLbl.text = @"RFID: (connecting to reader)";
+        [self zebraRapidRead];
     }
 }
 
@@ -461,7 +623,7 @@ extern DataClass *data;
 /**
  New tag found with uGrokit reader.
  
- Display the tag, stop the reader, disable the other reader, and check for a match.
+ Display the tag, stop the reader, disable the other readers, and check for a match.
  */
 - (void) inventoryTagFound:(UgiTag *)tag
    withDetailedPerReadData:(NSArray *)detailedPerReadData {
@@ -493,6 +655,7 @@ extern DataClass *data;
     }
     _ugiReaderConnected = TRUE;
     _areteReaderConnected = FALSE;
+    _zebraReaderConnected = FALSE;
   
     // If we have a barcode and an RFID tag read, compare the results
     if (_barcodeFound && _rfidFound) [self checkForMatch];
@@ -606,7 +769,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 /**
  New tag found with Arete reader.
  
- Display the tag, stop the reader, disable the other reader, and check for a match.
+ Display the tag, stop the reader, disable the other readers, and check for a match.
  */
 - (void)tagReceived:(NSData*)pcEpc
 {
@@ -641,6 +804,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        }
                        _ugiReaderConnected = FALSE;
                        _areteReaderConnected = TRUE;
+                       _zebraReaderConnected = FALSE;
                        
                        // If we have a barcode and an RFID tag read, compare the results
                        if (_barcodeFound && _rfidFound) [self checkForMatch];
@@ -767,6 +931,129 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
         // The label and the rfid flag have already been set in tagReceived
         // Don't do anything here
     }
+}
+
+// Zebra delegates
+#pragma mark - Zebra
+
+/**
+ Reader appeared.
+ 
+ Adjust to the new state.
+ */
+- (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
+{
+    NSLog(@"Zebra Reader Appeared - Name: %@", [availableReader getReaderName]);
+    
+    [_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]];
+}
+
+/**
+ Reader communication established.
+ 
+ Start reading
+ */
+- (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
+{
+    NSLog(@"Zebra Communication Established - Name: %@", [activeReader getReaderName]);
+    
+    // Now read tags
+    _readerID = [activeReader getReaderID];
+    [self zebraRapidRead];
+}
+
+/**
+ New tag found with Zebra reader.
+ 
+ Display the tag, stop the reader, disable the other readers, and check for a match.
+ */
+- (void)srfidEventReadNotify:(int)readerID aTagData:(srfidTagData*)tagData
+{
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       // tag was found for the first time
+    
+                       // Stop the RFID reader
+                       [_rfidSdkApi srfidStopRapidRead:readerID aStatusMessage:nil];
+                       
+                       // Get the RFID tag
+                       [data.rfid setString:[tagData getTagId]];
+                       [data.rfidBin setString:[_convert Hex2Bin:data.rfid]];
+                       _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
+                       _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+    
+                       // Get the serial number from the tag read
+                       [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
+    
+                       // Landscape label
+                       _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
+    
+                       // Close the connection
+                       [_rfidSdkApi srfidTerminateCommunicationSession:readerID];
+    
+                       // After the first read, we know which reader
+                       _rfidFound = TRUE;
+                       if (!_ugiReaderConnected) {
+                           [[RcpApi2 sharedInstance] stopReadTags];
+                           [[RcpApi2 sharedInstance] close];
+                       }
+                       _ugiReaderConnected = FALSE;
+                       _areteReaderConnected = FALSE;
+                       _zebraReaderConnected = TRUE;
+    
+                       // If we have a barcode and an RFID tag read, compare the results
+                       if (_barcodeFound && _rfidFound) [self checkForMatch];
+                   });
+}
+
+/**
+ Set the battery life of the Zebra reader.
+ 
+ This delegate is called at random intervals or prompted by the SDK
+ */
+- (void)srfidEventBatteryNotity:(int)readerID aBatteryEvent:(srfidBatteryEvent*)batteryEvent
+{
+    // Thread is unknown
+    NSLog(@"\nbatteryEvent: level = [%d] charging = [%d] cause = (%@)\n", [batteryEvent getPowerLevel], [batteryEvent getIsCharging], [batteryEvent getEventCause]);
+
+    int battery = [batteryEvent getPowerLevel];
+    
+    if(battery > 100) battery = 100;
+    else if(battery < 0) battery = 0;
+    
+    dispatch_async(dispatch_get_main_queue(),
+                   ^{
+                       _batteryLifeView.progress = battery/100.;
+                       _batteryLifeLbl.backgroundColor =
+                       (battery > 20)?UIColorFromRGB(0xA4CD39):
+                       (battery > 5 )?UIColorFromRGB(0xCC9900):
+                       UIColorFromRGB(0xCC0000);
+                       
+                       _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
+                   });
+}
+
+/**
+ None of these are needed
+ */
+- (void)srfidEventReaderDisappeared:(int)readerID
+{
+    NSLog(@"Zebra Reader Disappeared - ID: %d", readerID);
+}
+- (void)srfidEventCommunicationSessionTerminated:(int)readerID
+{
+    NSLog(@"Zebra Reader Session Terminated - ID: %d", readerID);
+}- (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event
+{
+    NSLog(@"Zebra Reader - Event status notify: %d", event);
+}
+- (void)srfidEventProximityNotify:(int)readerID aProximityPercent:(int)proximityPercent
+{
+    NSLog(@"Zebra Reader - Event proximity nofity percent: %d", proximityPercent);
+}
+- (void)srfidEventTriggerNotify:(int)readerID aTriggerEvent:(SRFID_TRIGGEREVENT)triggerEvent
+{
+    NSLog(@"Zebra Reader - Event trigger notify: %@", ((triggerEvent == SRFID_TRIGGEREVENT_PRESSED)?@"Pressed":@"Released"));
 }
 
 /*
