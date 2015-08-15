@@ -22,6 +22,9 @@
 		B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */; };
 		B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.mm */; };
 		B71C5C851AF0254800D28341 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C841AF0254800D28341 /* DataClass.m */; };
+		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
+		B76E24BA1B7E4D07004E8F73 /* ConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B91B7E4D07004E8F73 /* ConverterTests.m */; };
+		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
 		B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C341AF425B100025761 /* AudioToolbox.framework */; };
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
@@ -72,6 +75,9 @@
 		B71C5C811AF0108C00D28341 /* ScannerViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ScannerViewController.mm; sourceTree = "<group>"; };
 		B71C5C831AF0254800D28341 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataClass.h; sourceTree = "<group>"; };
 		B71C5C841AF0254800D28341 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataClass.m; sourceTree = "<group>"; };
+		B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoderTests.m; sourceTree = "<group>"; };
+		B76E24B91B7E4D07004E8F73 /* ConverterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConverterTests.m; sourceTree = "<group>"; };
+		B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerVCTests.m; sourceTree = "<group>"; };
 		B79B20111AFA6FD800B7900D /* DataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataViewController.h; sourceTree = "<group>"; };
 		B79B20121AFA6FD800B7900D /* DataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataViewController.m; sourceTree = "<group>"; };
 		B7B18C341AF425B100025761 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -161,11 +167,11 @@
 			children = (
 				B71C5C571AF000C700D28341 /* ValiTag */,
 				B7191BC81AF6C9500086DB7E /* EPCEncoder */,
-				B71C5C711AF000C700D28341 /* ValiTagTests */,
 				B71C5C561AF000C700D28341 /* Products */,
 				B7117D411B38920E00968426 /* uGrokit */,
 				B7117D591B38BCCB00968426 /* Arete */,
 				B7DA2FC61B7994D100F4C2FC /* Zebra */,
+				B71C5C711AF000C700D28341 /* ValiTagTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -211,6 +217,9 @@
 		B71C5C711AF000C700D28341 /* ValiTagTests */ = {
 			isa = PBXGroup;
 			children = (
+				B76E24B91B7E4D07004E8F73 /* ConverterTests.m */,
+				B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */,
+				B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */,
 				B71C5C741AF000C700D28341 /* ValiTagTests.m */,
 				B71C5C721AF000C700D28341 /* Supporting Files */,
 			);
@@ -354,6 +363,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B71C5C751AF000C700D28341 /* ValiTagTests.m in Sources */,
+				B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */,
+				B76E24BA1B7E4D07004E8F73 /* ConverterTests.m in Sources */,
+				B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
