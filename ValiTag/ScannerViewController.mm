@@ -17,7 +17,6 @@
 //  Zebra RFID scanner code from:
 //  http://compass.motorolasolutions.com
 
-
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import "DataClass.h"                   // Singleton data class
