@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
-		B7117D501B38A5E900968426 /* include in Resources */ = {isa = PBXBuildFile; fileRef = B7117D4F1B38A5E900968426 /* include */; };
 		B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D511B38A7A800968426 /* libUGrokItApi.a */; };
 		B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D551B38BCAF00968426 /* libAreteAudio.a */; };
 		B7191BCD1AF6C9500086DB7E /* Converter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* Converter.m */; };
@@ -31,7 +30,6 @@
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
 		B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */; };
 		B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */; };
-		B7DA2FCA1B79950800F4C2FC /* include in Resources */ = {isa = PBXBuildFile; fileRef = B7DA2FC91B79950800F4C2FC /* include */; };
 		B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */; };
 		B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */; };
 /* End PBXBuildFile section */
@@ -328,8 +326,6 @@
 				B71C5C641AF000C700D28341 /* Main.storyboard in Resources */,
 				B71C5C691AF000C700D28341 /* LaunchScreen.xib in Resources */,
 				B71C5C661AF000C700D28341 /* Images.xcassets in Resources */,
-				B7DA2FCA1B79950800F4C2FC /* include in Resources */,
-				B7117D501B38A5E900968426 /* include in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
