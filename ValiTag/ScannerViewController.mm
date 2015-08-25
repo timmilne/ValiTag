@@ -75,7 +75,6 @@
     srfidReportConfig           *_reportConfig;
     srfidAccessConfig           *_accessConfig;
 }
-
 @end
 
 // The singleton data class
@@ -178,7 +177,7 @@ extern DataClass *data;
     // When notified that the connection is established, get the battery life, and start a scan
     [[Ugi singleton] openConnection];
     
-    // RFID label
+    // Battery life label
     _batteryLifeLbl = [[UILabel alloc] init];
     _batteryLifeLbl.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
     _batteryLifeLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
@@ -188,7 +187,7 @@ extern DataClass *data;
     _batteryLifeLbl.text = @"RFID Battery Life";
     [self.view addSubview:_batteryLifeLbl];
     
-    // Battery life label
+    // Battery life view
     _batteryLifeView = [[UIProgressView alloc] init];
     _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 8, self.view.bounds.size.width, 40);
     _batteryLifeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
@@ -217,7 +216,9 @@ extern DataClass *data;
     [self initializeZebraRfidSdkWithAppSettings];
 }
 
-// Adjust the preview layer on orientation changes
+/*!
+ * @discussion Adjust the preview layer on orientation changes
+ */
 - (void)viewDidLayoutSubviews {
     [super viewDidLayoutSubviews];
   
@@ -238,184 +239,9 @@ extern DataClass *data;
     }
 }
 
-// This for Arete
-- (void)viewDidAppear:(BOOL)animated
-{
-    [super viewDidAppear:animated];
-    
-    // You can skip the rest, but this line is key
-    [RcpApi2 sharedInstance].delegate = self;
-    
-#ifndef __IPHONE_7_0
-    typedef void (^PermissionBlock)(BOOL granted);
-#endif
-    
-    static BOOL bPermission = NO;
-    
-    PermissionBlock permissionBlock = ^(BOOL granted)
-    {
-        if (granted)
-        {
-            bPermission = YES;
-        }
-        else
-        {
-            // Warn no access to microphone
-            UIAlertView *alert = [[UIAlertView alloc]
-                                  initWithTitle:@"Error"
-                                  message:@"Microphone input permission refused. Go to iOS settings to enable permission."
-                                  delegate:nil
-                                  cancelButtonTitle:@"OK"
-                                  otherButtonTitles:nil];
-            
-            dispatch_async(dispatch_get_main_queue(),
-                           ^{
-                               [alert show];
-                           });
-        }
-    };
-    
-    if([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)])
-    {
-        [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:)
-                                              withObject:permissionBlock];
-    }
-}
-
-// This for Zebra
-- (void)initializeZebraRfidSdkWithAppSettings
-{
-    _rfidSdkApi = [srfidSdkFactory createRfidSdkApiInstance];
-    [_rfidSdkApi srfidSetDelegate:self];
-    
-    int notifications_mask = SRFID_EVENT_READER_APPEARANCE |
-        SRFID_EVENT_READER_DISAPPEARANCE | // Not really needed
-        SRFID_EVENT_SESSION_ESTABLISHMENT |
-        SRFID_EVENT_SESSION_TERMINATION; // Not really needed
-    [_rfidSdkApi srfidSetOperationalMode:SRFID_OPMODE_MFI];
-    [_rfidSdkApi srfidSubsribeForEvents:notifications_mask];
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_READ | SRFID_EVENT_MASK_STATUS)]; // Event mask not needed
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_PROXIMITY)]; // Not really needed
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_TRIGGER)]; // Not really needed
-    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_BATTERY)];
-    [_rfidSdkApi srfidEnableAvailableReadersDetection:YES];
-    [_rfidSdkApi srfidEnableAutomaticSessionReestablishment:YES];
-    
-    _startTriggerConfig = [[srfidStartTriggerConfig alloc] init];
-    _stopTriggerConfig  = [[srfidStopTriggerConfig alloc] init];
-    _reportConfig       = [[srfidReportConfig alloc] init];
-    _accessConfig       = [[srfidAccessConfig alloc] init];
-    
-    // Configure start and stop triggers parameters to start and stop actual
-    // operation immediately on a corresponding response
-    [_startTriggerConfig setStartOnHandheldTrigger:NO];
-    [_startTriggerConfig setStartDelay:0];
-    [_startTriggerConfig setRepeatMonitoring:NO];
-    [_stopTriggerConfig setStopOnHandheldTrigger:NO];
-    [_stopTriggerConfig setStopOnTimeout:NO];
-    [_stopTriggerConfig setStopOnTagCount:NO];
-    [_stopTriggerConfig setStopOnInventoryCount:YES];
-    [_stopTriggerConfig setStopTagCount:1];
-    [_stopTriggerConfig setStopOnAccessCount:NO];
-    
-    // Configure report parameters to report RSSI, Channel Index, Phase and PC fields
-    [_reportConfig setIncPC:YES];
-    [_reportConfig setIncPhase:YES];
-    [_reportConfig setIncChannelIndex:YES];
-    [_reportConfig setIncRSSI:YES];
-    [_reportConfig setIncTagSeenCount:NO];
-    [_reportConfig setIncFirstSeenTime:NO];
-    [_reportConfig setIncLastSeenTime:NO];
-
-    // Configure access parameters to perform the operation with 12.0 dbm antenna
-    // power level without application of pre-filters for close proximity
-    [_accessConfig setPower:120];
-    [_accessConfig setDoSelect:NO];
-    
-    // See if a reader is already connected and try and read a tag
-    [self zebraRapidRead];
-}
-
-- (void)zebraRapidRead
-{
-    if (_readerID < 0) {
-        // Get an available reader (must connect with bluetooth settings outside of app)
-        NSMutableArray *readers = [[NSMutableArray alloc] init];
-        [_rfidSdkApi srfidGetAvailableReadersList:&readers];
-
-        for (srfidReaderInfo *reader in readers)
-        {
-            SRFID_RESULT result = [_rfidSdkApi srfidEstablishCommunicationSession:[reader getReaderID]];
-            if (result == SRFID_RESULT_SUCCESS) {
-                break;
-            }
-        }
-    }
-    else {
-        [_rfidSdkApi srfidRequestBatteryStatus:_readerID];
-        _zebraReaderConnected = TRUE;
-        
-        NSString *error_response = nil;
-        
-        do {
-            // Set start trigger parameters
-            SRFID_RESULT result = [_rfidSdkApi srfidSetStartTriggerConfiguration:_readerID
-                                                 aStartTriggeConfig:_startTriggerConfig
-                                                 aStatusMessage:&error_response];
-            if (SRFID_RESULT_SUCCESS == result) {
-                // Start trigger configuration applied
-                NSLog(@"Zebra Start trigger configuration has been set\n");
-            } else {
-                NSLog(@"Zebra Failed to set start trigger parameters\n");
-                break;
-            }
-            
-            // Set stop trigger parameters
-            result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_readerID
-                                                 aStopTriggeConfig:_stopTriggerConfig
-                                                 aStatusMessage:&error_response];
-            if (SRFID_RESULT_SUCCESS == result) {
-                // Stop trigger configuration applied
-                NSLog(@"Zebra Stop trigger configuration has been set\n");
-            } else {
-                NSLog(@"Zebra Failed to set stop trigger parameters\n");
-                break;
-            }
-            
-            // Start and stop triggers have been configured
-            error_response = nil;
-            
-            // Request performing of rapid read operation
-            result = [_rfidSdkApi srfidStartRapidRead:_readerID
-                                        aReportConfig:_reportConfig
-                                        aAccessConfig:_accessConfig
-                                        aStatusMessage:&error_response];
-            if (SRFID_RESULT_SUCCESS == result) {
-                NSLog(@"Zebra Request succeeded\n");
-                
-                _rfidLbl.text = @"RFID: (scanning for tags)";
-                _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-                
-                // Stop an operation after 1 minute
-                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 *
-                                                                          NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
-                });
-            }
-            else if (SRFID_RESULT_RESPONSE_ERROR == result) {
-                NSLog(@"Zebra Error response from RFID reader: %@\n", error_response);
-            }
-            else {
-                NSLog(@"Zebra Request failed\n");
-            }
-        } while (0);
-    }
-}
-
-/**
- Reset the interface and reader and begin reading.
- 
- Press the reset button after reading the first tag to read another.
+/*!
+ * @discussion Press reset button to reset the interface and reader and begin reading.
+ * @param sender An id for the sender control (not used)
  */
 - (IBAction)reset:(id)sender {
     // Reset
@@ -484,10 +310,8 @@ extern DataClass *data;
     // Dispose of any resources that can be recreated.
 }
 
-/**
- Check the barcode and RFID tag for a match.
- 
- Only proceed if both scanned and available.
+/*!
+ * @discussion Check the barcode and RFID tag for a match - Only proceed if both scanned and available.
  */
 - (void)checkForMatch {
     // Are we ready to check?
@@ -518,9 +342,200 @@ extern DataClass *data;
     }
 }
 
-// Barcode scanner delegates
-#pragma mark - Barcode Scanner
+// Arete RFID Reader
+#pragma mark - Arete Reader Support
 
+/*!
+ * @discussion Included for the Arete Reader - Set the delegate and check for permissions.
+ * @param animated Transition is animated - True of False
+ */
+- (void)viewDidAppear:(BOOL)animated
+{
+    [super viewDidAppear:animated];
+    
+    // You can skip the rest, but this line is key
+    [RcpApi2 sharedInstance].delegate = self;
+    
+#ifndef __IPHONE_7_0
+    typedef void (^PermissionBlock)(BOOL granted);
+#endif
+    
+    static BOOL bPermission = NO;
+    
+    PermissionBlock permissionBlock = ^(BOOL granted)
+    {
+        if (granted)
+        {
+            bPermission = YES;
+        }
+        else
+        {
+            // Warn no access to microphone
+            UIAlertView *alert = [[UIAlertView alloc]
+                                  initWithTitle:@"Error"
+                                  message:@"Microphone input permission refused. Go to iOS settings to enable permission."
+                                  delegate:nil
+                                  cancelButtonTitle:@"OK"
+                                  otherButtonTitles:nil];
+            
+            dispatch_async(dispatch_get_main_queue(),
+                           ^{
+                               [alert show];
+                           });
+        }
+    };
+    
+    if([[AVAudioSession sharedInstance] respondsToSelector:@selector(requestRecordPermission:)])
+    {
+        [[AVAudioSession sharedInstance] performSelector:@selector(requestRecordPermission:)
+                                              withObject:permissionBlock];
+    }
+}
+
+// Zebra RFID Reader
+#pragma mark - Zebra Reader Support
+
+/*!
+ * @discussion Initialize the Zebra reader and start a rapid read.
+ */
+- (void)initializeZebraRfidSdkWithAppSettings
+{
+    _rfidSdkApi = [srfidSdkFactory createRfidSdkApiInstance];
+    [_rfidSdkApi srfidSetDelegate:self];
+    
+    int notifications_mask = SRFID_EVENT_READER_APPEARANCE |
+    SRFID_EVENT_READER_DISAPPEARANCE | // Not really needed
+    SRFID_EVENT_SESSION_ESTABLISHMENT |
+    SRFID_EVENT_SESSION_TERMINATION; // Not really needed
+    [_rfidSdkApi srfidSetOperationalMode:SRFID_OPMODE_MFI];
+    [_rfidSdkApi srfidSubsribeForEvents:notifications_mask];
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_READ | SRFID_EVENT_MASK_STATUS)]; // Event mask not needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_PROXIMITY)]; // Not really needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_TRIGGER)]; // Not really needed
+    [_rfidSdkApi srfidSubsribeForEvents:(SRFID_EVENT_MASK_BATTERY)];
+    [_rfidSdkApi srfidEnableAvailableReadersDetection:YES];
+    [_rfidSdkApi srfidEnableAutomaticSessionReestablishment:YES];
+    
+    _startTriggerConfig = [[srfidStartTriggerConfig alloc] init];
+    _stopTriggerConfig  = [[srfidStopTriggerConfig alloc] init];
+    _reportConfig       = [[srfidReportConfig alloc] init];
+    _accessConfig       = [[srfidAccessConfig alloc] init];
+    
+    // Configure start and stop triggers parameters to start and stop actual
+    // operation immediately on a corresponding response
+    [_startTriggerConfig setStartOnHandheldTrigger:NO];
+    [_startTriggerConfig setStartDelay:0];
+    [_startTriggerConfig setRepeatMonitoring:NO];
+    [_stopTriggerConfig setStopOnHandheldTrigger:NO];
+    [_stopTriggerConfig setStopOnTimeout:NO];
+    [_stopTriggerConfig setStopOnTagCount:NO];
+    [_stopTriggerConfig setStopOnInventoryCount:YES];
+    [_stopTriggerConfig setStopTagCount:1];
+    [_stopTriggerConfig setStopOnAccessCount:NO];
+    
+    // Configure report parameters to report RSSI, Channel Index, Phase and PC fields
+    [_reportConfig setIncPC:YES];
+    [_reportConfig setIncPhase:YES];
+    [_reportConfig setIncChannelIndex:YES];
+    [_reportConfig setIncRSSI:YES];
+    [_reportConfig setIncTagSeenCount:NO];
+    [_reportConfig setIncFirstSeenTime:NO];
+    [_reportConfig setIncLastSeenTime:NO];
+    
+    // Configure access parameters to perform the operation with 12.0 dbm antenna
+    // power level without application of pre-filters for close proximity
+    [_accessConfig setPower:120];
+    [_accessConfig setDoSelect:NO];
+    
+    // See if a reader is already connected and try and read a tag
+    [self zebraRapidRead];
+}
+
+/*!
+ * @discussion Kick off a Zebra Rapid Read.
+ */
+- (void)zebraRapidRead
+{
+    if (_readerID < 0) {
+        // Get an available reader (must connect with bluetooth settings outside of app)
+        NSMutableArray *readers = [[NSMutableArray alloc] init];
+        [_rfidSdkApi srfidGetAvailableReadersList:&readers];
+        
+        for (srfidReaderInfo *reader in readers)
+        {
+            SRFID_RESULT result = [_rfidSdkApi srfidEstablishCommunicationSession:[reader getReaderID]];
+            if (result == SRFID_RESULT_SUCCESS) {
+                break;
+            }
+        }
+    }
+    else {
+        [_rfidSdkApi srfidRequestBatteryStatus:_readerID];
+        _zebraReaderConnected = TRUE;
+        
+        NSString *error_response = nil;
+        
+        do {
+            // Set start trigger parameters
+            SRFID_RESULT result = [_rfidSdkApi srfidSetStartTriggerConfiguration:_readerID
+                                                              aStartTriggeConfig:_startTriggerConfig
+                                                                  aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                // Start trigger configuration applied
+                NSLog(@"Zebra Start trigger configuration has been set\n");
+            } else {
+                NSLog(@"Zebra Failed to set start trigger parameters\n");
+                break;
+            }
+            
+            // Set stop trigger parameters
+            result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_readerID
+                                                 aStopTriggeConfig:_stopTriggerConfig
+                                                    aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                // Stop trigger configuration applied
+                NSLog(@"Zebra Stop trigger configuration has been set\n");
+            } else {
+                NSLog(@"Zebra Failed to set stop trigger parameters\n");
+                break;
+            }
+            
+            // Start and stop triggers have been configured
+            error_response = nil;
+            
+            // Request performing of rapid read operation
+            result = [_rfidSdkApi srfidStartRapidRead:_readerID
+                                        aReportConfig:_reportConfig
+                                        aAccessConfig:_accessConfig
+                                       aStatusMessage:&error_response];
+            if (SRFID_RESULT_SUCCESS == result) {
+                NSLog(@"Zebra Request succeeded\n");
+                
+                _rfidLbl.text = @"RFID: (scanning for tags)";
+                _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+                
+                // Stop an operation after 1 minute
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 *
+                                                                          NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                    [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+                });
+            }
+            else if (SRFID_RESULT_RESPONSE_ERROR == result) {
+                NSLog(@"Zebra Error response from RFID reader: %@\n", error_response);
+            }
+            else {
+                NSLog(@"Zebra Request failed\n");
+            }
+        } while (0);
+    }
+}
+
+// Barcode scanner
+#pragma mark - Barcode Scanner Delegates
+
+/*!
+ * @discussion Check for a valid scanned barcode, only proceed if a valid barcode found.
+ */
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
 {
     CGRect highlightViewRect = CGRectZero;
@@ -602,6 +617,8 @@ extern DataClass *data;
             _encodedBarcodeLbl.text = data.encodedBarcode;
             _barcodeFound = TRUE;
         }
+        
+        // Still scanning for barcodes
         else
             _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     }
@@ -612,13 +629,14 @@ extern DataClass *data;
     [self checkForMatch];
 }
 
-// uGrokit delegates
-#pragma mark - uGrokit
+// uGrokit RFID Reader
+#pragma mark - uGrokit Delegates
 
-/**
- New tag found with uGrokit reader.
- 
- Display the tag, stop the reader, disable the other readers, and check for a match.
+/*!
+ * @discussion New tag found with uGrokit reader.
+ * Display the tag, stop the reader, disable the other readers, and check for a match.
+ * @param tag The RFID tag
+ * @param detailedPerReadData The detailed data about the RFID tag
  */
 - (void) inventoryTagFound:(UgiTag *)tag
    withDetailedPerReadData:(NSArray *)detailedPerReadData {
@@ -658,21 +676,20 @@ extern DataClass *data;
     [self checkForMatch];
 }
 
-/**
- State changed with uGrokit reader.
- 
- Adjust to the new state, ignore if Arete reader being used.
+/*!
+ * @discussion State changed with uGrokit reader - Adjust to the new state, ignore if Arete reader being used.
+ * Listen for one of the following:
+ *    UGI_CONNECTION_STATE_NOT_CONNECTED -          Nothing connected to audio port
+ *    UGI_CONNECTION_STATE_CONNECTING -             Something connected to audio port, trying to connect
+ *    UGI_CONNECTION_STATE_INCOMPATIBLE_READER -    Connected to an reader with incompatible firmware
+ *    UGI_CONNECTION_STATE_CONNECTED -              Connected to reader
+ * @param notification The notification info
  */
 - (void)connectionStateChanged:(NSNotification *) notification {
     // This delegate conflicts with Arete's plugged call
     // If we are using the Arete reader, skip this
     if (_areteReaderConnected) return;
-    
-    // Listen for one of the following:
-    //    UGI_CONNECTION_STATE_NOT_CONNECTED,        //!< Nothing connected to audio port
-    //    UGI_CONNECTION_STATE_CONNECTING,           //!< Something connected to audio port, trying to connect
-    //    UGI_CONNECTION_STATE_INCOMPATIBLE_READER,  //!< Connected to an reader with incompatible firmware
-    //    UGI_CONNECTION_STATE_CONNECTED             //!< Connected to reader
+
     NSNumber *n = notification.object;
     
 // cplusplus stuff for Arete, and C++ compiler
@@ -760,13 +777,13 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 }
  */
 
-// Arete delegates
-#pragma mark - Arete
+// Arete RFID Reader
+#pragma mark - Arete Delegates
 
-/**
- New tag found with Arete reader.
- 
- Display the tag, stop the reader, disable the other readers, and check for a match.
+/*!
+ * @discussion New tag found with Arete reader.
+ * Display the tag, stop the reader, disable the other readers, and check for a match.
+ @param pcEpc The RFID tag
  */
 - (void)tagReceived:(NSData*)pcEpc
 {
@@ -842,10 +859,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 }
  */
 
-/**
- Reset received for Arete reader.
- 
- This will be called by both readers until Arete disabled.
+/*!
+ * @discussion Reset received for Arete reader
+ * @warning This will be called by both uGrokit and Arete readers until the Arete reader is disabled.
  */
 - (void)resetReceived
 {
@@ -857,20 +873,28 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    });
 }
 
+/*!
+ * @discussion Arete Reader Acknowlegement Received
+ * @param commandCode The command code
+ */
 - (void)successReceived:(uint8_t)commandCode
 {
     NSLog(@"Arete Reader Acknowledgement Received [%02X]\n",commandCode);
 }
 
+/*!
+ * @discussion Arete Reader Failure Received
+ * @param errorCode The error code
+ */
 - (void)failureReceived:(NSData*)errCode
 {
     NSLog(@"Arete Reader Error Received [%02X]\n", ((const uint8_t *)errCode.bytes)[0]);
 }
 
-/**
- Set the battery life of the Arete reader.
- 
- This delegate is called at random intervals.
+/*!
+ * @discussion Set the battery life of the Arete reader.
+ * @warning This delegate is called at random intervals (Stochastic baby!)
+ * @param data The data bytes
  */
 - (void)batteryStateReceived:(NSData*)data
 {
@@ -904,10 +928,12 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    });
 }
 
-/**
- Somthing was plugged into the audio jack (Arete reader).
- 
- Start reading tags, ignore if Arete reader being used.
+/*!
+ * @discussion Something was plugged into the audio jack (Arete reader) - start reading tags
+ * This delegate conflicts with uGrokit's connectionStateChanged call
+ * If we are using the uGrokit reader, skip this
+ * @warning Ignore if uGrokit reader being used.
+ * @param plug If something is plugged in - True of False
  */
 - (void)plugged:(BOOL)plug
 {
@@ -932,13 +958,12 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     }
 }
 
-// Zebra delegates
-#pragma mark - Zebra
+// Zebra RFID Reader
+#pragma mark - Zebra Delegates
 
-/**
- Reader appeared.
- 
- Adjust to the new state.
+/*!
+ * @discussion Zebra reader appeared - Adjust to the new state.
+ * @param availableReader Reader info about the newly appeared reader
  */
 - (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
 {
@@ -947,10 +972,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     [_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]];
 }
 
-/**
- Reader communication established.
- 
- Start reading
+/*!
+ * @discussion Zebra reader communication established - Start reading
+ * @param activeReader Reader info for the active reader
  */
 - (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
 {
@@ -961,10 +985,11 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     [self zebraRapidRead];
 }
 
-/**
- New tag found with Zebra reader.
- 
- Display the tag, stop the reader, disable the other readers, and check for a match.
+/*!
+ * @discussion New tag found with Zebra reader
+ * Display the tag, stop the reader, disable the other readers, and check for a match.
+ * @param readerID The ID of the reader
+ * @param aTagData The data in the RFID tag
  */
 - (void)srfidEventReadNotify:(int)readerID aTagData:(srfidTagData*)tagData
 {
@@ -1007,10 +1032,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    });
 }
 
-/**
- Set the battery life of the Zebra reader.
- 
- This delegate is called at random intervals or prompted by the SDK
+/*!
+ * @discussion Set the battery life of the Zebra reader.
+ * @warning This delegate is called at random intervals (Stochastic baby!), or can be prompted by the SDK
  */
 - (void)srfidEventBatteryNotity:(int)readerID aBatteryEvent:(srfidBatteryEvent*)batteryEvent
 {
