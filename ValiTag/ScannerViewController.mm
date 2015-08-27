@@ -674,6 +674,9 @@ extern DataClass *data;
   
     // Check for match
     [self checkForMatch];
+    
+    // Log the read tag
+    NSLog(@"\nRFID tag read: %@\n", data.rfid);
 }
 
 /*!
@@ -824,6 +827,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        
                        // Check for match
                        [self checkForMatch];
+                       
+                       // Log the read tag
+                       NSLog(@"\nRFID tag read: %@\n", data.rfid);
                    });
 }
 
@@ -1029,6 +1035,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     
                        // Check for match
                        [self checkForMatch];
+                       
+                       // Log the read tag
+                       NSLog(@"\nRFID tag read: %@\n", data.rfid);
                    });
 }
 
