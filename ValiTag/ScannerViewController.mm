@@ -244,6 +244,9 @@ extern DataClass *data;
  * @param sender An id for the sender control (not used)
  */
 - (IBAction)reset:(id)sender {
+// TPM - uncomment this to test a NewRelic crash
+//    [NewRelic crashNow:@"Crashed on Reset"];
+    
     // Reset
     data = [DataClass singleton:TRUE];
     _barcodeFound = FALSE;

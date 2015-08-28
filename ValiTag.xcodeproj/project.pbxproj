@@ -21,6 +21,10 @@
 		B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */; };
 		B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.mm */; };
 		B71C5C851AF0254800D28341 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C841AF0254800D28341 /* DataClass.m */; };
+		B725D2091B8FF4C100D4E9C2 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */; };
+		B725D20B1B8FF4D800D4E9C2 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */; };
+		B725D20D1B8FF4EA00D4E9C2 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */; };
+		B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */; };
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BA1B7E4D07004E8F73 /* ConverterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B91B7E4D07004E8F73 /* ConverterTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
@@ -73,6 +77,11 @@
 		B71C5C811AF0108C00D28341 /* ScannerViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ScannerViewController.mm; sourceTree = "<group>"; };
 		B71C5C831AF0254800D28341 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataClass.h; sourceTree = "<group>"; };
 		B71C5C841AF0254800D28341 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataClass.m; sourceTree = "<group>"; };
+		B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
+		B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
+		B725D20E1B8FF61A00D4E9C2 /* ValiTag-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ValiTag-Prefix.pch"; sourceTree = "<group>"; };
+		B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NewRelicAgent.framework; sourceTree = "<group>"; };
 		B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoderTests.m; sourceTree = "<group>"; };
 		B76E24B91B7E4D07004E8F73 /* ConverterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConverterTests.m; sourceTree = "<group>"; };
 		B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerVCTests.m; sourceTree = "<group>"; };
@@ -93,8 +102,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B725D20D1B8FF4EA00D4E9C2 /* libz.dylib in Frameworks */,
+				B725D20B1B8FF4D800D4E9C2 /* libc++.dylib in Frameworks */,
+				B725D2091B8FF4C100D4E9C2 /* CoreTelephony.framework in Frameworks */,
 				B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */,
 				B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */,
+				B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */,
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
 				B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
@@ -170,6 +183,7 @@
 				B7117D411B38920E00968426 /* uGrokit */,
 				B7117D591B38BCCB00968426 /* Arete */,
 				B7DA2FC61B7994D100F4C2FC /* Zebra */,
+				B725D2071B8FF47F00D4E9C2 /* NewRelic */,
 			);
 			sourceTree = "<group>";
 		};
@@ -208,6 +222,7 @@
 			children = (
 				B71C5C591AF000C700D28341 /* Info.plist */,
 				B71C5C5A1AF000C700D28341 /* main.m */,
+				B725D20E1B8FF61A00D4E9C2 /* ValiTag-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -232,6 +247,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		B725D2071B8FF47F00D4E9C2 /* NewRelic */ = {
+			isa = PBXGroup;
+			children = (
+				B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */,
+				B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */,
+				B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */,
+				B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */,
+			);
+			name = NewRelic;
+			sourceTree = "<group>";
+		};
 		B7DA2FC61B7994D100F4C2FC /* Zebra */ = {
 			isa = PBXGroup;
 			children = (
@@ -253,6 +279,7 @@
 				B71C5C511AF000C700D28341 /* Sources */,
 				B71C5C521AF000C700D28341 /* Frameworks */,
 				B71C5C531AF000C700D28341 /* Resources */,
+				B725D20F1B8FF63700D4E9C2 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -337,6 +364,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B725D20F1B8FF63700D4E9C2 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "SCRIPT=`/usr/bin/find \"${SRCROOT}\" -name newrelic_postbuild.sh | head -n 1`\n/bin/sh \"${SCRIPT}\" \"AA03046103ddc735e7b538b17aed7d015806fb077d\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B71C5C511AF000C700D28341 /* Sources */ = {
@@ -477,6 +520,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/ValiTag/ValiTag-Prefix.pch";
 				INFOPLIST_FILE = ValiTag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
@@ -496,6 +545,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "$(SRCROOT)/ValiTag/ValiTag-Prefix.pch";
 				INFOPLIST_FILE = ValiTag/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (

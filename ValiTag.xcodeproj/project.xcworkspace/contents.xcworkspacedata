@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:ValiTag.xcodeproj">
+      location = "self:/Users/z018620/Dev/Git/ValiTag/ValiTag.xcodeproj">
    </FileRef>
 </Workspace>
