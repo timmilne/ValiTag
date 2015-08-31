@@ -43,6 +43,7 @@
 	<key>UISupportedExternalAccessoryProtocols</key>
 	<array>
 		<string>com.symbol.rfd8X00_easytext</string>
+		<string>com.zebra.rfd8X00_easytext</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
