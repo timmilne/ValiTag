@@ -431,7 +431,7 @@ extern DataClass *data;
     [_startTriggerConfig setRepeatMonitoring:NO];
     [_stopTriggerConfig setStopOnHandheldTrigger:NO];
     [_stopTriggerConfig setStopOnTimeout:NO];
-    [_stopTriggerConfig setStopOnTagCount:NO];
+    [_stopTriggerConfig setStopOnTagCount:YES];
     [_stopTriggerConfig setStopOnInventoryCount:YES];
     [_stopTriggerConfig setStopTagCount:1];
     [_stopTriggerConfig setStopOnAccessCount:NO];
@@ -988,6 +988,10 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 - (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
 {
     NSLog(@"Zebra Communication Established - Name: %@", [activeReader getReaderName]);
+    
+    // Set the volume
+    NSString *statusMessage;
+    [_rfidSdkApi srfidSetBeeperConfig:[activeReader getReaderID] aBeeperConfig:SRFID_BEEPERCONFIG_LOW aStatusMessage:&statusMessage];
     
     // Now read tags
     _readerID = [activeReader getReaderID];
