@@ -161,7 +161,7 @@ extern DataClass *data;
     if (_input) {
         [_session addInput:_input];
     } else {
-        NSLog(@"Error: %@", error);
+        NSLog(@"Error: %@\n", error);
     }
     _output = [[AVCaptureMetadataOutput alloc] init];
     [_output setMetadataObjectsDelegate:self queue:dispatch_get_main_queue()];
@@ -874,7 +874,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
  */
 - (void)resetReceived
 {
-    NSLog(@"Arete Reader Reset Received");
+    NSLog(@"Arete Reader Reset Received\n");
     dispatch_async(dispatch_get_main_queue(),
                    ^{
                        self->_rfidLbl.text = @"RFID: (scanning for tags)";
@@ -976,7 +976,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
  */
 - (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
 {
-    NSLog(@"Zebra Reader Appeared - Name: %@", [availableReader getReaderName]);
+    NSLog(@"Zebra Reader Appeared - Name: %@\n", [availableReader getReaderName]);
     
     [_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]];
 }
@@ -987,7 +987,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
  */
 - (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
 {
-    NSLog(@"Zebra Communication Established - Name: %@", [activeReader getReaderName]);
+    NSLog(@"Zebra Communication Established - Name: %@\n", [activeReader getReaderName]);
     
     // Set the volume
     NSString *statusMessage;
@@ -1079,23 +1079,23 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
  */
 - (void)srfidEventReaderDisappeared:(int)readerID
 {
-    NSLog(@"Zebra Reader Disappeared - ID: %d", readerID);
+    NSLog(@"Zebra Reader Disappeared - ID: %d\n", readerID);
 }
 - (void)srfidEventCommunicationSessionTerminated:(int)readerID
 {
-    NSLog(@"Zebra Reader Session Terminated - ID: %d", readerID);
+    NSLog(@"Zebra Reader Session Terminated - ID: %d\n", readerID);
 }
 - (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event
 {
-    NSLog(@"Zebra Reader - Event status notify: %d", event);
+    NSLog(@"Zebra Reader - Event status notify: %d\n", event);
 }
 - (void)srfidEventProximityNotify:(int)readerID aProximityPercent:(int)proximityPercent
 {
-    NSLog(@"Zebra Reader - Event proximity nofity percent: %d", proximityPercent);
+    NSLog(@"Zebra Reader - Event proximity nofity percent: %d\n", proximityPercent);
 }
 - (void)srfidEventTriggerNotify:(int)readerID aTriggerEvent:(SRFID_TRIGGEREVENT)triggerEvent
 {
-    NSLog(@"Zebra Reader - Event trigger notify: %@", ((triggerEvent == SRFID_TRIGGEREVENT_PRESSED)?@"Pressed":@"Released"));
+    NSLog(@"Zebra Reader - Event trigger notify: %@\n", ((triggerEvent == SRFID_TRIGGEREVENT_PRESSED)?@"Pressed":@"Released"));
 }
 
 /*
