@@ -136,6 +136,23 @@ extern DataClass *data;
     _rfidLbl.text = @"RFID: (connecting to reader)";
     [self.view addSubview:_rfidLbl];
     
+    // Battery life label
+    _batteryLifeLbl = [[UILabel alloc] init];
+    _batteryLifeLbl.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
+    _batteryLifeLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _batteryLifeLbl.textColor = [UIColor whiteColor];
+    _batteryLifeLbl.textAlignment = NSTextAlignmentCenter;
+    _batteryLifeLbl.text = @"RFID Battery Life";
+    [self.view addSubview:_batteryLifeLbl];
+    
+    // Battery life view
+    _batteryLifeView = [[UIProgressView alloc] init];
+    _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 8, self.view.bounds.size.width, 40);
+    _batteryLifeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
+    _batteryLifeView.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    [self.view addSubview:_batteryLifeView];
+    
     // Initialize the bar code scanner session, device, input, output, and preview layer
     _session = [[AVCaptureSession alloc] init];
     _device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
@@ -176,23 +193,6 @@ extern DataClass *data;
     // Connect to the scanner
     // When notified that the connection is established, get the battery life, and start a scan
     [[Ugi singleton] openConnection];
-    
-    // Battery life label
-    _batteryLifeLbl = [[UILabel alloc] init];
-    _batteryLifeLbl.frame = CGRectMake(0, self.view.bounds.size.height - 40, self.view.bounds.size.width, 40);
-    _batteryLifeLbl.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-    _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-    _batteryLifeLbl.textColor = [UIColor whiteColor];
-    _batteryLifeLbl.textAlignment = NSTextAlignmentCenter;
-    _batteryLifeLbl.text = @"RFID Battery Life";
-    [self.view addSubview:_batteryLifeLbl];
-    
-    // Battery life view
-    _batteryLifeView = [[UIProgressView alloc] init];
-    _batteryLifeView.frame = CGRectMake(0, self.view.bounds.size.height - 8, self.view.bounds.size.width, 40);
-    _batteryLifeView.autoresizingMask = UIViewAutoresizingFlexibleTopMargin;
-    _batteryLifeView.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
-    [self.view addSubview:_batteryLifeView];
     
     // Pop the subviews to the front
     [self.view bringSubviewToFront:_rfidLbl];

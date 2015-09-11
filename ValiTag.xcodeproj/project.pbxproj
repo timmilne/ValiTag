@@ -107,7 +107,6 @@
 				B725D2091B8FF4C100D4E9C2 /* CoreTelephony.framework in Frameworks */,
 				B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */,
 				B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */,
-				B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */,
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
 				B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
@@ -116,6 +115,7 @@
 				B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */,
 				B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */,
 				B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */,
+				B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
