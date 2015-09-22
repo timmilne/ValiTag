@@ -1,2 +1,8 @@
-#Stop tacking this
+#Stop tracking this
 *.xcodeproj/project.xcworkspace/xcuserdata/*.xcuserdatad/UserInterfaceState.xcuserstate
+
+#Ignore any directories and files from the Fortify commands:
+# sourceanalyzer -b ValiTag xcodebuild -project ValiTag.xcodeproj -sdk iphonesimulator
+# sourceanalyzer -b ValiTag -scan -f ValiTag.fpr
+/build/
+*.fpr
