@@ -6,3 +6,4 @@
 # sourceanalyzer -b ValiTag -scan -f ValiTag.fpr
 /build/
 *.fpr
+*.fbs
