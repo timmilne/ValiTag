@@ -2,8 +2,10 @@
 *.xcodeproj/project.xcworkspace/xcuserdata/*.xcuserdatad/UserInterfaceState.xcuserstate
 
 #Ignore any directories and files from the Fortify commands:
+# sourceanalyzer -b ValiTag -clean
 # sourceanalyzer -b ValiTag xcodebuild -project ValiTag.xcodeproj -sdk iphonesimulator
-# sourceanalyzer -b ValiTag -scan -f ValiTag.fpr
+# sourceanalyzer -b ValiTag -export-build-session build/ValiTag.fbs (to upload to scan server)
+# sourceanalyzer -b ValiTag -scan -f build/ValiTag.fpr (only used for local scans)
 /build/
-*.fpr
 *.fbs
+*.fpr
