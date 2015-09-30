@@ -6,6 +6,7 @@
 # sourceanalyzer -b ValiTag xcodebuild -project ValiTag.xcodeproj -sdk iphonesimulator
 # sourceanalyzer -b ValiTag -export-build-session build/ValiTag.fbs (to upload to scan server)
 # sourceanalyzer -b ValiTag -scan -f build/ValiTag.fpr (only used for local scans)
+# sourceanalyzer -64 -Xmx2000M -b ValiTag -logfile build/build.log xcodebuild -project ValiTag.xcodeproj -sdk iphonesimulator (to create build logs)
 /build/
 *.fbs
 *.fpr
