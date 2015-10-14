@@ -8,7 +8,7 @@
 
 #import "DataViewController.h"
 #import "DataClass.h"                   // Singleton data class
-#import "EPCEncoder.h"                  // To encode the scanned barcode for comparison
+#import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
 
 @interface DataViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *scannedBarcodeLbl;

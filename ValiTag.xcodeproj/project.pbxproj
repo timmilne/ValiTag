@@ -10,8 +10,6 @@
 		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
 		B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D511B38A7A800968426 /* libUGrokItApi.a */; };
 		B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D551B38BCAF00968426 /* libAreteAudio.a */; };
-		B7191BCD1AF6C9500086DB7E /* Converter.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCA1AF6C9500086DB7E /* Converter.m */; };
-		B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */; };
 		B71C5C5B1AF000C700D28341 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5A1AF000C700D28341 /* main.m */; };
 		B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5D1AF000C700D28341 /* AppDelegate.m */; };
 		B71C5C641AF000C700D28341 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B71C5C621AF000C700D28341 /* Main.storyboard */; };
@@ -33,6 +31,8 @@
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
 		B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */; };
+		B7D5C9B91BCE073100EDCCC0 /* EPCEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */; };
+		B7D5C9BA1BCE07C700EDCCC0 /* EPCEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */; };
 		B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */; };
 		B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */; };
 		B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */; };
@@ -56,10 +56,6 @@
 		B7117D571B38BCBB00968426 /* RcpApi2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RcpApi2.h; path = Arete/include/RcpApi2.h; sourceTree = "<group>"; };
 		B7117D581B38BCC300968426 /* AudioMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioMgr.h; path = Arete/include/AudioMgr.h; sourceTree = "<group>"; };
 		B7117D5B1B38FE5300968426 /* EpcConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EpcConverter.h; path = Arete/include/EpcConverter.h; sourceTree = "<group>"; };
-		B7191BC91AF6C9500086DB7E /* Converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Converter.h; sourceTree = "<group>"; };
-		B7191BCA1AF6C9500086DB7E /* Converter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Converter.m; sourceTree = "<group>"; };
-		B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EPCEncoder.h; sourceTree = "<group>"; };
-		B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoder.m; sourceTree = "<group>"; };
 		B71C5C551AF000C700D28341 /* ValiTag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValiTag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B71C5C591AF000C700D28341 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B71C5C5A1AF000C700D28341 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -127,6 +123,7 @@
 		B7B18C361AF425BC00025761 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		B7B18C381AF425C900025761 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = usr/lib/libz.1.2.5.dylib; sourceTree = SDKROOT; };
+		B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = EPCEncoder.framework; sourceTree = "<group>"; };
 		B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libsymbolrfid-sdk.a"; path = "Zebra/libsymbolrfid-sdk.a"; sourceTree = "<group>"; };
 		B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		B7DA2FCD1B79978200F4C2FC /* ExternalAccessory.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ExternalAccessory.framework; path = System/Library/Frameworks/ExternalAccessory.framework; sourceTree = SDKROOT; };
@@ -145,6 +142,7 @@
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
 				B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
+				B7D5C9B91BCE073100EDCCC0 /* EPCEncoder.framework in Frameworks */,
 				B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */,
 				B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */,
 				B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */,
@@ -158,6 +156,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7D5C9BA1BCE07C700EDCCC0 /* EPCEncoder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -197,23 +196,12 @@
 			name = include;
 			sourceTree = "<group>";
 		};
-		B7191BC81AF6C9500086DB7E /* EPCEncoder */ = {
-			isa = PBXGroup;
-			children = (
-				B7191BC91AF6C9500086DB7E /* Converter.h */,
-				B7191BCA1AF6C9500086DB7E /* Converter.m */,
-				B7191BCB1AF6C9500086DB7E /* EPCEncoder.h */,
-				B7191BCC1AF6C9500086DB7E /* EPCEncoder.m */,
-			);
-			path = EPCEncoder;
-			sourceTree = "<group>";
-		};
 		B71C5C4C1AF000C700D28341 = {
 			isa = PBXGroup;
 			children = (
 				B71C5C571AF000C700D28341 /* ValiTag */,
-				B7191BC81AF6C9500086DB7E /* EPCEncoder */,
 				B71C5C711AF000C700D28341 /* ValiTagTests */,
+				B7D5C9B71BCE071A00EDCCC0 /* EPCEncoder */,
 				B71C5C561AF000C700D28341 /* Products */,
 				B7117D411B38920E00968426 /* uGrokit */,
 				B7117D591B38BCCB00968426 /* Arete */,
@@ -346,6 +334,14 @@
 			path = Zebra/include;
 			sourceTree = "<group>";
 		};
+		B7D5C9B71BCE071A00EDCCC0 /* EPCEncoder */ = {
+			isa = PBXGroup;
+			children = (
+				B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */,
+			);
+			name = EPCEncoder;
+			sourceTree = "<group>";
+		};
 		B7DA2FC61B7994D100F4C2FC /* Zebra */ = {
 			isa = PBXGroup;
 			children = (
@@ -474,11 +470,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B7191BCD1AF6C9500086DB7E /* Converter.m in Sources */,
 				B71C5C851AF0254800D28341 /* DataClass.m in Sources */,
 				B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */,
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
-				B7191BCE1AF6C9500086DB7E /* EPCEncoder.m in Sources */,
 				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
 				B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */,
@@ -661,6 +655,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -680,6 +675,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(SDKROOT)/Developer/Library/Frameworks",
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = ValiTagTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
