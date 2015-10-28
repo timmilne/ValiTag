@@ -73,7 +73,7 @@
      */
   
     // For all orientations, use this
-     return (NSUInteger)UIInterfaceOrientationMaskAll;
+    return UIInterfaceOrientationMaskAll;
 }
 
 @end
