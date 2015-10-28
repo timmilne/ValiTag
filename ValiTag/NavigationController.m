@@ -59,10 +59,10 @@
 */
 
 // For all orientations, this will suffice.
--(NSUInteger)supportedInterfaceOrientations{
- 
+-(UIInterfaceOrientationMask)supportedInterfaceOrientations{
+    
     /*
-     NSInteger orientationMask = 0;
+     UIInterfaceOrientationMask orientationMask = 0;
      
      orientationMask |= UIInterfaceOrientationMaskLandscapeLeft;
      orientationMask |= UIInterfaceOrientationMaskLandscapeRight;
@@ -71,9 +71,9 @@
      
      return orientationMask;
      */
-    
+  
     // For all orientations, use this
-    return UIInterfaceOrientationMaskAll;
+     return (NSUInteger)UIInterfaceOrientationMaskAll;
 }
 
 @end
