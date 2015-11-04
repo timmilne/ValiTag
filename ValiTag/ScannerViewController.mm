@@ -278,7 +278,7 @@ extern DataClass *data;
 // reader flags for that session.  Until then, all protocols are attempted until a tag is found.
     
     // If no connection open, open it now and start scanning for RFID tags
-    // Before we know what reader, we try all, so test the double negative
+    // Before we know what reader, we try all, so test the negative
 
     // Arete Reader (do this first to suppress a uGrokit bug)
     if (!_ugiReaderConnected && !_zebraReaderConnected) {
