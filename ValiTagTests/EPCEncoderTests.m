@@ -68,6 +68,46 @@
     XCTAssertEqualObjects(_test_empty  , [_encode sgtin_uri], @"withDptClsItmSer: Test 1 Part 7 Failed");
 }
 
+- (void)testGidWithGTIN{
+    // Check with http://www.kentraub.net/tools/tagxlate/EPCEncoderDecoder.html
+    //    NSString *GID_Hex_Ken_str = @"3504B3264014EC6000003039";
+    _gtin   = @"00052175551276";
+    _ser = @"0100012345";
+    [_encode gidWithGTIN:_gtin ser:_ser];
+    _test_gid_bin = @"001101010000000000001100101111001111000010000110100101101100000000000101111101100001000100111001";
+    _test_gid_hex = @"35000CBCF08696C005F61139";
+    // TPM - We are not using the uri, so leave this for now, but note that GID CANNOT have leading zeroes
+    //       in the manager and item fields...
+    //    _test_gid_uri = @"urn:epc:tag:gid-96:52175.551276.100012345"; // This is what it is supposed to look like
+    _test_gid_uri = @"urn:epc:tag:gid-96:00052175.0551276.0100012345";  // This is what is being returned
+    
+    XCTAssertEqualObjects(_test_gid_bin, [_encode gid_bin],   @"gidWithGTIN: Test 1 Part 1 Failed");
+    XCTAssertEqualObjects(_test_gid_hex, [_encode gid_hex],   @"gidWithGTIN: Test 1 Part 2 Failed");
+    XCTAssertEqualObjects(_test_gid_uri, [_encode gid_uri],   @"gidWithGTIN: Test 1 Part 3 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode gtin],      @"gidWithGTIN: Test 1 Part 4 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_bin], @"gidWithGTIN: Test 1 Part 5 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_hex], @"gidWithGTIN: Test 1 Part 6 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_uri], @"gidWithGTIN: Test 1 Part 7 Failed");
+    
+    _gtin   = @"052175551276";
+    _ser = @"100012345";
+    [_encode gidWithGTIN:_gtin ser:_ser];
+    _test_gid_bin = @"001101010000000000001100101111001111000010000110100101101100000000000101111101100001000100111001";
+    _test_gid_hex = @"35000CBCF08696C005F61139";
+    // TPM - We are not using the uri, so leave this for now, but note that GID CANNOT have leading zeroes
+    //       in the manager and item fields...
+    //    _test_gid_uri = @"urn:epc:tag:gid-96:52175.551276.100012345"; // This is what it is supposed to look like
+    _test_gid_uri = @"urn:epc:tag:gid-96:00052175.0551276.0100012345";  // This is what is being returned
+    
+    XCTAssertEqualObjects(_test_gid_bin, [_encode gid_bin],   @"gidWithGTIN: Test 2 Part 1 Failed");
+    XCTAssertEqualObjects(_test_gid_hex, [_encode gid_hex],   @"gidWithGTIN: Test 2 Part 2 Failed");
+    XCTAssertEqualObjects(_test_gid_uri, [_encode gid_uri],   @"gidWithGTIN: Test 2 Part 3 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode gtin],      @"gidWithGTIN: Test 2 Part 4 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_bin], @"gidWithGTIN: Test 2 Part 5 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_hex], @"gidWithGTIN: Test 2 Part 6 Failed");
+    XCTAssertEqualObjects(_test_empty  , [_encode sgtin_uri], @"gidWithGTIN: Test 2 Part 7 Failed");
+}
+
 - (void)testWithGtinSerPartBin{
     // Check with http://www.kentraub.net/tools/tagxlate/EPCEncoderDecoder.html
     _gtin   = @"00043935460624";

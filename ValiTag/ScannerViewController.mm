@@ -588,7 +588,32 @@ extern DataClass *data;
                 [data.itm setString:itm];
             }
             
+            // National brand replacement tag encoded in GID with commissioning authority
+            // Make sure the serial number is 10 digits long and check the first two digits of the serial number
+            // for 01, 02, 03, 04 (remembering that the decoder drops leading zeroes, so it's a 9 digit number that
+            // would start with 1, 2, 3, or 4.  These are reserved for Target's commisioning authority).
+            // NOTE: this only works if the RFID tag has already been read
+            else if (([data.rfidBin length] > 0) &&
+                     ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                     ([data.ser length] == 9) &&
+                     (([[data.ser substringToIndex:1] isEqualToString:@"1"]) ||
+                      ([[data.ser substringToIndex:1] isEqualToString:@"2"]) ||
+                      ([[data.ser substringToIndex:1] isEqualToString:@"3"]) ||
+                      ([[data.ser substringToIndex:1] isEqualToString:@"4"])) &&
+                     ((barcode.length == 12) || (barcode.length == 14))) {
+                
+                [_encode gidWithGTIN:barcode ser:data.ser];  // In this case, we have a serial number to encode
+                
+                [data.barcode setString:detectionString];
+                [data.encodedBarcode setString:[_encode gid_hex]];
+                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+                [data.dpt setString:@""];
+                [data.cls setString:@""];
+                [data.itm setString:@""];
+            }
+            
             // National brand, check against GTIN (barcode) encoded in SGTIN
+            // NOTE: this only works if the RFID tag has already been read
             else if (([data.rfidBin length] > 0) &&
                      ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
                      ((barcode.length == 12) || (barcode.length == 14))) {
