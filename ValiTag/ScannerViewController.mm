@@ -544,12 +544,26 @@ extern DataClass *data;
     CGRect highlightViewRect = CGRectZero;
     AVMetadataMachineReadableCodeObject *barCodeObject;
     NSString *detectionString = nil;
-    NSArray *barCodeTypes = @[AVMetadataObjectTypeUPCECode, AVMetadataObjectTypeCode39Code, AVMetadataObjectTypeCode39Mod43Code,
-                              AVMetadataObjectTypeEAN13Code, AVMetadataObjectTypeEAN8Code, AVMetadataObjectTypeCode93Code, AVMetadataObjectTypeCode128Code,
-                              AVMetadataObjectTypePDF417Code, AVMetadataObjectTypeQRCode, AVMetadataObjectTypeAztecCode];
+    NSString *type;
+    
+// TPM don't check all barcode types, but these are the ones iOS supports.
+    NSArray *barCodeTypes = @[AVMetadataObjectTypeUPCECode,
+//                              AVMetadataObjectTypeCode39Code,
+//                              AVMetadataObjectTypeCode39Mod43Code,
+                              AVMetadataObjectTypeEAN13Code,
+//                              AVMetadataObjectTypeEAN8Code,
+//                              AVMetadataObjectTypeCode93Code,
+//                              AVMetadataObjectTypeCode128Code,
+//                              AVMetadataObjectTypePDF417Code,
+//                              AVMetadataObjectTypeQRCode,
+//                              AVMetadataObjectTypeAztecCode,
+//                              AVMetadataObjectTypeInterleaved2of5Code,
+//                              AVMetadataObjectTypeITF14Code,
+//                              AVMetadataObjectTypeDataMatrixCode
+                              ];
     
     for (AVMetadataObject *metadata in metadataObjects) {
-        for (NSString *type in barCodeTypes) {
+        for (type in barCodeTypes) {
             if ([metadata.type isEqualToString:type])
             {
                 barCodeObject = (AVMetadataMachineReadableCodeObject *)[_prevLayer transformedMetadataObjectForMetadataObject:(AVMetadataMachineReadableCodeObject *)metadata];
