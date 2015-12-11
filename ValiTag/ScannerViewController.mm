@@ -43,6 +43,7 @@
     
     BOOL                        _barcodeFound;
     BOOL                        _rfidFound;
+    NSMutableString             *_lastDetectionString;
     
     AVCaptureSession            *_session;
     AVCaptureDevice             *_device;
@@ -69,7 +70,7 @@
     
     BOOL                        _zebraReaderConnected;
     id <srfidISdkApi>           _rfidSdkApi;
-    int                         _readerID;
+    int                         _zebraReaderID;
     srfidStartTriggerConfig     *_startTriggerConfig;
     srfidStopTriggerConfig      *_stopTriggerConfig;
     srfidReportConfig           *_reportConfig;
@@ -102,7 +103,8 @@ extern DataClass *data;
     // Initialize and grab the data class
     data = [DataClass singleton:TRUE];
     
-    // Reset
+    // Initialize variables
+    _lastDetectionString = [[NSMutableString alloc] init];
     _barcodeFound = FALSE;
     _rfidFound = FALSE;
    
@@ -212,7 +214,7 @@ extern DataClass *data;
     
     // Set Zebra scanner configurations used in srfidStartRapidRead
     _zebraReaderConnected = FALSE;
-    _readerID = -1;
+    _zebraReaderID = -1;
     [self zebraInitializeRfidSdkWithAppSettings];
 }
 
@@ -251,6 +253,7 @@ extern DataClass *data;
     data = [DataClass singleton:TRUE];
     _barcodeFound = FALSE;
     _rfidFound = FALSE;
+    [_lastDetectionString setString:@""];
     _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     _rfidLbl.text = @"RFID: (connecting to reader)";
     _batteryLifeLbl.text = @"RFID Battery Life";
@@ -300,9 +303,9 @@ extern DataClass *data;
     
     // Zebra Reader
     if (!_ugiReaderConnected && !_areteReaderConnected) {
-        [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
-        [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
-        _readerID = -1;
+        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+        _zebraReaderID = -1;
         _rfidLbl.text = @"RFID: (connecting to reader)";
         [self zebraRapidRead];
     }
@@ -459,7 +462,7 @@ extern DataClass *data;
  */
 - (void)zebraRapidRead
 {
-    if (_readerID < 0) {
+    if (_zebraReaderID < 0) {
         // Get an available reader (must connect with bluetooth settings outside of app)
         NSMutableArray *readers = [[NSMutableArray alloc] init];
         [_rfidSdkApi srfidGetAvailableReadersList:&readers];
@@ -473,14 +476,13 @@ extern DataClass *data;
         }
     }
     else {
-        [_rfidSdkApi srfidRequestBatteryStatus:_readerID];
-        _zebraReaderConnected = TRUE;
+        [_rfidSdkApi srfidRequestBatteryStatus:_zebraReaderID];
         
         NSString *error_response = nil;
         
         do {
             // Set start trigger parameters
-            SRFID_RESULT result = [_rfidSdkApi srfidSetStartTriggerConfiguration:_readerID
+            SRFID_RESULT result = [_rfidSdkApi srfidSetStartTriggerConfiguration:_zebraReaderID
                                                               aStartTriggeConfig:_startTriggerConfig
                                                                   aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
@@ -492,7 +494,7 @@ extern DataClass *data;
             }
             
             // Set stop trigger parameters
-            result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_readerID
+            result = [_rfidSdkApi srfidSetStopTriggerConfiguration:_zebraReaderID
                                                  aStopTriggeConfig:_stopTriggerConfig
                                                     aStatusMessage:&error_response];
             if (SRFID_RESULT_SUCCESS == result) {
@@ -507,7 +509,7 @@ extern DataClass *data;
             error_response = nil;
             
             // Request performing of rapid read operation
-            result = [_rfidSdkApi srfidStartRapidRead:_readerID
+            result = [_rfidSdkApi srfidStartRapidRead:_zebraReaderID
                                         aReportConfig:_reportConfig
                                         aAccessConfig:_accessConfig
                                        aStatusMessage:&error_response];
@@ -520,7 +522,7 @@ extern DataClass *data;
                 // Stop an operation after 1 minute
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 *
                                                                           NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
+                    [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
                 });
             }
             else if (SRFID_RESULT_RESPONSE_ERROR == result) {
@@ -529,7 +531,7 @@ extern DataClass *data;
             else {
                 NSLog(@"Zebra Request failed\n");
             }
-        } while (0);
+        } while (0); // Only do this once, but break on any errors (Objective-C GO TO :)
     }
 }
 
@@ -573,8 +575,14 @@ extern DataClass *data;
             }
         }
         
-        if (detectionString != nil)
-        {
+        // Update before returning
+        _highlightView.frame = highlightViewRect;
+        
+        if (detectionString != nil) {
+            // Don't keep processing the same barcode
+            if ([_lastDetectionString isEqualToString:detectionString]) return;
+            [_lastDetectionString setString:detectionString];
+            
             // Grab the barcode
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -600,6 +608,9 @@ extern DataClass *data;
                 [data.dpt setString:dpt];
                 [data.cls setString:cls];
                 [data.itm setString:itm];
+                
+                // Log the read barcode
+                NSLog(@"\nBar code read read: %@\n", barcode);
             }
             
             // National brand replacement tag encoded in GID with commissioning authority
@@ -624,6 +635,9 @@ extern DataClass *data;
                 [data.dpt setString:@""];
                 [data.cls setString:@""];
                 [data.itm setString:@""];
+                
+                // Log the read barcode
+                NSLog(@"\nBar code read read: %@\n", barcode);
             }
             
             // National brand, check against GTIN (barcode) encoded in SGTIN
@@ -640,6 +654,9 @@ extern DataClass *data;
                 [data.dpt setString:@""];
                 [data.cls setString:@""];
                 [data.itm setString:@""];
+                
+                // Log the read barcode
+                NSLog(@"\nBar code read read: %@\n", barcode);
             }
             
             //Unsupported barcode
@@ -650,6 +667,9 @@ extern DataClass *data;
                 [data.dpt setString:@""];
                 [data.cls setString:@""];
                 [data.itm setString:@""];
+                
+                // Log the unsupported barcode
+                NSLog(@"\nUnsupported barcode: %@\n", barcode);
             }
             
             // Landscape labels
@@ -664,7 +684,8 @@ extern DataClass *data;
         else
             _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     }
-    
+
+    // This clears the scan rectangle if empty
     _highlightView.frame = highlightViewRect;
 
     // Check for match
@@ -707,8 +728,9 @@ extern DataClass *data;
     if (!_ugiReaderConnected) {
         [[RcpApi2 sharedInstance] stopReadTags];
         [[RcpApi2 sharedInstance] close];
-        [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
-        [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
+        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+        _zebraReaderID = -1;
     }
     _ugiReaderConnected = TRUE;
     _areteReaderConnected = FALSE;
@@ -860,8 +882,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        if (!_areteReaderConnected) {
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
-                           [_rfidSdkApi srfidStopRapidRead:_readerID aStatusMessage:nil];
-                           [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
+                           [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+                           [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+                           _zebraReaderID = -1;
                        }
                        _ugiReaderConnected = FALSE;
                        _areteReaderConnected = TRUE;
@@ -1028,16 +1051,18 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 {
     NSLog(@"Zebra Communication Established - Name: %@\n", [activeReader getReaderName]);
     
-    // Set the volume
-    NSString *statusMessage;
-    [_rfidSdkApi srfidSetBeeperConfig:[activeReader getReaderID] aBeeperConfig:SRFID_BEEPERCONFIG_LOW aStatusMessage:&statusMessage];
-    
     // Set the reader
-    _readerID = [activeReader getReaderID];
+    _zebraReaderID = [activeReader getReaderID];
     
     // Establish ASCII connection
-    if ([_rfidSdkApi srfidEstablishAsciiConnection:_readerID aPassword:nil] == SRFID_RESULT_SUCCESS)
+    if ([_rfidSdkApi srfidEstablishAsciiConnection:_zebraReaderID aPassword:nil] == SRFID_RESULT_SUCCESS)
     {
+        // Set the volume
+        NSString *statusMessage = nil;
+        [_rfidSdkApi srfidSetBeeperConfig:_zebraReaderID
+                            aBeeperConfig:SRFID_BEEPERCONFIG_LOW
+                           aStatusMessage:&statusMessage];
+        
         // Success, now read tags
         [self zebraRapidRead];
     }
@@ -1057,8 +1082,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        });
         
         // Terminate sesssion
-        [_rfidSdkApi srfidTerminateCommunicationSession:_readerID];
-        _readerID = -1;
+        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+        _zebraReaderID = -1;
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.text = @"RFID: Zebra connection failed";
     }
@@ -1079,6 +1104,10 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        // Stop the RFID reader
                        [_rfidSdkApi srfidStopRapidRead:readerID aStatusMessage:nil];
                        
+                       // Close the connection
+                       [_rfidSdkApi srfidTerminateCommunicationSession:readerID];
+                       if (readerID == _zebraReaderID) _zebraReaderID = -1;
+                       
                        // Get the RFID tag
                        [data.rfid setString:[tagData getTagId]];
                        [data.rfidBin setString:[_convert Hex2Bin:data.rfid]];
@@ -1090,9 +1119,6 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     
                        // Landscape label
                        _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
-    
-                       // Close the connection
-                       [_rfidSdkApi srfidTerminateCommunicationSession:readerID];
     
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
