@@ -1084,8 +1084,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
         // Terminate sesssion
         [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
         _zebraReaderID = -1;
-        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.text = @"RFID: Zebra connection failed";
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
     }
 }
 
