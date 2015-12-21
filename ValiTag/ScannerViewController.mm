@@ -714,7 +714,7 @@ extern DataClass *data;
     _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
     _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
 
-    // Get the serial number from the tag read
+    // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
     [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
     
     // Landscape label
@@ -868,7 +868,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
                        _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
                        
-                       // Get the serial number from the tag read
+                       // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
                        [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
                        
                        // Landscape label
@@ -1114,7 +1114,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
                        _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     
-                       // Get the serial number from the tag read
+                       // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
                        [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
     
                        // Landscape label
