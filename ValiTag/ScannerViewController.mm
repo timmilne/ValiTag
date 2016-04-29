@@ -42,6 +42,7 @@
     __weak IBOutlet UILabel     *_encodedBarcodeLbl;
     
     BOOL                        _barcodeFound;
+    BOOL                        _barcodeProcessed;
     BOOL                        _rfidFound;
     NSMutableString             *_lastDetectionString;
     
@@ -106,6 +107,7 @@ extern DataClass *data;
     // Initialize variables
     _lastDetectionString = [[NSMutableString alloc] init];
     _barcodeFound = FALSE;
+    _barcodeProcessed = FALSE;
     _rfidFound = FALSE;
    
 // TPM: The barcode scanner example built the UI from scratch.  This made it easier to deal with all
@@ -252,6 +254,7 @@ extern DataClass *data;
     // Reset
     data = [DataClass singleton:TRUE];
     _barcodeFound = FALSE;
+    _barcodeProcessed = FALSE;
     _rfidFound = FALSE;
     [_lastDetectionString setString:@""];
     _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
@@ -314,6 +317,130 @@ extern DataClass *data;
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+/*!
+ * @discussion If both available, check the possible barcode encodings based on the RFID tag
+ */
+- (void)checkEncodings {
+    // Are we ready to check?
+    if (!_barcodeFound || !_rfidFound) return;
+    
+    if (!_barcodeProcessed) {
+        NSString *barcode;
+        barcode = data.barcode;
+        
+        // Set the defaults
+        [data.dpt setString:@""];
+        [data.cls setString:@""];
+        [data.itm setString:@""];
+        
+        // Quick length checks, chop to 12 for now (remove leading zeros)
+        if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
+        if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
+        
+        // Vendor provided owned brand DPCI encoded in an SGTIN
+        // NOTE: this only works if the RFID tag has already been read
+        if ((barcode.length == 12) &&
+            ([data.rfidBin length] > 0) &&
+            ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
+            ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
+            
+            [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            
+            [data.encodedBarcode setString:[_encode sgtin_hex]];
+            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            
+            [data.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
+            [data.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
+            [data.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
+        
+        // Owned brand DPCI properly encoded in a GID
+        // NOTE: this is the only one that works without the RFID tag, but we'll check it for completeness
+        else if ((barcode.length == 12) &&
+                 ([data.rfidBin length] > 0) &&
+                 ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
+            
+            NSString *dpt = [barcode substringWithRange:NSMakeRange(2,3)];
+            NSString *cls = [barcode substringWithRange:NSMakeRange(5,2)];
+            NSString *itm = [barcode substringWithRange:NSMakeRange(7,4)];
+            
+            [_encode withDpt:dpt cls:cls itm:itm ser:@"0"];
+            
+            [data.encodedBarcode setString:[_encode gid_hex]];
+            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            
+            [data.dpt setString:dpt];
+            [data.cls setString:cls];
+            [data.itm setString:itm];
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
+        
+        // National brand replacement tag encoded in GID with commissioning authority
+        // Make sure the serial number is 10 digits long and check the first two digits of the serial number
+        // for 01, 02, 03, 04 (remembering that the decoder drops leading zeroes, so it's a 9 digit number that
+        // would start with 1, 2, 3, or 4.  These are reserved for Target's commisioning authority).
+        // NOTE: this only works if the RFID tag has already been read
+        else if ((barcode.length == 12) &&
+                 ([data.rfidBin length] > 0) &&
+                 ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([data.ser length] == 9) &&
+                 (([[data.ser substringToIndex:1] isEqualToString:@"1"]) ||
+                  ([[data.ser substringToIndex:1] isEqualToString:@"2"]) ||
+                  ([[data.ser substringToIndex:1] isEqualToString:@"3"]) ||
+                  ([[data.ser substringToIndex:1] isEqualToString:@"4"]))) {
+            
+            [_encode gidWithGTIN:barcode ser:@"0"];
+            
+            [data.encodedBarcode setString:[_encode gid_hex]];
+            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
+        
+        // National brand GTIN encoded in SGTIN
+        // NOTE: this only works if the RFID tag has already been read
+        else if ((barcode.length == 12) &&
+                 ([data.rfidBin length] > 0) &&
+                 ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
+            
+            [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            
+            [data.encodedBarcode setString:[_encode sgtin_hex]];
+            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
+        
+        //Unsupported barcode
+        else {
+            [data.barcode setString:@"unsupported barcode"];
+            [data.encodedBarcode setString:@"unsupported barcode"];
+            [data.encodedBarcodeBin setString:@"unsupported barcode"];
+            
+            // Log the unsupported barcode
+            NSLog(@"\nUnsupported barcode: %@\n", barcode);
+        }
+        
+        // Landscape labels
+        _dptLbl.text = [NSString stringWithFormat:@"Department: %@", data.dpt];
+        _clsLbl.text = [NSString stringWithFormat:@"Class: %@", data.cls];
+        _itmLbl.text = [NSString stringWithFormat:@"Item: %@", data.itm];
+        _encodedBarcodeLbl.text = data.encodedBarcode;
+        _barcodeProcessed = TRUE;
+    }
+    
+    // Check for match
+    [self checkForMatch];
 }
 
 /*!
@@ -583,113 +710,20 @@ extern DataClass *data;
             if ([_lastDetectionString isEqualToString:detectionString]) return;
             [_lastDetectionString setString:detectionString];
             
-            // Grab the barcode
+            // Save the (new) barcode
+            [data.barcode setString:detectionString];
+            _barcodeProcessed = FALSE;
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
-            NSString *barcode;
-            barcode = detectionString;
-
-            // Quick length checks, chop to 12 for now (remove leading zeros)
-            if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
-            if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
-            
-            // Owned brand, check against the DPCI encoded in a GID
-            if (barcode.length == 12 && [[barcode substringToIndex:2] isEqualToString:@"49"]) {
-                NSString *dpt = [barcode substringWithRange:NSMakeRange(2,3)];
-                NSString *cls = [barcode substringWithRange:NSMakeRange(5,2)];
-                NSString *itm = [barcode substringWithRange:NSMakeRange(7,4)];
-                NSString *ser = @"0";
-                
-                [_encode withDpt:dpt cls:cls itm:itm ser:ser];
-                
-                [data.barcode setString:detectionString];
-                [data.encodedBarcode setString:[_encode gid_hex]];
-                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
-                [data.dpt setString:dpt];
-                [data.cls setString:cls];
-                [data.itm setString:itm];
-                
-                // Log the read barcode
-                NSLog(@"\nBar code read read: %@\n", barcode);
-            }
-            
-            // National brand replacement tag encoded in GID with commissioning authority
-            // Make sure the serial number is 10 digits long and check the first two digits of the serial number
-            // for 01, 02, 03, 04 (remembering that the decoder drops leading zeroes, so it's a 9 digit number that
-            // would start with 1, 2, 3, or 4.  These are reserved for Target's commisioning authority).
-            // NOTE: this only works if the RFID tag has already been read
-            else if (([data.rfidBin length] > 0) &&
-                     ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
-                     ([data.ser length] == 9) &&
-                     (([[data.ser substringToIndex:1] isEqualToString:@"1"]) ||
-                      ([[data.ser substringToIndex:1] isEqualToString:@"2"]) ||
-                      ([[data.ser substringToIndex:1] isEqualToString:@"3"]) ||
-                      ([[data.ser substringToIndex:1] isEqualToString:@"4"])) &&
-                     ((barcode.length == 12) || (barcode.length == 14))) {
-                
-                [_encode gidWithGTIN:barcode ser:data.ser];  // In this case, we have a serial number to encode
-                
-                [data.barcode setString:detectionString];
-                [data.encodedBarcode setString:[_encode gid_hex]];
-                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
-                [data.dpt setString:@""];
-                [data.cls setString:@""];
-                [data.itm setString:@""];
-                
-                // Log the read barcode
-                NSLog(@"\nBar code read read: %@\n", barcode);
-            }
-            
-            // National brand, check against GTIN (barcode) encoded in SGTIN
-            // NOTE: this only works if the RFID tag has already been read
-            else if (([data.rfidBin length] > 0) &&
-                     ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
-                     ((barcode.length == 12) || (barcode.length == 14))) {
-                
-                [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
-                
-                [data.barcode setString:detectionString];
-                [data.encodedBarcode setString:[_encode sgtin_hex]];
-                [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
-                [data.dpt setString:@""];
-                [data.cls setString:@""];
-                [data.itm setString:@""];
-                
-                // Log the read barcode
-                NSLog(@"\nBar code read read: %@\n", barcode);
-            }
-            
-            //Unsupported barcode
-            else {
-                [data.barcode setString:@"unsupported barcode"];
-                [data.encodedBarcode setString:@"unsupported barcode"];
-                [data.encodedBarcodeBin setString:@"unsupported barcode"];
-                [data.dpt setString:@""];
-                [data.cls setString:@""];
-                [data.itm setString:@""];
-                
-                // Log the unsupported barcode
-                NSLog(@"\nUnsupported barcode: %@\n", barcode);
-            }
-            
-            // Landscape labels
-            _dptLbl.text = [NSString stringWithFormat:@"Department: %@", data.dpt];
-            _clsLbl.text = [NSString stringWithFormat:@"Class: %@", data.cls];
-            _itmLbl.text = [NSString stringWithFormat:@"Item: %@", data.itm];
-            _encodedBarcodeLbl.text = data.encodedBarcode;
             _barcodeFound = TRUE;
         }
-        
-        // Still scanning for barcodes
-        else
-            _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     }
 
     // This clears the scan rectangle if empty
     _highlightView.frame = highlightViewRect;
 
-    // Check for match
-    [self checkForMatch];
+    // Check encodings
+    [self checkEncodings];
 }
 
 // uGrokit RFID Reader
@@ -736,8 +770,8 @@ extern DataClass *data;
     _areteReaderConnected = FALSE;
     _zebraReaderConnected = FALSE;
   
-    // Check for match
-    [self checkForMatch];
+    // Check encodings
+    [self checkEncodings];
     
     // Log the read tag
     NSLog(@"\nRFID tag read: %@\n", data.rfid);
@@ -890,8 +924,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _areteReaderConnected = TRUE;
                        _zebraReaderConnected = FALSE;
                        
-                       // Check for match
-                       [self checkForMatch];
+                       // Check encodings
+                       [self checkEncodings];
                        
                        // Log the read tag
                        NSLog(@"\nRFID tag read: %@\n", data.rfid);
@@ -1132,8 +1166,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        _areteReaderConnected = FALSE;
                        _zebraReaderConnected = TRUE;
     
-                       // Check for match
-                       [self checkForMatch];
+                       // Check encodings
+                       [self checkEncodings];
                        
                        // Log the read tag
                        NSLog(@"\nRFID tag read: %@\n", data.rfid);
