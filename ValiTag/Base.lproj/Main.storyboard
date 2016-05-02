@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="14F27" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="IyZ-85-VS8">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="IyZ-85-VS8">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <scenes>
         <!--Navigation Controller-->
@@ -180,6 +180,12 @@
                                 <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="ValiTag Version: " textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KQ8-Xj-n9Y">
+                                <rect key="frame" x="227" y="514" width="147" height="24"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <color key="textColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" misplaced="YES" text="Serial Number:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="uqC-pr-d2f">
                                 <rect key="frame" x="235" y="448" width="131" height="24"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
@@ -198,6 +204,7 @@
                             <constraint firstAttribute="centerX" secondItem="8cX-uO-neB" secondAttribute="centerX" id="SAp-Vm-uFg"/>
                             <constraint firstAttribute="centerX" secondItem="HR8-xA-hZe" secondAttribute="centerX" id="bPq-Ir-OJH"/>
                             <constraint firstAttribute="centerX" secondItem="k1o-rP-zCw" secondAttribute="centerX" id="hSN-am-fON"/>
+                            <constraint firstItem="KQ8-Xj-n9Y" firstAttribute="centerX" secondItem="PtX-XV-KdH" secondAttribute="centerX" id="k3L-pU-fbD"/>
                             <constraint firstAttribute="centerX" secondItem="OIA-qN-XhF" secondAttribute="centerX" id="lke-5o-jFt"/>
                             <constraint firstAttribute="centerX" secondItem="hug-lv-kjd" secondAttribute="centerX" id="zfE-SC-ZKx"/>
                         </constraints>
@@ -211,6 +218,7 @@
                         <outlet property="scannedBarcodeLbl" destination="OIA-qN-XhF" id="ftJ-Cb-vHt"/>
                         <outlet property="scannedRFIDLbl" destination="07F-Nh-sWc" id="h52-eR-i0R"/>
                         <outlet property="serialLbl" destination="uqC-pr-d2f" id="BUx-E1-oIM"/>
+                        <outlet property="versionLbl" destination="KQ8-Xj-n9Y" id="qNQ-TG-r4B"/>
                         <segue destination="I6q-ON-eg7" kind="unwind" identifier="unwindToContainerVC" unwindAction="unwindToContainerVC:" id="u2n-pj-SdE"/>
                     </connections>
                 </viewController>

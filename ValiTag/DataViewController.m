@@ -18,6 +18,7 @@
 @property (weak, nonatomic) IBOutlet UILabel *classLbl;
 @property (weak, nonatomic) IBOutlet UILabel *itemLbl;
 @property (weak, nonatomic) IBOutlet UILabel *serialLbl;
+@property (weak, nonatomic) IBOutlet UILabel *versionLbl;
 
 @end
 
@@ -46,6 +47,8 @@ extern DataClass *data;
     _classLbl.text = [NSString stringWithFormat:@"Class: %@", data.cls];
     _itemLbl.text = [NSString stringWithFormat:@"Item: %@", data.itm];
     _serialLbl.text = [NSString stringWithFormat:@"Serial Number: %@", data.ser];
+    _versionLbl.text = [NSString stringWithFormat:@"ValiTag Version: %@",
+                        [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
     
     // Compare the binary formats
     if ([data.rfidBin length] > 60 && [data.encodedBarcodeBin length] > 60 &&
