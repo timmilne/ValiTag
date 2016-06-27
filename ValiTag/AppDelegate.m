@@ -26,14 +26,6 @@
 // TPM - uncomment this for useful debugging info
 //    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
     
-    // This for NewRelic monitoring of app
-// TPM - uncomment this for useful debugging info
-//    [NRLogger setLogLevels:NRLogLevelALL];
-// TPM - Dev
-    [NewRelicAgent startWithApplicationToken:@"AA6b6feee2b60cf69ae08f7b6e6507b45a16a989cc"];
-// TPM - Prod
-//    [NewRelicAgent startWithApplicationToken:@"AA03046103ddc735e7b538b17aed7d015806fb077d"];
-    
     return YES;
 }
 

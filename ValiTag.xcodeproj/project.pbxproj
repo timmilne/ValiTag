@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */ = {isa = PBXBuildFile; fileRef = B7117D3C1B31FFF900968426 /* NavigationController.m */; };
 		B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D511B38A7A800968426 /* libUGrokItApi.a */; };
-		B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7117D551B38BCAF00968426 /* libAreteAudio.a */; };
 		B71C5C5B1AF000C700D28341 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5A1AF000C700D28341 /* main.m */; };
 		B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C5D1AF000C700D28341 /* AppDelegate.m */; };
 		B71C5C641AF000C700D28341 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B71C5C621AF000C700D28341 /* Main.storyboard */; };
@@ -17,12 +16,8 @@
 		B71C5C691AF000C700D28341 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = B71C5C671AF000C700D28341 /* LaunchScreen.xib */; };
 		B71C5C751AF000C700D28341 /* ValiTagTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C741AF000C700D28341 /* ValiTagTests.m */; };
 		B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */; };
-		B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.mm */; };
+		B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.m */; };
 		B71C5C851AF0254800D28341 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C841AF0254800D28341 /* DataClass.m */; };
-		B725D2091B8FF4C100D4E9C2 /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */; };
-		B725D20B1B8FF4D800D4E9C2 /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */; };
-		B725D20D1B8FF4EA00D4E9C2 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */; };
-		B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */; };
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
@@ -52,10 +47,6 @@
 		B7117D3B1B31FFF900968426 /* NavigationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NavigationController.h; sourceTree = "<group>"; };
 		B7117D3C1B31FFF900968426 /* NavigationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NavigationController.m; sourceTree = "<group>"; };
 		B7117D511B38A7A800968426 /* libUGrokItApi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libUGrokItApi.a; path = uGrokit/libUGrokItApi.a; sourceTree = "<group>"; };
-		B7117D551B38BCAF00968426 /* libAreteAudio.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libAreteAudio.a; path = Arete/libAreteAudio.a; sourceTree = "<group>"; };
-		B7117D571B38BCBB00968426 /* RcpApi2.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RcpApi2.h; path = Arete/include/RcpApi2.h; sourceTree = "<group>"; };
-		B7117D581B38BCC300968426 /* AudioMgr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioMgr.h; path = Arete/include/AudioMgr.h; sourceTree = "<group>"; };
-		B7117D5B1B38FE5300968426 /* EpcConverter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EpcConverter.h; path = Arete/include/EpcConverter.h; sourceTree = "<group>"; };
 		B71C5C551AF000C700D28341 /* ValiTag.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ValiTag.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B71C5C591AF000C700D28341 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B71C5C5A1AF000C700D28341 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -69,14 +60,9 @@
 		B71C5C741AF000C700D28341 /* ValiTagTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ValiTagTests.m; sourceTree = "<group>"; };
 		B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		B71C5C801AF0108C00D28341 /* ScannerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScannerViewController.h; sourceTree = "<group>"; };
-		B71C5C811AF0108C00D28341 /* ScannerViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ScannerViewController.mm; sourceTree = "<group>"; };
+		B71C5C811AF0108C00D28341 /* ScannerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerViewController.m; sourceTree = "<group>"; };
 		B71C5C831AF0254800D28341 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataClass.h; sourceTree = "<group>"; };
 		B71C5C841AF0254800D28341 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataClass.m; sourceTree = "<group>"; };
-		B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
-		B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
-		B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
-		B725D20E1B8FF61A00D4E9C2 /* ValiTag-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ValiTag-Prefix.pch"; sourceTree = "<group>"; };
-		B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NewRelicAgent.framework; sourceTree = "<group>"; };
 		B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoderTests.m; sourceTree = "<group>"; };
 		B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerVCTests.m; sourceTree = "<group>"; };
 		B77B31EC1BBC0C5C0017348E /* Ugi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi.h; sourceTree = "<group>"; };
@@ -135,13 +121,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B725D20D1B8FF4EA00D4E9C2 /* libz.dylib in Frameworks */,
-				B725D20B1B8FF4D800D4E9C2 /* libc++.dylib in Frameworks */,
-				B725D2091B8FF4C100D4E9C2 /* CoreTelephony.framework in Frameworks */,
 				B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */,
 				B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */,
 				B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */,
-				B7117D561B38BCAF00968426 /* libAreteAudio.a in Frameworks */,
 				B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */,
 				B7D5C9B91BCE073100EDCCC0 /* EPCEncoder.framework in Frameworks */,
 				B7117D521B38A7A800968426 /* libUGrokItApi.a in Frameworks */,
@@ -149,7 +131,6 @@
 				B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */,
 				B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */,
 				B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */,
-				B725D2111B8FF81A00D4E9C2 /* NewRelicAgent.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,25 +159,6 @@
 			name = uGrokit;
 			sourceTree = "<group>";
 		};
-		B7117D591B38BCCB00968426 /* Arete */ = {
-			isa = PBXGroup;
-			children = (
-				B7117D551B38BCAF00968426 /* libAreteAudio.a */,
-				B7117D5A1B38BCD400968426 /* include */,
-			);
-			name = Arete;
-			sourceTree = "<group>";
-		};
-		B7117D5A1B38BCD400968426 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				B7117D571B38BCBB00968426 /* RcpApi2.h */,
-				B7117D581B38BCC300968426 /* AudioMgr.h */,
-				B7117D5B1B38FE5300968426 /* EpcConverter.h */,
-			);
-			name = include;
-			sourceTree = "<group>";
-		};
 		B71C5C4C1AF000C700D28341 = {
 			isa = PBXGroup;
 			children = (
@@ -205,9 +167,7 @@
 				B7D5C9B71BCE071A00EDCCC0 /* EPCEncoder */,
 				B71C5C561AF000C700D28341 /* Products */,
 				B7117D411B38920E00968426 /* uGrokit */,
-				B7117D591B38BCCB00968426 /* Arete */,
 				B7DA2FC61B7994D100F4C2FC /* Zebra */,
-				B725D2071B8FF47F00D4E9C2 /* NewRelic */,
 			);
 			sourceTree = "<group>";
 		};
@@ -231,7 +191,7 @@
 				B79B20111AFA6FD800B7900D /* DataViewController.h */,
 				B79B20121AFA6FD800B7900D /* DataViewController.m */,
 				B71C5C801AF0108C00D28341 /* ScannerViewController.h */,
-				B71C5C811AF0108C00D28341 /* ScannerViewController.mm */,
+				B71C5C811AF0108C00D28341 /* ScannerViewController.m */,
 				B7117D3B1B31FFF900968426 /* NavigationController.h */,
 				B7117D3C1B31FFF900968426 /* NavigationController.m */,
 				B71C5C621AF000C700D28341 /* Main.storyboard */,
@@ -247,7 +207,6 @@
 			children = (
 				B71C5C591AF000C700D28341 /* Info.plist */,
 				B71C5C5A1AF000C700D28341 /* main.m */,
-				B725D20E1B8FF61A00D4E9C2 /* ValiTag-Prefix.pch */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -270,17 +229,6 @@
 				B71C5C731AF000C700D28341 /* Info.plist */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		B725D2071B8FF47F00D4E9C2 /* NewRelic */ = {
-			isa = PBXGroup;
-			children = (
-				B725D2101B8FF81A00D4E9C2 /* NewRelicAgent.framework */,
-				B725D2081B8FF4C100D4E9C2 /* CoreTelephony.framework */,
-				B725D20A1B8FF4D800D4E9C2 /* libc++.dylib */,
-				B725D20C1B8FF4EA00D4E9C2 /* libz.dylib */,
-			);
-			name = NewRelic;
 			sourceTree = "<group>";
 		};
 		B77B31EB1BBC0C5C0017348E /* include */ = {
@@ -365,7 +313,6 @@
 				B71C5C511AF000C700D28341 /* Sources */,
 				B71C5C521AF000C700D28341 /* Frameworks */,
 				B71C5C531AF000C700D28341 /* Resources */,
-				B725D20F1B8FF63700D4E9C2 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -452,22 +399,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		B725D20F1B8FF63700D4E9C2 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "SCRIPT=`/usr/bin/find \"${SRCROOT}\" -name newrelic_postbuild.sh | head -n 1`\n/bin/sh \"${SCRIPT}\" \"AA03046103ddc735e7b538b17aed7d015806fb077d\"";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		B71C5C511AF000C700D28341 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -478,7 +409,7 @@
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
 				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
-				B71C5C821AF0108C00D28341 /* ScannerViewController.mm in Sources */,
+				B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,8 +537,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = ValiTag/ValiTag.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = NO;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -615,7 +548,6 @@
 					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "$(SRCROOT)/ValiTag/ValiTag-Prefix.pch";
 				INFOPLIST_FILE = ValiTag/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -623,13 +555,12 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/uGrokit",
-					"$(PROJECT_DIR)/Arete",
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.target.stores.$(PRODUCT_NAME:rfc1034identifier:lower).daily";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/** Zebra/include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
 			};
 			name = Debug;
 		};
@@ -637,8 +568,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = ValiTag/ValiTag.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = NO;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -646,7 +579,6 @@
 					"$(PROJECT_DIR)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_PREFIX_HEADER = "$(SRCROOT)/ValiTag/ValiTag-Prefix.pch";
 				INFOPLIST_FILE = ValiTag/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -654,13 +586,12 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/uGrokit",
-					"$(PROJECT_DIR)/Arete",
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.target.stores.$(PRODUCT_NAME:rfc1034identifier:lower).daily";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Arete/include/** Zebra/include/**";
+				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
 			};
 			name = Release;
 		};
