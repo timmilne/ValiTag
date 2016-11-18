@@ -2,18 +2,18 @@
   "images" : [
     {
       "idiom" : "universal",
-      "scale" : "1x",
-      "filename" : "magnifying_glass.png"
+      "filename" : "InspectIcon-1.png",
+      "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "scale" : "2x",
-      "filename" : "magnifying_glass@2x.png"
+      "filename" : "InspectIcon-2.png",
+      "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "scale" : "3x",
-      "filename" : "magnifying_glass@2x-1.png"
+      "filename" : "InspectIcon-3.png",
+      "scale" : "3x"
     }
   ],
   "info" : {

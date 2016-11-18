@@ -352,10 +352,11 @@
 				TargetAttributes = {
 					B71C5C541AF000C700D28341 = {
 						CreatedOnToolsVersion = 6.2;
-						DevelopmentTeam = 56H62Y5EBN;
+						DevelopmentTeam = 6B6T6M8GHY;
 					};
 					B71C5C6D1AF000C700D28341 = {
 						CreatedOnToolsVersion = 6.2;
+						DevelopmentTeam = 6B6T6M8GHY;
 						TestTargetID = B71C5C541AF000C700D28341;
 					};
 				};
@@ -542,6 +543,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = 6B6T6M8GHY;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -558,7 +560,7 @@
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.target.stores.valitag.daily.tim;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
 			};
@@ -573,6 +575,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = NO;
+				DEVELOPMENT_TEAM = 6B6T6M8GHY;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -589,7 +592,7 @@
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.target.stores.valitag.daily.tim;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
 			};
@@ -599,6 +602,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 6B6T6M8GHY;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -619,6 +623,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 6B6T6M8GHY;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
