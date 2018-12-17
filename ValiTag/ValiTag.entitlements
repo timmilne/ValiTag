@@ -4,5 +4,9 @@
 <dict>
 	<key>com.apple.external-accessory.wireless-configuration</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.timmilne.tagreads</string>
+	</array>
 </dict>
 </plist>

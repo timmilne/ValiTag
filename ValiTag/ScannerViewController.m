@@ -3,7 +3,7 @@
 //  ValiTag
 //
 //  Created by Tim.Milne on 4/28/15.
-//  Copyright (c) 2015 Tim.Milne. All rights reserved.
+//  Copyright (c) 2015, 2019 Tim.Milne. All rights reserved.
 //
 //  Barcode scanner code from:
 //  http://www.infragistics.com/community/blogs/torrey-betts/archive/2013/10/10/scanning-barcodes-with-ios-7-objective-c.aspx
@@ -18,14 +18,14 @@
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
 #import <EPCEncoder/Converter.h>        // To convert to binary for comparison
-#import "DataClass.h"                   // Singleton data class
+#import "CheckDataObject.h"             // Singleton check object data class
 #import "Ugi.h"                         // uGrokit reader
 #import "RfidSdkFactory.h"              // Zebra reader
 
 #pragma mark -
 #pragma mark AVFoundationScanSetup
 
-@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate, srfidISdkApiDelegate>
+@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate, srfidISdkApiDelegate, NSFilePresenter>
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
@@ -34,6 +34,7 @@
     __weak IBOutlet UILabel     *_itmLbl;
     __weak IBOutlet UILabel     *_serLbl;
     __weak IBOutlet UILabel     *_encodedBarcodeLbl;
+    __weak IBOutlet UIButton    *_saveValidTagBtn;      // To save the validated tag
     
     BOOL                        _barcodeFound;
     BOOL                        _barcodeProcessed;
@@ -69,9 +70,13 @@
 @end
 
 // The singleton data class
-extern DataClass *data;
+extern CheckDataObject *data;
 
 @implementation ScannerViewController
+
+// NSFilePresenter
+@synthesize presentedItemOperationQueue;
+@synthesize presentedItemURL;
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:0.65]
 
@@ -86,7 +91,7 @@ extern DataClass *data;
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
     
     // Initialize and grab the data class
-    data = [DataClass singleton:TRUE];
+    data = [CheckDataObject singleton:TRUE];
     
     // Initialize variables
     _lastDetectionString = [[NSMutableString alloc] init];
@@ -219,6 +224,9 @@ extern DataClass *data;
             [_prevLayer.connection setVideoOrientation:AVCaptureVideoOrientationLandscapeRight];
             break;
     }
+    _saveValidTagBtn.frame = CGRectMake(_prevLayer.frame.size.width - 4 - 26,
+                                        self.view.bounds.size.height - 120 - 10 - 26,
+                                        26, 26);
 }
 
 /*!
@@ -227,7 +235,7 @@ extern DataClass *data;
  */
 - (IBAction)reset:(id)sender {
     // Reset
-    data = [DataClass singleton:TRUE];
+    data = [CheckDataObject singleton:TRUE];
     _barcodeFound = FALSE;
     _barcodeProcessed = FALSE;
     _rfidFound = FALSE;
@@ -251,8 +259,10 @@ extern DataClass *data;
     //Match images
     [self.view sendSubviewToBack:_matchView];
     [self.view sendSubviewToBack:_noMatchView];
+    [self.view sendSubviewToBack:_saveValidTagBtn];
     _matchView.hidden = YES;
     _noMatchView.hidden = YES;
+    _saveValidTagBtn.hidden = YES;
     
 // TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
 // to another.  If you change readers, restart the app.  The first reader to scan a tag sets the
@@ -277,6 +287,63 @@ extern DataClass *data;
         _rfidLbl.text = @"RFID: (connecting to reader)";
         [self zebraRapidRead];
     }
+}
+
+/*!
+ * @discussion Press the save button
+ * @param sender An id for the sender control (not used)
+ */
+- (IBAction)saveValidTag:(id)sender {
+    NSURL *tagReadsGroupURL = [[NSFileManager defaultManager]
+                               containerURLForSecurityApplicationGroupIdentifier:
+                               @"group.com.timmilne.tagreads"];
+    NSString *validTagFile = [[NSString alloc] initWithFormat:@"validTag.dat"];
+    NSURL *validTagFileURL = [[NSURL alloc] initFileURLWithPath:validTagFile
+                                                    isDirectory:false
+                                                  relativeToURL:tagReadsGroupURL];
+    NSFileCoordinator *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:self];
+    NSError *fileCoordinatorError = nil;
+    
+    [fileCoordinator coordinateWritingItemAtURL:validTagFileURL
+                                        options:NSFileCoordinatorWritingForReplacing
+                                          error:&fileCoordinatorError
+                                     byAccessor:^(NSURL *newURL) {
+                                         // Save to a file
+                                         if ([NSKeyedArchiver archiveRootObject:data
+                                                                         toFile:[newURL path]]) {
+                                             [self alertDialog:@"saveValidTag"
+                                                   withMessage:[NSString stringWithFormat:@"File Saved: %@",
+                                                                [newURL path]]];
+                                         }
+                                         else {
+                                             // Error!
+                                             [self alertDialog:@"saveValidTag"
+                                                   withMessage:[NSString stringWithFormat:@"File Save Error"]];
+                                         }
+                                     }];
+
+}
+
+/*!
+ * @discussion NSFilePresenter Notification if the shared file changed
+ */
+- (void)presentedItemDidChange {
+    // Reload the tagReads data, it changed...
+    NSLog (@"validTag file changed, reload it. (Not yet implemented!!)");
+}
+
+- (void)alertDialog:(NSString *)title withMessage:(NSString *)message {
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:title
+                          message:message
+                          delegate:nil
+                          cancelButtonTitle:@"OK"
+                          otherButtonTitles:nil];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [alert show];
+    });
+    NSLog (@"%@", message);
 }
 
 - (void)didReceiveMemoryWarning {
@@ -422,8 +489,10 @@ extern DataClass *data;
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
+        [self.view bringSubviewToFront:_saveValidTagBtn];
         _matchView.hidden = NO;
         _noMatchView.hidden = YES;
+        _saveValidTagBtn.hidden = NO;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
@@ -432,8 +501,10 @@ extern DataClass *data;
         // No match: hide the match and show the no match
         [self.view bringSubviewToFront:_noMatchView];
         [self.view sendSubviewToBack:_matchView];
+        [self.view sendSubviewToBack:_saveValidTagBtn];
         _matchView.hidden = YES;
         _noMatchView.hidden = NO;
+        _saveValidTagBtn.hidden = YES;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         [self.view setBackgroundColor:UIColorFromRGB(0xCC0000)];
@@ -821,17 +892,8 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
     else
     {
         // Error, alert
-        UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"Zebra Error"
-                              message:@"Failed to establish connection with Zebra RFID reader"
-                              delegate:nil
-                              cancelButtonTitle:@"OK"
-                              otherButtonTitles:nil];
-        
-        dispatch_async(dispatch_get_main_queue(),
-                       ^{
-                           [alert show];
-                       });
+        [self alertDialog:@"Zebra Error"
+              withMessage:@"Failed to establish connection with Zebra RFID reader"];
         
         // Terminate sesssion
         [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];

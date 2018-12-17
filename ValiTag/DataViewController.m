@@ -7,8 +7,8 @@
 //
 
 #import "DataViewController.h"
-#import "DataClass.h"                   // Singleton data class
-#import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
+#import "CheckDataObject.h"         // Singleton data class
+#import <EPCEncoder/EPCEncoder.h>   // To encode the scanned barcode for comparison
 
 @interface DataViewController ()
 @property (weak, nonatomic) IBOutlet UILabel *scannedBarcodeLbl;
@@ -23,7 +23,7 @@
 @end
 
 // The singleton data class
-extern DataClass *data;
+extern CheckDataObject *data;
 
 @implementation DataViewController
 
@@ -37,7 +37,7 @@ extern DataClass *data;
     self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
     
     // We better not have gotten here without doing this, but just in case...
-    data = [DataClass singleton:FALSE];
+    data = [CheckDataObject singleton:FALSE];
     
     // Do any additional setup after loading the view.
     _scannedBarcodeLbl.text = data.barcode;

@@ -17,7 +17,6 @@
 		B71C5C751AF000C700D28341 /* ValiTagTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C741AF000C700D28341 /* ValiTagTests.m */; };
 		B71C5C7F1AF00E3D00D28341 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */; };
 		B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.m */; };
-		B71C5C851AF0254800D28341 /* DataClass.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C841AF0254800D28341 /* DataClass.m */; };
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
@@ -25,6 +24,7 @@
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
 		B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */; };
+		B7BE3A6C21C6F0FF00BDC0AB /* CheckDataObject.m in Sources */ = {isa = PBXBuildFile; fileRef = B7BE3A6B21C6F0FF00BDC0AB /* CheckDataObject.m */; };
 		B7D5C9B91BCE073100EDCCC0 /* EPCEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */; };
 		B7D5C9BA1BCE07C700EDCCC0 /* EPCEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */; };
 		B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */; };
@@ -61,8 +61,6 @@
 		B71C5C7E1AF00E3D00D28341 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		B71C5C801AF0108C00D28341 /* ScannerViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScannerViewController.h; sourceTree = "<group>"; };
 		B71C5C811AF0108C00D28341 /* ScannerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerViewController.m; sourceTree = "<group>"; };
-		B71C5C831AF0254800D28341 /* DataClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataClass.h; sourceTree = "<group>"; };
-		B71C5C841AF0254800D28341 /* DataClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataClass.m; sourceTree = "<group>"; };
 		B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoderTests.m; sourceTree = "<group>"; };
 		B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerVCTests.m; sourceTree = "<group>"; };
 		B77B31EC1BBC0C5C0017348E /* Ugi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ugi.h; sourceTree = "<group>"; };
@@ -109,6 +107,8 @@
 		B7B18C361AF425BC00025761 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		B7B18C381AF425C900025761 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		B7B18C3A1AF425D900025761 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = usr/lib/libz.1.2.5.dylib; sourceTree = SDKROOT; };
+		B7BE3A6A21C6F0FF00BDC0AB /* CheckDataObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CheckDataObject.h; sourceTree = "<group>"; };
+		B7BE3A6B21C6F0FF00BDC0AB /* CheckDataObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CheckDataObject.m; sourceTree = "<group>"; };
 		B7D5C9B81BCE073100EDCCC0 /* EPCEncoder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = EPCEncoder.framework; sourceTree = "<group>"; };
 		B7DA2FC71B7994FB00F4C2FC /* libsymbolrfid-sdk.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libsymbolrfid-sdk.a"; path = "Zebra/libsymbolrfid-sdk.a"; sourceTree = "<group>"; };
 		B7DA2FCB1B79977500F4C2FC /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
@@ -186,8 +186,8 @@
 				B7A733C51C0396E9008F2030 /* ValiTag.entitlements */,
 				B71C5C5C1AF000C700D28341 /* AppDelegate.h */,
 				B71C5C5D1AF000C700D28341 /* AppDelegate.m */,
-				B71C5C831AF0254800D28341 /* DataClass.h */,
-				B71C5C841AF0254800D28341 /* DataClass.m */,
+				B7BE3A6A21C6F0FF00BDC0AB /* CheckDataObject.h */,
+				B7BE3A6B21C6F0FF00BDC0AB /* CheckDataObject.m */,
 				B79B20111AFA6FD800B7900D /* DataViewController.h */,
 				B79B20121AFA6FD800B7900D /* DataViewController.m */,
 				B71C5C801AF0108C00D28341 /* ScannerViewController.h */,
@@ -353,6 +353,11 @@
 					B71C5C541AF000C700D28341 = {
 						CreatedOnToolsVersion = 6.2;
 						DevelopmentTeam = 6B6T6M8GHY;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					B71C5C6D1AF000C700D28341 = {
 						CreatedOnToolsVersion = 6.2;
@@ -405,11 +410,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B71C5C851AF0254800D28341 /* DataClass.m in Sources */,
 				B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */,
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
 				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
+				B7BE3A6C21C6F0FF00BDC0AB /* CheckDataObject.m in Sources */,
 				B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
