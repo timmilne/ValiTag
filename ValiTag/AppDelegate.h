@@ -10,8 +10,12 @@
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) UIWindow  *window;
 
+// OpenURL support
+@property                     BOOL      autoSaveAndExit;
+@property (strong, nonatomic) NSString  *callBackApp;
+- (void)returnToCaller;
 
 @end
 

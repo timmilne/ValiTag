@@ -18,9 +18,10 @@
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
 #import <EPCEncoder/Converter.h>        // To convert to binary for comparison
-#import "CheckDataObject.h"             // Singleton check object data class
+#import "CheckDataObject.h"             // Singleton check data object class
 #import "Ugi.h"                         // uGrokit reader
 #import "RfidSdkFactory.h"              // Zebra reader
+#import "AppDelegate.h"                 // The app delegate
 
 #pragma mark -
 #pragma mark AVFoundationScanSetup
@@ -69,8 +70,8 @@
 }
 @end
 
-// The singleton data class
-extern CheckDataObject *data;
+// The singleton check data object
+extern CheckDataObject *checkData;
 
 @implementation ScannerViewController
 
@@ -79,6 +80,8 @@ extern CheckDataObject *data;
 @synthesize presentedItemURL;
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:0.65]
+
+#define MyAppDelegate ((AppDelegate *)[UIApplication sharedApplication].delegate)
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -90,8 +93,8 @@ extern CheckDataObject *data;
     // Set the default background color
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
     
-    // Initialize and grab the data class
-    data = [CheckDataObject singleton:TRUE];
+    // Initialize and grab the singleton check data object
+    checkData = [CheckDataObject singleton:TRUE];
     
     // Initialize variables
     _lastDetectionString = [[NSMutableString alloc] init];
@@ -235,7 +238,7 @@ extern CheckDataObject *data;
  */
 - (IBAction)reset:(id)sender {
     // Reset
-    data = [CheckDataObject singleton:TRUE];
+    checkData = [CheckDataObject singleton:TRUE];
     _barcodeFound = FALSE;
     _barcodeProcessed = FALSE;
     _rfidFound = FALSE;
@@ -294,6 +297,16 @@ extern CheckDataObject *data;
  * @param sender An id for the sender control (not used)
  */
 - (IBAction)saveValidTag:(id)sender {
+    
+    // Were we invoked from another caller?
+    if (MyAppDelegate.autoSaveAndExit) {
+        if ([self autoSaveValidTag]) {
+            // We've saved new valid tag, return to caller app
+            [MyAppDelegate returnToCaller];
+            return;
+        }
+    }
+    
     NSURL *tagReadsGroupURL = [[NSFileManager defaultManager]
                                containerURLForSecurityApplicationGroupIdentifier:
                                @"group.com.timmilne.tagreads"];
@@ -309,7 +322,7 @@ extern CheckDataObject *data;
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
                                          // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:data
+                                         if ([NSKeyedArchiver archiveRootObject:checkData
                                                                          toFile:[newURL path]]) {
                                              [self alertDialog:@"saveValidTag"
                                                    withMessage:[NSString stringWithFormat:@"File Saved: %@",
@@ -325,11 +338,92 @@ extern CheckDataObject *data;
 }
 
 /*!
+ * @discussion Auto Save - just like above, but no dialog prompt for success or error
+ */
+- (BOOL)autoSaveValidTag {
+    NSURL *tagReadsGroupURL = [[NSFileManager defaultManager]
+                               containerURLForSecurityApplicationGroupIdentifier:
+                               @"group.com.timmilne.tagreads"];
+    NSString *validTagFile = [[NSString alloc] initWithFormat:@"validTag.dat"];
+    NSURL *validTagFileURL = [[NSURL alloc] initFileURLWithPath:validTagFile
+                                                    isDirectory:false
+                                                  relativeToURL:tagReadsGroupURL];
+    NSFileCoordinator *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:self];
+    NSError *fileCoordinatorError = nil;
+    
+    __block BOOL success = FALSE;
+    
+    [fileCoordinator coordinateWritingItemAtURL:validTagFileURL
+                                        options:NSFileCoordinatorWritingForReplacing
+                                          error:&fileCoordinatorError
+                                     byAccessor:^(NSURL *newURL) {
+                                         // Save to a file
+                                         if ([NSKeyedArchiver archiveRootObject:checkData
+                                                                         toFile:[newURL path]]) {
+                                             NSLog(@"autoSaveValidTag File Saved: %@",[newURL path]);
+                                             success = TRUE;
+                                         }
+                                         else {
+                                             // Error!
+                                             NSLog(@"autoSaveValidTag: File Save Error");
+                                         }
+                                     }];
+    return success;
+}
+
+/*!
+ * @discussion Load Valid Tag from a previous save
+ */
+- (BOOL)loadValidTag {
+    NSURL *tagReadsGroupURL = [[NSFileManager defaultManager]
+                               containerURLForSecurityApplicationGroupIdentifier:
+                               @"group.com.timmilne.tagreads"];
+    NSString *validTagFile = [[NSString alloc] initWithFormat:@"validTag.dat"];
+    NSURL *validTagFileURL = [[NSURL alloc] initFileURLWithPath:validTagFile
+                                                    isDirectory:false
+                                                  relativeToURL:tagReadsGroupURL];
+    if ([[NSFileManager defaultManager] isReadableFileAtPath:[validTagFileURL path]]) {
+        // Ok, we have something to do
+        NSFileCoordinator *fileCoordinator = [[NSFileCoordinator alloc] initWithFilePresenter:self];
+        NSError *fileCoordinatorError = nil;
+        __block BOOL loaded = FALSE;
+        
+        [fileCoordinator coordinateReadingItemAtURL:validTagFileURL
+                                            options:0
+                                              error:&fileCoordinatorError
+                                         byAccessor:^(NSURL *newURL) {
+                                             // Load from file
+                                             NSData *validTagData = [NSData dataWithContentsOfURL:newURL];
+                                             
+                                             if (validTagData != nil) {
+                                                 // Because this is a singleton, I don't
+                                                 // need to catch the return value...
+                                                 [NSKeyedUnarchiver unarchiveObjectWithData:validTagData];
+                                                 loaded = TRUE;
+                                             }
+                                         }];
+        if (loaded) {
+            return TRUE;
+        }
+        else {
+            // Error!
+            [self alertDialog:@"loadValidTag" withMessage:@"File Load Error: Error loading file."];
+            return FALSE;
+        }
+    }
+    else {
+        // Error!
+        [self alertDialog:@"loadValidTag" withMessage:@"File Load Error: No validTag file available."];
+        return FALSE;
+    }
+}
+
+/*!
  * @discussion NSFilePresenter Notification if the shared file changed
  */
 - (void)presentedItemDidChange {
-    // Reload the tagReads data, it changed...
-    NSLog (@"validTag file changed, reload it. (Not yet implemented!!)");
+    // Reload the validTag data, it changed...
+    [self loadValidTag];
 }
 
 - (void)alertDialog:(NSString *)title withMessage:(NSString *)message {
@@ -360,12 +454,12 @@ extern CheckDataObject *data;
     
     if (!_barcodeProcessed) {
         NSString *barcode;
-        barcode = data.barcode;
+        barcode = checkData.barcode;
         
         // Set the defaults
-        [data.dpt setString:@""];
-        [data.cls setString:@""];
-        [data.itm setString:@""];
+        [checkData.dpt setString:@""];
+        [checkData.cls setString:@""];
+        [checkData.itm setString:@""];
         
         // Quick length checks, chop to 12 for now (remove leading zeros)
         if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
@@ -374,18 +468,18 @@ extern CheckDataObject *data;
         // Vendor provided owned brand DPCI encoded in an SGTIN
         // NOTE: this only works if the RFID tag has already been read
         if ((barcode.length == 12) &&
-            ([data.rfidBin length] > 0) &&
-            ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
+            ([checkData.rfidBin length] > 0) &&
+            ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
             ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encode withGTIN:barcode ser:@"0" partBin:[checkData.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [data.encodedBarcode setString:[_encode sgtin_hex]];
-            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            [checkData.encodedBarcode setString:[_encode sgtin_hex]];
+            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
             
-            [data.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
-            [data.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
-            [data.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
+            [checkData.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
+            [checkData.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
+            [checkData.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -394,8 +488,8 @@ extern CheckDataObject *data;
         // Owned brand DPCI properly encoded in a GID
         // NOTE: this is the only one that works without the RFID tag, but we'll check it for completeness
         else if ((barcode.length == 12) &&
-                 ([data.rfidBin length] > 0) &&
-                 ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([checkData.rfidBin length] > 0) &&
+                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
                  ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
             
             NSString *dpt = [barcode substringWithRange:NSMakeRange(2,3)];
@@ -404,12 +498,12 @@ extern CheckDataObject *data;
             
             [_encode withDpt:dpt cls:cls itm:itm ser:@"0"];
             
-            [data.encodedBarcode setString:[_encode gid_hex]];
-            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            [checkData.encodedBarcode setString:[_encode gid_hex]];
+            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
             
-            [data.dpt setString:dpt];
-            [data.cls setString:cls];
-            [data.itm setString:itm];
+            [checkData.dpt setString:dpt];
+            [checkData.cls setString:cls];
+            [checkData.itm setString:itm];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -421,18 +515,18 @@ extern CheckDataObject *data;
         // would start with 1, 2, 3, or 4.  These are reserved for Target's commisioning authority).
         // NOTE: this only works if the RFID tag has already been read
         else if ((barcode.length == 12) &&
-                 ([data.rfidBin length] > 0) &&
-                 ([[data.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
-                 ([data.ser length] == 9) &&
-                 (([[data.ser substringToIndex:1] isEqualToString:@"1"]) ||
-                  ([[data.ser substringToIndex:1] isEqualToString:@"2"]) ||
-                  ([[data.ser substringToIndex:1] isEqualToString:@"3"]) ||
-                  ([[data.ser substringToIndex:1] isEqualToString:@"4"]))) {
+                 ([checkData.rfidBin length] > 0) &&
+                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([checkData.ser length] == 9) &&
+                 (([[checkData.ser substringToIndex:1] isEqualToString:@"1"]) ||
+                  ([[checkData.ser substringToIndex:1] isEqualToString:@"2"]) ||
+                  ([[checkData.ser substringToIndex:1] isEqualToString:@"3"]) ||
+                  ([[checkData.ser substringToIndex:1] isEqualToString:@"4"]))) {
             
             [_encode gidWithGTIN:barcode ser:@"0"];
             
-            [data.encodedBarcode setString:[_encode gid_hex]];
-            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            [checkData.encodedBarcode setString:[_encode gid_hex]];
+            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -441,13 +535,13 @@ extern CheckDataObject *data;
         // National brand GTIN encoded in SGTIN
         // NOTE: this only works if the RFID tag has already been read
         else if ((barcode.length == 12) &&
-                 ([data.rfidBin length] > 0) &&
-                 ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
+                 ([checkData.rfidBin length] > 0) &&
+                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[data.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encode withGTIN:barcode ser:@"0" partBin:[checkData.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [data.encodedBarcode setString:[_encode sgtin_hex]];
-            [data.encodedBarcodeBin setString:[_convert Hex2Bin:data.encodedBarcode]];
+            [checkData.encodedBarcode setString:[_encode sgtin_hex]];
+            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -455,19 +549,19 @@ extern CheckDataObject *data;
         
         //Unsupported barcode
         else {
-            [data.barcode setString:@"unsupported barcode"];
-            [data.encodedBarcode setString:@"unsupported barcode"];
-            [data.encodedBarcodeBin setString:@"unsupported barcode"];
+            [checkData.barcode setString:@"unsupported barcode"];
+            [checkData.encodedBarcode setString:@"unsupported barcode"];
+            [checkData.encodedBarcodeBin setString:@"unsupported barcode"];
             
             // Log the unsupported barcode
             NSLog(@"\nUnsupported barcode: %@\n", barcode);
         }
         
         // Landscape labels
-        _dptLbl.text = [NSString stringWithFormat:@"Department: %@", data.dpt];
-        _clsLbl.text = [NSString stringWithFormat:@"Class: %@", data.cls];
-        _itmLbl.text = [NSString stringWithFormat:@"Item: %@", data.itm];
-        _encodedBarcodeLbl.text = data.encodedBarcode;
+        _dptLbl.text = [NSString stringWithFormat:@"Department: %@", checkData.dpt];
+        _clsLbl.text = [NSString stringWithFormat:@"Class: %@", checkData.cls];
+        _itmLbl.text = [NSString stringWithFormat:@"Item: %@", checkData.itm];
+        _encodedBarcodeLbl.text = checkData.encodedBarcode;
         _barcodeProcessed = TRUE;
     }
     
@@ -483,9 +577,9 @@ extern CheckDataObject *data;
     if (!_barcodeFound || !_rfidFound) return;
     
     // Compare the binary formats: SGTIN = 58, GID = 60
-    int length = ([[data.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
-    if ([data.rfidBin length] > length && [data.encodedBarcodeBin length] > length &&
-        [[data.rfidBin substringToIndex:(length-1)] isEqualToString:[data.encodedBarcodeBin substringToIndex:(length-1)]]) {
+    int length = ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    if ([checkData.rfidBin length] > length && [checkData.encodedBarcodeBin length] > length &&
+        [[checkData.rfidBin substringToIndex:(length-1)] isEqualToString:[checkData.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
@@ -496,6 +590,12 @@ extern CheckDataObject *data;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
+        if (MyAppDelegate.autoSaveAndExit) {
+            if ([self autoSaveValidTag]) {
+                // We've saved a valid tag, return to caller app
+                [MyAppDelegate returnToCaller];
+            }
+        }
     }
     else {
         // No match: hide the match and show the no match
@@ -508,6 +608,21 @@ extern CheckDataObject *data;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         [self.view setBackgroundColor:UIColorFromRGB(0xCC0000)];
+    }
+}
+
+- (void)returnToCaller {
+    NSString *customURL = @"FindaTag://";
+    
+    if ([[UIApplication sharedApplication]
+         canOpenURL:[NSURL URLWithString:customURL]])
+    {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:customURL]];
+    }
+    else
+    {
+        [self alertDialog:@"URL Error"
+              withMessage:[NSString stringWithFormat: @"No custom URL defined for %@", customURL]];
     }
 }
 
@@ -697,7 +812,7 @@ extern CheckDataObject *data;
             [_lastDetectionString setString:detectionString];
             
             // Save the (new) barcode
-            [data.barcode setString:detectionString];
+            [checkData.barcode setString:detectionString];
             _barcodeProcessed = FALSE;
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -729,16 +844,16 @@ extern CheckDataObject *data;
     [[Ugi singleton].activeInventory stopInventory];
     
     // Get the RFID tag
-    [data.rfid setString:[tag.epc toString]];
-    [data.rfidBin setString:[_convert Hex2Bin:data.rfid]];
-    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
+    [checkData.rfid setString:[tag.epc toString]];
+    [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
+    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
     _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
 
     // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-    [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
+    [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
     
     // Landscape label
-    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
+    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
     
     // Close the connection
     [[Ugi singleton] closeConnection];
@@ -757,7 +872,7 @@ extern CheckDataObject *data;
     [self checkEncodings];
     
     // Log the read tag
-    NSLog(@"\nRFID tag read: %@\n", data.rfid);
+    NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
 }
 
 /*!
@@ -797,7 +912,7 @@ extern CheckDataObject *data;
     }
     if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
         // With no reader, just ignore the RFID reads
-        [data.rfid setString:@"RFID: no reader found"];
+        [checkData.rfid setString:@"RFID: no reader found"];
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidFound = TRUE;
         return;
@@ -923,16 +1038,16 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        if (readerID == _zebraReaderID) _zebraReaderID = -1;
                        
                        // Get the RFID tag
-                       [data.rfid setString:[tagData getTagId]];
-                       [data.rfidBin setString:[_convert Hex2Bin:data.rfid]];
-                       _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", data.rfid];
+                       [checkData.rfid setString:[tagData getTagId]];
+                       [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
+                       _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
                        _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     
                        // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-                       [data.ser setString:[_convert Bin2Dec:[data.rfidBin substringFromIndex:60]]];
+                       [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
     
                        // Landscape label
-                       _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", data.ser];
+                       _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
     
                        // After the first read, we know which reader
                        _rfidFound = TRUE;
@@ -947,7 +1062,7 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        [self checkEncodings];
                        
                        // Log the read tag
-                       NSLog(@"\nRFID tag read: %@\n", data.rfid);
+                       NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
                    });
 }
 

@@ -15,6 +15,8 @@
 
 @implementation AppDelegate
 
+@synthesize autoSaveAndExit;
+@synthesize callBackApp;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
@@ -25,6 +27,10 @@
     
 // TPM - uncomment this for useful debugging info
 //    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
+    
+    // Only true if invoked from another app
+    [self setAutoSaveAndExit:NO];
+    [self setCallBackApp:nil];
     
     return YES;
 }
@@ -52,6 +58,58 @@
     
     // Release the uGrokit reader
     [Ugi releaseSingleton];
+}
+
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
+  sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSLog(@"Calling Application Bundle ID: %@", sourceApplication);
+    NSLog(@"URL scheme:%@", [url scheme]);
+    NSLog(@"URL query: %@", [url query]);
+    
+    // Set the autoSaveAndExit flag
+    [self setAutoSaveAndExit:YES];
+    
+    // Look for and save the calling app for a return call
+    NSArray <NSString *> *queryArgs = [[url query] componentsSeparatedByString:@"&"];
+    for (NSString *query in queryArgs) {
+        if ([query containsString:@"callBackApp"]) {
+            callBackApp = [query stringByReplacingOccurrencesOfString:@"callBackApp=" withString:@""];
+            callBackApp = [callBackApp stringByAppendingString:@"://"];
+            break;
+        }
+    }
+    
+    return YES;
+}
+
+- (void)returnToCaller {
+    if (!autoSaveAndExit) return;
+    if (!callBackApp) return;
+    
+    // iOS 10 +
+    if ([[UIApplication sharedApplication] respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]
+                                           options:@{}
+                                 completionHandler:^(BOOL success) {
+                                     NSLog(@"returnToCaller Success: %d",success);
+                                 }];
+        [self setAutoSaveAndExit:NO];
+        [self setCallBackApp:nil];
+    }
+    else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:callBackApp]]) {
+        if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]]) {
+            NSLog(@"returnToCaller Success.");
+            [self setAutoSaveAndExit:NO];
+            [self setCallBackApp:nil];
+        }
+        else {
+            NSLog(@"returnToCaller Failure.");
+        }
+    }
+    else {
+        NSLog(@"URL Error: No call back app found for: %@", callBackApp);
+    }
 }
 
 @end

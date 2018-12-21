@@ -21,7 +21,7 @@
 @synthesize ser;
 
 // The singleton check data object
-CheckDataObject *data = nil;
+CheckDataObject *checkData = nil;
 
 static CheckDataObject *instance = nil;
 
@@ -56,30 +56,30 @@ static CheckDataObject *instance = nil;
 }
 
 - (void)encodeWithCoder:(NSCoder *)encoder {
-    data = [CheckDataObject singleton:FALSE];
-    [encoder encodeObject:data.barcode              forKey:@"barcode"];
-    [encoder encodeObject:data.encodedBarcode       forKey:@"encodedBarcode"];
-    [encoder encodeObject:data.encodedBarcodeBin    forKey:@"encodedBarcodeBin"];
-    [encoder encodeObject:data.rfid                 forKey:@"rfid"];
-    [encoder encodeObject:data.rfidBin              forKey:@"rfidBin"];
-    [encoder encodeObject:data.dpt                  forKey:@"dpt"];
-    [encoder encodeObject:data.cls                  forKey:@"cls"];
-    [encoder encodeObject:data.itm                  forKey:@"itm"];
-    [encoder encodeObject:data.ser                  forKey:@"ser"];
+    checkData = [CheckDataObject singleton:FALSE];
+    [encoder encodeObject:checkData.barcode              forKey:@"barcode"];
+    [encoder encodeObject:checkData.encodedBarcode       forKey:@"encodedBarcode"];
+    [encoder encodeObject:checkData.encodedBarcodeBin    forKey:@"encodedBarcodeBin"];
+    [encoder encodeObject:checkData.rfid                 forKey:@"rfid"];
+    [encoder encodeObject:checkData.rfidBin              forKey:@"rfidBin"];
+    [encoder encodeObject:checkData.dpt                  forKey:@"dpt"];
+    [encoder encodeObject:checkData.cls                  forKey:@"cls"];
+    [encoder encodeObject:checkData.itm                  forKey:@"itm"];
+    [encoder encodeObject:checkData.ser                  forKey:@"ser"];
 }
 
 - (id)initWithCoder:(NSCoder *)decoder {
-    data = [CheckDataObject singleton:FALSE];
+    checkData = [CheckDataObject singleton:FALSE];
     if (self = [super init]) {
-        data.barcode            = [decoder decodeObjectForKey:@"barcode"];
-        data.encodedBarcode     = [decoder decodeObjectForKey:@"encodedBarcode"];
-        data.encodedBarcodeBin  = [decoder decodeObjectForKey:@"encodedBarcodeBin"];
-        data.rfid               = [decoder decodeObjectForKey:@"rfid"];
-        data.rfidBin            = [decoder decodeObjectForKey:@"rfidBin"];
-        data.dpt                = [decoder decodeObjectForKey:@"dpt"];
-        data.cls                = [decoder decodeObjectForKey:@"cls"];
-        data.itm                = [decoder decodeObjectForKey:@"itm"];
-        data.ser                = [decoder decodeObjectForKey:@"ser"];
+        checkData.barcode            = [decoder decodeObjectForKey:@"barcode"];
+        checkData.encodedBarcode     = [decoder decodeObjectForKey:@"encodedBarcode"];
+        checkData.encodedBarcodeBin  = [decoder decodeObjectForKey:@"encodedBarcodeBin"];
+        checkData.rfid               = [decoder decodeObjectForKey:@"rfid"];
+        checkData.rfidBin            = [decoder decodeObjectForKey:@"rfidBin"];
+        checkData.dpt                = [decoder decodeObjectForKey:@"dpt"];
+        checkData.cls                = [decoder decodeObjectForKey:@"cls"];
+        checkData.itm                = [decoder decodeObjectForKey:@"itm"];
+        checkData.ser                = [decoder decodeObjectForKey:@"ser"];
     }
     return self;
 }
