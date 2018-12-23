@@ -17,6 +17,7 @@
 
 @synthesize autoSaveAndExit;
 @synthesize callBackApp;
+@synthesize dataFile;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
@@ -28,9 +29,10 @@
 // TPM - uncomment this for useful debugging info
 //    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
     
-    // Only true if invoked from another app
+    // Only true or set if invoked from another app
     [self setAutoSaveAndExit:NO];
     [self setCallBackApp:nil];
+    [self setDataFile:nil];
     
     return YES;
 }
@@ -76,7 +78,11 @@
         if ([query containsString:@"callBackApp"]) {
             callBackApp = [query stringByReplacingOccurrencesOfString:@"callBackApp=" withString:@""];
             callBackApp = [callBackApp stringByAppendingString:@"://"];
-            break;
+        }
+        if ([query containsString:@"dataFile"]) {
+            dataFile = [query stringByReplacingOccurrencesOfString:@"dataFile=" withString:@""];
+            callBackApp = [callBackApp stringByAppendingString:@"?"];
+            callBackApp = [callBackApp stringByAppendingString:query];
         }
     }
     
@@ -96,12 +102,14 @@
                                  }];
         [self setAutoSaveAndExit:NO];
         [self setCallBackApp:nil];
+        [self setDataFile:nil];
     }
     else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:callBackApp]]) {
         if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]]) {
             NSLog(@"returnToCaller Success.");
             [self setAutoSaveAndExit:NO];
             [self setCallBackApp:nil];
+            [self setDataFile:nil];
         }
         else {
             NSLog(@"returnToCaller Failure.");

@@ -15,6 +15,7 @@
 // OpenURL support
 @property                     BOOL      autoSaveAndExit;
 @property (strong, nonatomic) NSString  *callBackApp;
+@property (strong, nonatomic) NSString  *dataFile;
 - (void)returnToCaller;
 
 @end
