@@ -977,8 +977,10 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
 - (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
 {
     NSLog(@"Zebra Reader Appeared - Name: %@\n", [availableReader getReaderName]);
-    
-    [_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]];
+
+    if ([_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]] != SRFID_RESULT_SUCCESS) {
+        NSLog(@"Zebra Reader: Could not connect\n");
+    }
 }
 
 /*!
