@@ -257,7 +257,7 @@
                         <outlet property="scannedRFIDLbl" destination="07F-Nh-sWc" id="h52-eR-i0R"/>
                         <outlet property="serialLbl" destination="uqC-pr-d2f" id="BUx-E1-oIM"/>
                         <outlet property="versionLbl" destination="KQ8-Xj-n9Y" id="qNQ-TG-r4B"/>
-                        <segue destination="I6q-ON-eg7" kind="unwind" identifier="" unwindAction="unwindToContainerVC:" id="u2n-pj-SdE"/>
+                        <segue destination="I6q-ON-eg7" kind="unwind" identifier="unwindToContainerVC" unwindAction="unwindToContainerVC:" id="u2n-pj-SdE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="H0a-T4-eGX" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -8,11 +8,11 @@
 //  Barcode scanner code from:
 //  http://www.infragistics.com/community/blogs/torrey-betts/archive/2013/10/10/scanning-barcodes-with-ios-7-objective-c.aspx
 //
-//  uGrokit RFID scanner code from:
-//  http://dev.ugrokit.com/ios.html
-//
 //  Zebra RFID scanner code from:
 //  http://compass.motorolasolutions.com
+//
+//  uGrokit RFID scanner code from:
+//  http://dev.ugrokit.com/ios.html
 
 #import "ScannerViewController.h"
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
@@ -175,16 +175,16 @@ extern CheckDataObject *checkData;
     [self.view bringSubviewToFront:_highlightView];
     [self.view bringSubviewToFront:_barcodeLbl];
     
-    // Initiliaze the encoder and converter
+    // Initialize the encoder and converter
     if (_encode == nil) _encode = [EPCEncoder alloc];
     if (_convert == nil) _convert = [Converter alloc];
     
     // Register with the default NotificationCenter
     // TPM there was a typo in the online documentation fixed here
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                            selector:@selector(connectionStateChanged:)
-                                            name:[Ugi singleton].NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
-                                            object:nil];
+                                             selector:@selector(connectionStateChanged:)
+                                                 name:[Ugi singleton].NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
+                                               object:nil];
     
     // Connect to the scanner
     // When notified that the connection is established, get the battery life, and start a scan
@@ -204,6 +204,12 @@ extern CheckDataObject *checkData;
     _zebraReaderConnected = FALSE;
     _zebraReaderID = -1;
     [self zebraInitializeRfidSdkWithAppSettings];
+    
+    // OpenURL Update Notification support from delegate
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(openURLUpdateNotification:)
+                                                 name:@"openURLUpdateNotification"
+                                               object:nil];
 }
 
 /*!
@@ -232,48 +238,119 @@ extern CheckDataObject *checkData;
                                         26, 26);
 }
 
+- (void)alertDialog:(NSString *)title withMessage:(NSString *)message {
+    UIAlertView *alert = [[UIAlertView alloc]
+                          initWithTitle:title
+                          message:message
+                          delegate:nil
+                          cancelButtonTitle:@"OK"
+                          otherButtonTitles:nil];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [alert show];
+    });
+    NSLog (@"%@", message);
+}
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+
+#pragma mark -
+#pragma mark - Navigation
+#pragma mark -
+
+/*
+ // In a storyboard-based application, you will often want to do a little preparation before navigation
+ - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+ // Get the new view controller using [segue destinationViewController].
+ // Pass the selected object to the new view controller.
+ 
+ // Stop the RFID reader
+ [[Ugi singleton].activeInventory stopInventory];
+ }
+ */
+
+- (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
+    // Used for swipe gestures, but can't get this working with my new VC
+}
+
+#pragma mark -
+#pragma mark - Initialization Routines
+#pragma mark -
+
+/*!
+ * @discussion Initialize rfid
+ * @param barcode The rfid used to initialize
+ */
+- (BOOL)rfidInit:(NSString *)rfid {
+    [checkData.rfid setString:rfid];
+    [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
+    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
+    _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+    _rfidFound = TRUE;
+    
+    // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
+    [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
+    
+    // Landscape label
+    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
+    
+    return TRUE;
+}
+
+/*!
+ * @discussion Initialize barcode
+ * @param barcode The barcode used to initialize
+ */
+- (BOOL)barcodeInit:(NSString *)barcode {
+    if ([barcode length] == 12) barcode = [NSString stringWithFormat:@"0%@", barcode];
+    [checkData.barcode setString:barcode];
+    _barcodeProcessed = FALSE;
+    _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", barcode];
+    _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+    _barcodeFound = TRUE;
+    
+    return TRUE;
+}
+
+#pragma mark -
+#pragma mark - Reset Routines
+#pragma mark -
+
 /*!
  * @discussion Press reset button to reset the interface and reader and begin reading.
  * @param sender An id for the sender control (not used)
  */
 - (IBAction)reset:(id)sender {
-    // Reset
-    checkData = [CheckDataObject singleton:TRUE];
-    _barcodeFound = FALSE;
-    _barcodeProcessed = FALSE;
-    _rfidFound = FALSE;
-    [_lastDetectionString setString:@""];
-    _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
+    // Reset All
+    [self rfidReset];
+    [self barcodeReset];
+}
+
+/*!
+ * @discussion Reset RFID
+ */
+- (BOOL)rfidReset {
+    [checkData.rfid setString:@""];
+    [checkData.rfidBin setString:@""];
     _rfidLbl.text = @"RFID: (connecting to reader)";
-    _batteryLifeLbl.text = @"RFID Battery Life";
-    _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _batteryLifeLbl.text = @"RFID Battery Life";
     _batteryLifeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _batteryLifeView.progress = 0.;
+    _rfidFound = FALSE;
     
-    // Landscape labels
-    _dptLbl.text = @"Department: ";
-    _clsLbl.text = @"Class: ";
-    _itmLbl.text = @"Item: ";
-    _serLbl.text = @"Serial Num: ";
-    _encodedBarcodeLbl.text = @"(scanning for barcodes)";
-    [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
+    [self resetMatch];
     
-    //Match images
-    [self.view sendSubviewToBack:_matchView];
-    [self.view sendSubviewToBack:_noMatchView];
-    [self.view sendSubviewToBack:_saveValidTagBtn];
-    _matchView.hidden = YES;
-    _noMatchView.hidden = YES;
-    _saveValidTagBtn.hidden = YES;
-    
-// TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
-// to another.  If you change readers, restart the app.  The first reader to scan a tag sets the
-// reader flags for that session.  Until then, all protocols are attempted until a tag is found.
+    // TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
+    // to another.  If you change readers, restart the app.  The first reader to scan a tag sets the
+    // reader flags for that session.  Until then, all protocols are attempted until a tag is found.
     
     // If no connection open, open it now and start scanning for RFID tags
     // Before we know what reader, we try all, so test the negative
-
+    
     // uGrokit Reader
     if (!_zebraReaderConnected) {
         [[Ugi singleton].activeInventory stopInventory];
@@ -290,7 +367,57 @@ extern CheckDataObject *checkData;
         _rfidLbl.text = @"RFID: (connecting to reader)";
         [self zebraRapidRead];
     }
+    
+    return TRUE;
 }
+
+/*!
+ * @discussion Reset barcode
+ */
+- (BOOL)barcodeReset {
+    [checkData.barcode setString:@""];
+    [checkData.encodedBarcode setString:@""];
+    [checkData.encodedBarcodeBin setString:@""];
+    [checkData.dpt setString:@""];
+    [checkData.cls setString:@""];
+    [checkData.itm setString:@""];
+    [checkData.ser setString:@""];
+    [_lastDetectionString setString:@""];
+    _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
+    _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
+    _barcodeFound = FALSE;
+    _barcodeProcessed = FALSE;
+    
+    // Landscape labels
+    _dptLbl.text = @"Department: ";
+    _clsLbl.text = @"Class: ";
+    _itmLbl.text = @"Item: ";
+    _serLbl.text = @"Serial Num: ";
+    _encodedBarcodeLbl.text = @"(scanning for barcodes)";
+    [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
+    
+    [self resetMatch];
+    
+    return TRUE;
+}
+
+/*!
+ * @discussion Reset match images
+ */
+- (BOOL)resetMatch {
+    [self.view sendSubviewToBack:_matchView];
+    [self.view sendSubviewToBack:_noMatchView];
+    [self.view sendSubviewToBack:_saveValidTagBtn];
+    _matchView.hidden = YES;
+    _noMatchView.hidden = YES;
+    _saveValidTagBtn.hidden = YES;
+    
+    return TRUE;
+}
+
+#pragma mark -
+#pragma mark - File Routines
+#pragma mark -
 
 /*!
  * @discussion Press the save button
@@ -299,7 +426,7 @@ extern CheckDataObject *checkData;
 - (IBAction)saveValidTag:(id)sender {
     
     // Were we invoked from another caller?
-    if (MyAppDelegate.autoSaveAndExit) {
+    if (MyAppDelegate.scanScanSaveReturn) {
         if ([self autoSaveValidTag]) {
             // We've saved new valid tag, return to caller app
             [MyAppDelegate returnToCaller];
@@ -426,24 +553,9 @@ extern CheckDataObject *checkData;
     [self loadValidTag];
 }
 
-- (void)alertDialog:(NSString *)title withMessage:(NSString *)message {
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:title
-                          message:message
-                          delegate:nil
-                          cancelButtonTitle:@"OK"
-                          otherButtonTitles:nil];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [alert show];
-    });
-    NSLog (@"%@", message);
-}
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
+#pragma mark -
+#pragma mark - Match Utility Routines
+#pragma mark -
 
 /*!
  * @discussion If both available, check the possible barcode encodings based on the RFID tag
@@ -590,7 +702,7 @@ extern CheckDataObject *checkData;
         _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
-        if (MyAppDelegate.autoSaveAndExit) {
+        if (MyAppDelegate.scanScanSaveReturn) {
             if ([self autoSaveValidTag]) {
                 // We've saved a valid tag, return to caller app
                 [MyAppDelegate returnToCaller];
@@ -611,6 +723,42 @@ extern CheckDataObject *checkData;
     }
 }
 
+#pragma mark -
+#pragma mark - OpenURL Routines
+#pragma mark -
+
+/*!
+ * @discussion OpenURL Update Notification handler
+ */
+- (void) openURLUpdateNotification:(NSNotification *) notification
+{
+    if ([[notification name] isEqualToString:@"openURLUpdateNotification"]) {
+        NSLog (@"Notification update from openURL call");
+        
+        // If invoked from an openURL caller with scanConfirm
+        if (MyAppDelegate.scanConfirm) {
+            if (MyAppDelegate.rfid) {
+                [self rfidInit:MyAppDelegate.rfid];
+            }
+            else {
+                [self rfidReset];
+            }
+            
+            if (MyAppDelegate.barcode) {
+                [self barcodeInit:MyAppDelegate.barcode];
+            }
+            else {
+                [self barcodeReset];
+            }
+            
+            if (MyAppDelegate.rfid || MyAppDelegate.barcode) {
+                // Check encodings
+                [self checkEncodings];
+            }
+        }
+    }
+}
+
 - (void)returnToCaller {
     NSString *customURL = @"FindaTag://";
     
@@ -626,8 +774,147 @@ extern CheckDataObject *checkData;
     }
 }
 
-// Zebra RFID Reader
+#pragma mark -
+#pragma mark - Barcode Scanner Delegates
+#pragma mark -
+
+/*!
+ * @discussion Check for a valid scanned barcode, only proceed if a valid barcode found.
+ */
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
+{
+    CGRect highlightViewRect = CGRectZero;
+    AVMetadataMachineReadableCodeObject *barCodeObject;
+    NSString *detectionString = nil;
+    NSString *type;
+    
+// TPM don't check all barcode types, but these are the ones iOS supports.
+    NSArray *barCodeTypes = @[AVMetadataObjectTypeUPCECode,
+//                              AVMetadataObjectTypeCode39Code,
+//                              AVMetadataObjectTypeCode39Mod43Code,
+                              AVMetadataObjectTypeEAN13Code,
+//                              AVMetadataObjectTypeEAN8Code,
+//                              AVMetadataObjectTypeCode93Code,
+//                              AVMetadataObjectTypeCode128Code,
+//                              AVMetadataObjectTypePDF417Code,
+//                              AVMetadataObjectTypeQRCode,
+//                              AVMetadataObjectTypeAztecCode,
+//                              AVMetadataObjectTypeInterleaved2of5Code,
+//                              AVMetadataObjectTypeITF14Code,
+//                              AVMetadataObjectTypeDataMatrixCode
+                              ];
+    
+    for (AVMetadataObject *metadata in metadataObjects) {
+        for (type in barCodeTypes) {
+            if ([metadata.type isEqualToString:type])
+            {
+                barCodeObject = (AVMetadataMachineReadableCodeObject *)[_prevLayer transformedMetadataObjectForMetadataObject:(AVMetadataMachineReadableCodeObject *)metadata];
+                highlightViewRect = barCodeObject.bounds;
+                detectionString = [(AVMetadataMachineReadableCodeObject *)metadata stringValue];
+                break;
+            }
+        }
+        
+        // Update before returning
+        _highlightView.frame = highlightViewRect;
+        
+        if (detectionString != nil) {
+            // Don't keep processing the same barcode
+            if ([_lastDetectionString isEqualToString:detectionString]) return;
+            [_lastDetectionString setString:detectionString];
+            
+            // Save the (new) barcode
+            [checkData.barcode setString:detectionString];
+            _barcodeProcessed = FALSE;
+            _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
+            _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
+            _barcodeFound = TRUE;
+        }
+    }
+
+    // This clears the scan rectangle if empty
+    _highlightView.frame = highlightViewRect;
+
+    // Check encodings
+    [self checkEncodings];
+}
+
+#pragma mark -
+#pragma mark - Zebra Reader Delegates
+#pragma mark -
+
+/*!
+ * @discussion Zebra reader appeared - Adjust to the new state.
+ * @param availableReader Reader info about the newly appeared reader
+ */
+- (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
+{
+    NSLog(@"Zebra Reader Appeared - Name: %@\n", [availableReader getReaderName]);
+    
+    if ([_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]] != SRFID_RESULT_SUCCESS) {
+        NSLog(@"Zebra Reader: Could not connect\n");
+    }
+}
+
+/*!
+ * @discussion Zebra reader communication established - Start reading
+ * @param activeReader Reader info for the active reader
+ */
+- (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
+{
+    NSLog(@"Zebra Communication Established - Name: %@\n", [activeReader getReaderName]);
+    
+    // Set the reader
+    _zebraReaderID = [activeReader getReaderID];
+    
+    // Establish ASCII connection
+    if ([_rfidSdkApi srfidEstablishAsciiConnection:_zebraReaderID aPassword:nil] == SRFID_RESULT_SUCCESS)
+    {
+        // Set the volume
+        NSString *statusMessage = nil;
+        [_rfidSdkApi srfidSetBeeperConfig:_zebraReaderID
+                            aBeeperConfig:SRFID_BEEPERCONFIG_LOW
+                           aStatusMessage:&statusMessage];
+        
+        // Success, now read tags
+        [self zebraRapidRead];
+    }
+    else
+    {
+        // Error, alert
+        [self alertDialog:@"Zebra Error"
+              withMessage:@"Failed to establish connection with Zebra RFID reader"];
+        
+        // Terminate sesssion
+        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+        _zebraReaderID = -1;
+        _rfidLbl.text = @"RFID: Zebra connection failed";
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
+    }
+}
+
+/**
+ None of these are really needed
+ */
+- (void)srfidEventReaderDisappeared:(int)readerID {
+    NSLog(@"Zebra Reader Disappeared - ID: %d\n", readerID);
+}
+- (void)srfidEventCommunicationSessionTerminated:(int)readerID {
+    NSLog(@"Zebra Reader Session Terminated - ID: %d\n", readerID);
+}
+- (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event aNotification:(id)notificationData {
+    NSLog(@"Zebra Reader - Event status notify: %d\n", event);
+}
+- (void)srfidEventProximityNotify:(int)readerID aProximityPercent:(int)proximityPercent {
+    NSLog(@"Zebra Reader - Event proximity nofity percent: %d\n", proximityPercent);
+}
+- (void)srfidEventTriggerNotify:(int)readerID aTriggerEvent:(SRFID_TRIGGEREVENT)triggerEvent {
+    NSLog(@"Zebra Reader - Event trigger notify: %@\n", ((triggerEvent == SRFID_TRIGGEREVENT_PRESSED)?@"Pressed":@"Released"));
+}
+
+#pragma mark -
 #pragma mark - Zebra Reader Support
+#pragma mark -
 
 /*!
  * @discussion Initialize the Zebra reader and start a rapid read.
@@ -763,263 +1050,6 @@ extern CheckDataObject *checkData;
     }
 }
 
-// Barcode scanner
-#pragma mark - Barcode Scanner Delegates
-
-/*!
- * @discussion Check for a valid scanned barcode, only proceed if a valid barcode found.
- */
-- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputMetadataObjects:(NSArray *)metadataObjects fromConnection:(AVCaptureConnection *)connection
-{
-    CGRect highlightViewRect = CGRectZero;
-    AVMetadataMachineReadableCodeObject *barCodeObject;
-    NSString *detectionString = nil;
-    NSString *type;
-    
-// TPM don't check all barcode types, but these are the ones iOS supports.
-    NSArray *barCodeTypes = @[AVMetadataObjectTypeUPCECode,
-//                              AVMetadataObjectTypeCode39Code,
-//                              AVMetadataObjectTypeCode39Mod43Code,
-                              AVMetadataObjectTypeEAN13Code,
-//                              AVMetadataObjectTypeEAN8Code,
-//                              AVMetadataObjectTypeCode93Code,
-//                              AVMetadataObjectTypeCode128Code,
-//                              AVMetadataObjectTypePDF417Code,
-//                              AVMetadataObjectTypeQRCode,
-//                              AVMetadataObjectTypeAztecCode,
-//                              AVMetadataObjectTypeInterleaved2of5Code,
-//                              AVMetadataObjectTypeITF14Code,
-//                              AVMetadataObjectTypeDataMatrixCode
-                              ];
-    
-    for (AVMetadataObject *metadata in metadataObjects) {
-        for (type in barCodeTypes) {
-            if ([metadata.type isEqualToString:type])
-            {
-                barCodeObject = (AVMetadataMachineReadableCodeObject *)[_prevLayer transformedMetadataObjectForMetadataObject:(AVMetadataMachineReadableCodeObject *)metadata];
-                highlightViewRect = barCodeObject.bounds;
-                detectionString = [(AVMetadataMachineReadableCodeObject *)metadata stringValue];
-                break;
-            }
-        }
-        
-        // Update before returning
-        _highlightView.frame = highlightViewRect;
-        
-        if (detectionString != nil) {
-            // Don't keep processing the same barcode
-            if ([_lastDetectionString isEqualToString:detectionString]) return;
-            [_lastDetectionString setString:detectionString];
-            
-            // Save the (new) barcode
-            [checkData.barcode setString:detectionString];
-            _barcodeProcessed = FALSE;
-            _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
-            _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
-            _barcodeFound = TRUE;
-        }
-    }
-
-    // This clears the scan rectangle if empty
-    _highlightView.frame = highlightViewRect;
-
-    // Check encodings
-    [self checkEncodings];
-}
-
-// uGrokit RFID Reader
-#pragma mark - uGrokit Delegates
-
-/*!
- * @discussion New tag found with uGrokit reader.
- * Display the tag, stop the reader, disable the other readers, and check for a match.
- * @param tag The RFID tag
- * @param detailedPerReadData The detailed data about the RFID tag
- */
-- (void) inventoryTagFound:(UgiTag *)tag
-   withDetailedPerReadData:(NSArray *)detailedPerReadData {
-    // tag was found for the first time
-    
-    // Stop the RFID reader
-    [[Ugi singleton].activeInventory stopInventory];
-    
-    // Get the RFID tag
-    [checkData.rfid setString:[tag.epc toString]];
-    [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
-    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
-    _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
-
-    // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-    [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
-    
-    // Landscape label
-    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
-    
-    // Close the connection
-    [[Ugi singleton] closeConnection];
-    
-    // After the first read, we know which reader
-    _rfidFound = TRUE;
-    if (!_ugiReaderConnected) {
-        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
-        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
-        _zebraReaderID = -1;
-    }
-    _ugiReaderConnected = TRUE;
-    _zebraReaderConnected = FALSE;
-  
-    // Check encodings
-    [self checkEncodings];
-    
-    // Log the read tag
-    NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
-}
-
-/*!
- * @discussion State changed with uGrokit reader - Adjust to the new state, ignore if Arete reader being used.
- * Listen for one of the following:
- *    UGI_CONNECTION_STATE_NOT_CONNECTED -          Nothing connected to audio port
- *    UGI_CONNECTION_STATE_CONNECTING -             Something connected to audio port, trying to connect
- *    UGI_CONNECTION_STATE_INCOMPATIBLE_READER -    Connected to an reader with incompatible firmware
- *    UGI_CONNECTION_STATE_CONNECTED -              Connected to reader
- * @param notification The notification info
- */
-- (void)connectionStateChanged:(NSNotification *) notification {
-    NSNumber *n = notification.object;
-    
-    UgiConnectionStates connectionState = n.intValue;
-    if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
-        // Update the battery life with a new connection before starting an inventory
-        UgiBatteryInfo batteryInfo;
-        if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
-            _batteryLifeView.progress = (batteryInfo.percentRemaining)/100.;
-            _batteryLifeLbl.backgroundColor =
-                (batteryInfo.percentRemaining > 20)?UIColorFromRGB(0xA4CD39):
-                (batteryInfo.percentRemaining > 5 )?UIColorFromRGB(0xCC9900):
-                                                    UIColorFromRGB(0xCC0000);
-            
-            _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", batteryInfo.percentRemaining];
-        }
-        
-        // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
-        _rfidLbl.text = @"RFID: (scanning for tags)";
-        [[Ugi singleton] startInventory:self withConfiguration:_ugiConfig];
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_CONNECTING) {
-        _rfidLbl.text = @"RFID: (connecting to reader)";
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
-        // With no reader, just ignore the RFID reads
-        [checkData.rfid setString:@"RFID: no reader found"];
-        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
-        _rfidFound = TRUE;
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ) {
-        // This gets called after a tag is read and the connection closed
-        // The label and the rfid flag have already been set in inventoryTagFound
-        // Don't do anything here
-        return;
-    }
-}
-
-/*
-// Subsequent finds of previously found tag
-- (void) inventoryTagSubsequentFinds:(UgiTag *)tag numFinds:(int)num
-             withDetailedPerReadData:(NSArray *)detailedPerReadData {
-    // tag found count more times
-}
-*/
-
-/*
-// Tag visibility changed
-- (void) inventoryTagChanged:(UgiTag *)tag isFirstFind:(BOOL)firstFind {
-    if (firstFind) {
-        // tag was found for the first time
-    } else if (tag.isVisible) {
-        // tag was not visible, is now visible again
-    } else {
-        // tag is no longer visible
-    }
-}
-*/
-
-/*
-// Tag filtering
-- (BOOL) inventoryFilterTag:(UgiTag *)tag {
-    if (this tag should be ignored) {
-        return YES;
-    } else {
-        return NO;
-    }
-}
-*/
-
-/*
-// List of found tags
-// While inventory is running, the app can access the list of found tags via the tags property of the UgiInventory object.
-// @property (readonly, retain) NSArray *tags;
-// Usage is typically:
-for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
-    // do something with tag
-}
- */
-
-// Zebra RFID Reader
-#pragma mark - Zebra Delegates
-
-/*!
- * @discussion Zebra reader appeared - Adjust to the new state.
- * @param availableReader Reader info about the newly appeared reader
- */
-- (void)srfidEventReaderAppeared:(srfidReaderInfo*)availableReader
-{
-    NSLog(@"Zebra Reader Appeared - Name: %@\n", [availableReader getReaderName]);
-
-    if ([_rfidSdkApi srfidEstablishCommunicationSession:[availableReader getReaderID]] != SRFID_RESULT_SUCCESS) {
-        NSLog(@"Zebra Reader: Could not connect\n");
-    }
-}
-
-/*!
- * @discussion Zebra reader communication established - Start reading
- * @param activeReader Reader info for the active reader
- */
-- (void)srfidEventCommunicationSessionEstablished:(srfidReaderInfo*)activeReader
-{
-    NSLog(@"Zebra Communication Established - Name: %@\n", [activeReader getReaderName]);
-    
-    // Set the reader
-    _zebraReaderID = [activeReader getReaderID];
-    
-    // Establish ASCII connection
-    if ([_rfidSdkApi srfidEstablishAsciiConnection:_zebraReaderID aPassword:nil] == SRFID_RESULT_SUCCESS)
-    {
-        // Set the volume
-        NSString *statusMessage = nil;
-        [_rfidSdkApi srfidSetBeeperConfig:_zebraReaderID
-                            aBeeperConfig:SRFID_BEEPERCONFIG_LOW
-                           aStatusMessage:&statusMessage];
-        
-        // Success, now read tags
-        [self zebraRapidRead];
-    }
-    else
-    {
-        // Error, alert
-        [self alertDialog:@"Zebra Error"
-              withMessage:@"Failed to establish connection with Zebra RFID reader"];
-        
-        // Terminate sesssion
-        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
-        _zebraReaderID = -1;
-        _rfidLbl.text = @"RFID: Zebra connection failed";
-        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
-    }
-}
-
 /*!
  * @discussion New tag found with Zebra reader
  * Display the tag, stop the reader, disable the other readers, and check for a match.
@@ -1040,19 +1070,9 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                        if (readerID == _zebraReaderID) _zebraReaderID = -1;
                        
                        // Get the RFID tag
-                       [checkData.rfid setString:[tagData getTagId]];
-                       [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
-                       _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
-                       _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
-    
-                       // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-                       [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
-    
-                       // Landscape label
-                       _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
+                       [self rfidInit:[tagData getTagId]];
     
                        // After the first read, we know which reader
-                       _rfidFound = TRUE;
                        if (!_zebraReaderConnected) {
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
@@ -1094,45 +1114,135 @@ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
                    });
 }
 
-/**
- None of these are really needed
+#pragma mark -
+#pragma mark - uGrokit Reader Support
+#pragma mark -
+
+/*!
+ * @discussion New tag found with uGrokit reader.
+ * Display the tag, stop the reader, disable the other readers, and check for a match.
+ * @param tag The RFID tag
+ * @param detailedPerReadData The detailed data about the RFID tag
  */
-- (void)srfidEventReaderDisappeared:(int)readerID
-{
-    NSLog(@"Zebra Reader Disappeared - ID: %d\n", readerID);
-}
-- (void)srfidEventCommunicationSessionTerminated:(int)readerID
-{
-    NSLog(@"Zebra Reader Session Terminated - ID: %d\n", readerID);
-}
-- (void)srfidEventStatusNotify:(int)readerID aEvent:(SRFID_EVENT_STATUS)event aNotification:(id)notificationData
-{
-    NSLog(@"Zebra Reader - Event status notify: %d\n", event);
-}
-- (void)srfidEventProximityNotify:(int)readerID aProximityPercent:(int)proximityPercent
-{
-    NSLog(@"Zebra Reader - Event proximity nofity percent: %d\n", proximityPercent);
-}
-- (void)srfidEventTriggerNotify:(int)readerID aTriggerEvent:(SRFID_TRIGGEREVENT)triggerEvent
-{
-    NSLog(@"Zebra Reader - Event trigger notify: %@\n", ((triggerEvent == SRFID_TRIGGEREVENT_PRESSED)?@"Pressed":@"Released"));
-}
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void) inventoryTagFound:(UgiTag *)tag
+   withDetailedPerReadData:(NSArray *)detailedPerReadData {
+    // tag was found for the first time
     
     // Stop the RFID reader
     [[Ugi singleton].activeInventory stopInventory];
+    
+    // Initialize the RFID tag
+    [self rfidInit:[tag.epc toString]];
+    
+    // Close the connection
+    [[Ugi singleton] closeConnection];
+    
+    // After the first read, we know which reader
+    if (!_ugiReaderConnected) {
+        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+        _zebraReaderID = -1;
+    }
+    _ugiReaderConnected = TRUE;
+    _zebraReaderConnected = FALSE;
+    
+    // Check encodings
+    [self checkEncodings];
+    
+    // Log the read tag
+    NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
 }
-*/
 
-- (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
-    // Used for swipe gestures, but can't get this working with my new VC    
+/*!
+ * @discussion State changed with uGrokit reader - Adjust to the new state, ignore if Arete reader being used.
+ * Listen for one of the following:
+ *    UGI_CONNECTION_STATE_NOT_CONNECTED -          Nothing connected to audio port
+ *    UGI_CONNECTION_STATE_CONNECTING -             Something connected to audio port, trying to connect
+ *    UGI_CONNECTION_STATE_INCOMPATIBLE_READER -    Connected to an reader with incompatible firmware
+ *    UGI_CONNECTION_STATE_CONNECTED -              Connected to reader
+ * @param notification The notification info
+ */
+- (void)connectionStateChanged:(NSNotification *) notification {
+    NSNumber *n = notification.object;
+    
+    UgiConnectionStates connectionState = n.intValue;
+    if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
+        // Update the battery life with a new connection before starting an inventory
+        UgiBatteryInfo batteryInfo;
+        if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
+            _batteryLifeView.progress = (batteryInfo.percentRemaining)/100.;
+            _batteryLifeLbl.backgroundColor =
+            (batteryInfo.percentRemaining > 20)?UIColorFromRGB(0xA4CD39):
+            (batteryInfo.percentRemaining > 5 )?UIColorFromRGB(0xCC9900):
+            UIColorFromRGB(0xCC0000);
+            
+            _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", batteryInfo.percentRemaining];
+        }
+        
+        // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
+        _rfidLbl.text = @"RFID: (scanning for tags)";
+        [[Ugi singleton] startInventory:self withConfiguration:_ugiConfig];
+        return;
+    }
+    if (connectionState == UGI_CONNECTION_STATE_CONNECTING) {
+        _rfidLbl.text = @"RFID: (connecting to reader)";
+        return;
+    }
+    if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
+        // With no reader, just ignore the RFID reads
+        [checkData.rfid setString:@"RFID: no reader found"];
+        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
+        _rfidFound = TRUE;
+        return;
+    }
+    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ) {
+        // This gets called after a tag is read and the connection closed
+        // The label and the rfid flag have already been set in inventoryTagFound
+        // Don't do anything here
+        return;
+    }
 }
+
+/*
+ // Subsequent finds of previously found tag
+ - (void) inventoryTagSubsequentFinds:(UgiTag *)tag numFinds:(int)num
+ withDetailedPerReadData:(NSArray *)detailedPerReadData {
+ // tag found count more times
+ }
+ */
+
+/*
+ // Tag visibility changed
+ - (void) inventoryTagChanged:(UgiTag *)tag isFirstFind:(BOOL)firstFind {
+ if (firstFind) {
+ // tag was found for the first time
+ } else if (tag.isVisible) {
+ // tag was not visible, is now visible again
+ } else {
+ // tag is no longer visible
+ }
+ }
+ */
+
+/*
+ // Tag filtering
+ - (BOOL) inventoryFilterTag:(UgiTag *)tag {
+ if (this tag should be ignored) {
+ return YES;
+ } else {
+ return NO;
+ }
+ }
+ */
+
+/*
+ // List of found tags
+ // While inventory is running, the app can access the list of found tags via the tags property of the UgiInventory object.
+ // @property (readonly, retain) NSArray *tags;
+ // Usage is typically:
+ for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
+ // do something with tag
+ }
+ */
 
 @end

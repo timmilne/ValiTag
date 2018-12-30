@@ -15,9 +15,12 @@
 
 @implementation AppDelegate
 
-@synthesize autoSaveAndExit;
-@synthesize callBackApp;
+@synthesize scanScanSaveReturn;
 @synthesize dataFile;
+@synthesize scanConfirm;
+@synthesize rfid;
+@synthesize barcode;
+@synthesize callBackApp;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
@@ -30,9 +33,12 @@
 //    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
     
     // Only true or set if invoked from another app
-    [self setAutoSaveAndExit:NO];
-    [self setCallBackApp:nil];
+    [self setScanScanSaveReturn:NO];
     [self setDataFile:nil];
+    [self setScanConfirm:NO];
+    [self setRfid:nil];
+    [self setBarcode:nil];
+    [self setCallBackApp:nil];
     
     return YES;
 }
@@ -69,54 +75,78 @@
     NSLog(@"URL scheme:%@", [url scheme]);
     NSLog(@"URL query: %@", [url query]);
     
-    // Set the autoSaveAndExit flag
-    [self setAutoSaveAndExit:YES];
-    
     // Look for and save the calling app for a return call
     NSArray <NSString *> *queryArgs = [[url query] componentsSeparatedByString:@"&"];
     for (NSString *query in queryArgs) {
         if ([query containsString:@"callBackApp"]) {
             callBackApp = [query stringByReplacingOccurrencesOfString:@"callBackApp=" withString:@""];
             callBackApp = [callBackApp stringByAppendingString:@"://"];
+            [self setScanScanSaveReturn:YES];
+            [self setScanConfirm:NO];
         }
         if ([query containsString:@"dataFile"]) {
             dataFile = [query stringByReplacingOccurrencesOfString:@"dataFile=" withString:@""];
             callBackApp = [callBackApp stringByAppendingString:@"?"];
             callBackApp = [callBackApp stringByAppendingString:query];
+            [self setScanScanSaveReturn:YES];
+            [self setScanConfirm:NO];
         }
+        if ([query containsString:@"rfid"]) {
+            rfid = [query stringByReplacingOccurrencesOfString:@"rfid=" withString:@""];
+            [self setScanConfirm:YES];
+            [self setScanScanSaveReturn:NO];
+        }
+        if ([query containsString:@"barcode"]) {
+            barcode = [query stringByReplacingOccurrencesOfString:@"barcode=" withString:@""];
+            [self setScanConfirm:YES];
+            [self setScanScanSaveReturn:NO];
+        }
+    }
+    
+    if (rfid || barcode) {
+        // Post a notification to update
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"openURLUpdateNotification"
+                                                            object:self];
     }
     
     return YES;
 }
 
 - (void)returnToCaller {
-    if (!autoSaveAndExit) return;
     if (!callBackApp) return;
-    
-    // iOS 10 +
-    if ([[UIApplication sharedApplication] respondsToSelector:@selector(openURL:options:completionHandler:)]) {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]
-                                           options:@{}
-                                 completionHandler:^(BOOL success) {
-                                     NSLog(@"returnToCaller Success: %d",success);
-                                 }];
-        [self setAutoSaveAndExit:NO];
-        [self setCallBackApp:nil];
-        [self setDataFile:nil];
-    }
-    else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:callBackApp]]) {
-        if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]]) {
-            NSLog(@"returnToCaller Success.");
-            [self setAutoSaveAndExit:NO];
-            [self setCallBackApp:nil];
+   
+    if (scanScanSaveReturn || scanConfirm) {
+        // iOS 10 +
+        if ([[UIApplication sharedApplication] respondsToSelector:@selector(openURL:options:completionHandler:)]) {
+            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]
+                                               options:@{}
+                                     completionHandler:^(BOOL success) {
+                                         NSLog(@"returnToCaller Success: %d",success);
+                                     }];
+            [self setScanScanSaveReturn:NO];
             [self setDataFile:nil];
+            [self setScanConfirm:NO];
+            [self setRfid:nil];
+            [self setBarcode:nil];
+            [self setCallBackApp:nil];
+        }
+        else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:callBackApp]]) {
+            if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]]) {
+                NSLog(@"returnToCaller Success.");
+                [self setScanScanSaveReturn:NO];
+                [self setDataFile:nil];
+                [self setScanConfirm:NO];
+                [self setRfid:nil];
+                [self setBarcode:nil];
+                [self setCallBackApp:nil];
+            }
+            else {
+                NSLog(@"returnToCaller Failure.");
+            }
         }
         else {
-            NSLog(@"returnToCaller Failure.");
+            NSLog(@"URL Error: No call back app found for: %@", callBackApp);
         }
-    }
-    else {
-        NSLog(@"URL Error: No call back app found for: %@", callBackApp);
     }
 }
 

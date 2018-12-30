@@ -13,9 +13,19 @@
 @property (strong, nonatomic) UIWindow  *window;
 
 // OpenURL support
+// Scan Scan Save and Return
 @property                     BOOL      autoSaveAndExit;
-@property (strong, nonatomic) NSString  *callBackApp;
+@property                     BOOL      scanScanSaveReturn;
 @property (strong, nonatomic) NSString  *dataFile;
+
+// Scan and confirm, manual return (preload one or both to check)
+@property                     BOOL      scanConfirm;
+@property (strong, nonatomic) NSString  *rfid;
+@property (strong, nonatomic) NSString  *barcode;
+
+// The callback
+@property (strong, nonatomic) NSString  *callBackApp;
+
 - (void)returnToCaller;
 
 @end
