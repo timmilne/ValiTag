@@ -7,7 +7,6 @@
 //
 
 #import "DataViewController.h"
-#import "CheckDataObject.h"         // Singleton check data data object
 #import <EPCEncoder/EPCEncoder.h>   // To encode the scanned barcode for comparison
 
 @interface DataViewController ()
@@ -22,10 +21,9 @@
 
 @end
 
-// The singleton check data object
-extern CheckDataObject *checkData;
-
 @implementation DataViewController
+
+@synthesize validTag;
 
 #define UIColorFromRGB(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16))/255.0 green:((float)((rgbValue & 0xFF00) >> 8))/255.0 blue:((float)(rgbValue & 0xFF))/255.0 alpha:0.65]
 
@@ -36,23 +34,20 @@ extern CheckDataObject *checkData;
     // Also had to add the statusBarStyle entry to info.plist
     self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
     
-    // We better not have gotten here without doing this, but just in case...
-    checkData = [CheckDataObject singleton:FALSE];
-    
     // Do any additional setup after loading the view.
-    _scannedBarcodeLbl.text = checkData.barcode;
-    _encodedBarcodeLbl.text = checkData.encodedBarcode;
-    _scannedRFIDLbl.text = checkData.rfid;
-    _departmentLbl.text = [NSString stringWithFormat:@"Department: %@", checkData.dpt];
-    _classLbl.text = [NSString stringWithFormat:@"Class: %@", checkData.cls];
-    _itemLbl.text = [NSString stringWithFormat:@"Item: %@", checkData.itm];
-    _serialLbl.text = [NSString stringWithFormat:@"Serial Number: %@", checkData.ser];
+    _scannedBarcodeLbl.text = validTag.barcode;
+    _encodedBarcodeLbl.text = validTag.encodedBarcode;
+    _scannedRFIDLbl.text = validTag.rfid;
+    _departmentLbl.text = [NSString stringWithFormat:@"Department: %@", validTag.dpt];
+    _classLbl.text = [NSString stringWithFormat:@"Class: %@", validTag.cls];
+    _itemLbl.text = [NSString stringWithFormat:@"Item: %@", validTag.itm];
+    _serialLbl.text = [NSString stringWithFormat:@"Serial Number: %@", validTag.ser];
     _versionLbl.text = [NSString stringWithFormat:@"ValiTag Version: %@",
                         [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]];
     
     // Compare the binary formats
-    if ([checkData.rfidBin length] > 60 && [checkData.encodedBarcodeBin length] > 60 &&
-        [[checkData.rfidBin substringToIndex:59] isEqualToString:[checkData.encodedBarcodeBin substringToIndex:59]]) {
+    if ([validTag.rfidBin length] > 60 && [validTag.encodedBarcodeBin length] > 60 &&
+        [[validTag.rfidBin substringToIndex:59] isEqualToString:[validTag.encodedBarcodeBin substringToIndex:59]]) {
         // Match: hide the no match and show the match
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
     }
@@ -62,9 +57,9 @@ extern CheckDataObject *checkData;
     }
     
     // Compare the binary formats: SGTIN = 58, GID = 60
-    int length = ([checkData.rfidBin length] > 0 && [[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
-    if ([checkData.rfidBin length] > length && [checkData.encodedBarcodeBin length] > length &&
-        [[checkData.rfidBin substringToIndex:(length-1)] isEqualToString:[checkData.encodedBarcodeBin substringToIndex:(length-1)]]) {
+    int length = ([validTag.rfidBin length] > 0 && [[validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    if ([validTag.rfidBin length] > length && [validTag.encodedBarcodeBin length] > length &&
+        [[validTag.rfidBin substringToIndex:(length-1)] isEqualToString:[validTag.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
         [self.view setBackgroundColor:UIColorFromRGB(0xA4CD39)];
     }

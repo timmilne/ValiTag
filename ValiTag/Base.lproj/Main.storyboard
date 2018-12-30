@@ -122,7 +122,7 @@
                         </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="InfoImage" id="EBi-V7-Iaa">
                             <connections>
-                                <segue destination="Ocr-M9-Hse" kind="show" identifier="" id="qoi-RY-IxY"/>
+                                <segue destination="Ocr-M9-Hse" kind="show" identifier="ProductDetailsSegue" id="qoi-RY-IxY"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>

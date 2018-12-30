@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ValidTagObject.h"  // Valid Tag object data class
 
 @interface DataViewController : UIViewController
+
+@property (nonatomic) ValidTagObject *validTag;
 
 @end

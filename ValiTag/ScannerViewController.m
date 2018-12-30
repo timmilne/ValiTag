@@ -15,10 +15,11 @@
 //  http://dev.ugrokit.com/ios.html
 
 #import "ScannerViewController.h"
+#import "DataViewController.h"          // Data details view controller
 #import <AVFoundation/AVFoundation.h>   // Barcode capture tools
 #import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
 #import <EPCEncoder/Converter.h>        // To convert to binary for comparison
-#import "CheckDataObject.h"             // Singleton check data object class
+#import "ValidTagObject.h"              // Valid tag data object class
 #import "Ugi.h"                         // uGrokit reader
 #import "RfidSdkFactory.h"              // Zebra reader
 #import "AppDelegate.h"                 // The app delegate
@@ -54,6 +55,7 @@
     UILabel                     *_batteryLifeLbl;
     UIProgressView              *_batteryLifeView;
     
+    ValidTagObject              *_validTag;
     EPCEncoder                  *_encode;
     Converter                   *_convert;
     
@@ -69,9 +71,6 @@
     srfidAccessConfig           *_accessConfig;
 }
 @end
-
-// The singleton check data object
-extern CheckDataObject *checkData;
 
 @implementation ScannerViewController
 
@@ -93,8 +92,8 @@ extern CheckDataObject *checkData;
     // Set the default background color
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
     
-    // Initialize and grab the singleton check data object
-    checkData = [CheckDataObject singleton:TRUE];
+    // Initialize valid tag
+    _validTag = [[ValidTagObject alloc] init];
     
     // Initialize variables
     _lastDetectionString = [[NSMutableString alloc] init];
@@ -272,7 +271,39 @@ extern CheckDataObject *checkData;
  }
  */
 
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the _productArray to the destination, and allow them to swipe through all the details
+    NSLog(@"prepareForSegue:%@ sender:%@", [segue description], [sender description]);
+    
+    // Make sure your segue name in storyboard is the same as this line
+    if ([[segue identifier] isEqualToString:@"ProductDetailsSegue"])
+    {
+        // Get reference to the destination view controller
+        DataViewController *vc = [segue destinationViewController];
+        
+        // Pass valid tag
+        [vc setValidTag:_validTag];
+    }
+}
+
+- (BOOL)shouldPerformSegueWithIdentifier:(NSString *)identifier sender:(id)sender
+{
+    if ([identifier isEqualToString:@"ProductDetailsSegue"]) {
+        NSLog(@"Product Details Showed");
+        return YES;
+    }
+    else {
+        NSLog(@"Product Details Not showed");
+        return NO;
+    }
+}
+
 - (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
+    // To return from Product Details - no data needed
+    NSLog(@"ReturningFromProductDetails:%@", [segue description]);
+    
     // Used for swipe gestures, but can't get this working with my new VC
 }
 
@@ -285,17 +316,17 @@ extern CheckDataObject *checkData;
  * @param barcode The rfid used to initialize
  */
 - (BOOL)rfidInit:(NSString *)rfid {
-    [checkData.rfid setString:rfid];
-    [checkData.rfidBin setString:[_convert Hex2Bin:checkData.rfid]];
-    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", checkData.rfid];
+    [_validTag.rfid setString:rfid];
+    [_validTag.rfidBin setString:[_convert Hex2Bin:_validTag.rfid]];
+    _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", _validTag.rfid];
     _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     _rfidFound = TRUE;
     
     // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-    [checkData.ser setString:[_convert Bin2Dec:[checkData.rfidBin substringFromIndex:60]]];
+    [_validTag.ser setString:[_convert Bin2Dec:[_validTag.rfidBin substringFromIndex:60]]];
     
     // Landscape label
-    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", checkData.ser];
+    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", _validTag.ser];
     
     return TRUE;
 }
@@ -306,7 +337,7 @@ extern CheckDataObject *checkData;
  */
 - (BOOL)barcodeInit:(NSString *)barcode {
     if ([barcode length] == 12) barcode = [NSString stringWithFormat:@"0%@", barcode];
-    [checkData.barcode setString:barcode];
+    [_validTag.barcode setString:barcode];
     _barcodeProcessed = FALSE;
     _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", barcode];
     _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -333,8 +364,8 @@ extern CheckDataObject *checkData;
  * @discussion Reset RFID
  */
 - (BOOL)rfidReset {
-    [checkData.rfid setString:@""];
-    [checkData.rfidBin setString:@""];
+    [_validTag.rfid setString:@""];
+    [_validTag.rfidBin setString:@""];
     _rfidLbl.text = @"RFID: (connecting to reader)";
     _rfidLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     _batteryLifeLbl.text = @"RFID Battery Life";
@@ -375,13 +406,13 @@ extern CheckDataObject *checkData;
  * @discussion Reset barcode
  */
 - (BOOL)barcodeReset {
-    [checkData.barcode setString:@""];
-    [checkData.encodedBarcode setString:@""];
-    [checkData.encodedBarcodeBin setString:@""];
-    [checkData.dpt setString:@""];
-    [checkData.cls setString:@""];
-    [checkData.itm setString:@""];
-    [checkData.ser setString:@""];
+    [_validTag.barcode setString:@""];
+    [_validTag.encodedBarcode setString:@""];
+    [_validTag.encodedBarcodeBin setString:@""];
+    [_validTag.dpt setString:@""];
+    [_validTag.cls setString:@""];
+    [_validTag.itm setString:@""];
+    [_validTag.ser setString:@""];
     [_lastDetectionString setString:@""];
     _barcodeLbl.text = @"Barcode: (scanning for barcodes)";
     _barcodeLbl.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
@@ -449,7 +480,7 @@ extern CheckDataObject *checkData;
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
                                          // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:checkData
+                                         if ([NSKeyedArchiver archiveRootObject:_validTag
                                                                          toFile:[newURL path]]) {
                                              [self alertDialog:@"saveValidTag"
                                                    withMessage:[NSString stringWithFormat:@"File Saved: %@",
@@ -485,7 +516,7 @@ extern CheckDataObject *checkData;
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
                                          // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:checkData
+                                         if ([NSKeyedArchiver archiveRootObject:_validTag
                                                                          toFile:[newURL path]]) {
                                              NSLog(@"autoSaveValidTag File Saved: %@",[newURL path]);
                                              success = TRUE;
@@ -566,12 +597,12 @@ extern CheckDataObject *checkData;
     
     if (!_barcodeProcessed) {
         NSString *barcode;
-        barcode = checkData.barcode;
+        barcode = _validTag.barcode;
         
         // Set the defaults
-        [checkData.dpt setString:@""];
-        [checkData.cls setString:@""];
-        [checkData.itm setString:@""];
+        [_validTag.dpt setString:@""];
+        [_validTag.cls setString:@""];
+        [_validTag.itm setString:@""];
         
         // Quick length checks, chop to 12 for now (remove leading zeros)
         if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
@@ -580,18 +611,18 @@ extern CheckDataObject *checkData;
         // Vendor provided owned brand DPCI encoded in an SGTIN
         // NOTE: this only works if the RFID tag has already been read
         if ((barcode.length == 12) &&
-            ([checkData.rfidBin length] > 0) &&
-            ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
+            ([_validTag.rfidBin length] > 0) &&
+            ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
             ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[checkData.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encode withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [checkData.encodedBarcode setString:[_encode sgtin_hex]];
-            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
+            [_validTag.encodedBarcode setString:[_encode sgtin_hex]];
+            [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
-            [checkData.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
-            [checkData.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
-            [checkData.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
+            [_validTag.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
+            [_validTag.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
+            [_validTag.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -600,8 +631,8 @@ extern CheckDataObject *checkData;
         // Owned brand DPCI properly encoded in a GID
         // NOTE: this is the only one that works without the RFID tag, but we'll check it for completeness
         else if ((barcode.length == 12) &&
-                 ([checkData.rfidBin length] > 0) &&
-                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([_validTag.rfidBin length] > 0) &&
+                 ([[_validTag.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
                  ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
             
             NSString *dpt = [barcode substringWithRange:NSMakeRange(2,3)];
@@ -610,12 +641,12 @@ extern CheckDataObject *checkData;
             
             [_encode withDpt:dpt cls:cls itm:itm ser:@"0"];
             
-            [checkData.encodedBarcode setString:[_encode gid_hex]];
-            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
+            [_validTag.encodedBarcode setString:[_encode gid_hex]];
+            [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
-            [checkData.dpt setString:dpt];
-            [checkData.cls setString:cls];
-            [checkData.itm setString:itm];
+            [_validTag.dpt setString:dpt];
+            [_validTag.cls setString:cls];
+            [_validTag.itm setString:itm];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -627,18 +658,18 @@ extern CheckDataObject *checkData;
         // would start with 1, 2, 3, or 4.  These are reserved for Target's commisioning authority).
         // NOTE: this only works if the RFID tag has already been read
         else if ((barcode.length == 12) &&
-                 ([checkData.rfidBin length] > 0) &&
-                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
-                 ([checkData.ser length] == 9) &&
-                 (([[checkData.ser substringToIndex:1] isEqualToString:@"1"]) ||
-                  ([[checkData.ser substringToIndex:1] isEqualToString:@"2"]) ||
-                  ([[checkData.ser substringToIndex:1] isEqualToString:@"3"]) ||
-                  ([[checkData.ser substringToIndex:1] isEqualToString:@"4"]))) {
+                 ([_validTag.rfidBin length] > 0) &&
+                 ([[_validTag.rfidBin substringToIndex:8] isEqualToString:GID_Bin_Prefix]) &&
+                 ([_validTag.ser length] == 9) &&
+                 (([[_validTag.ser substringToIndex:1] isEqualToString:@"1"]) ||
+                  ([[_validTag.ser substringToIndex:1] isEqualToString:@"2"]) ||
+                  ([[_validTag.ser substringToIndex:1] isEqualToString:@"3"]) ||
+                  ([[_validTag.ser substringToIndex:1] isEqualToString:@"4"]))) {
             
             [_encode gidWithGTIN:barcode ser:@"0"];
             
-            [checkData.encodedBarcode setString:[_encode gid_hex]];
-            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
+            [_validTag.encodedBarcode setString:[_encode gid_hex]];
+            [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -647,13 +678,13 @@ extern CheckDataObject *checkData;
         // National brand GTIN encoded in SGTIN
         // NOTE: this only works if the RFID tag has already been read
         else if ((barcode.length == 12) &&
-                 ([checkData.rfidBin length] > 0) &&
-                 ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
+                 ([_validTag.rfidBin length] > 0) &&
+                 ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[checkData.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encode withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [checkData.encodedBarcode setString:[_encode sgtin_hex]];
-            [checkData.encodedBarcodeBin setString:[_convert Hex2Bin:checkData.encodedBarcode]];
+            [_validTag.encodedBarcode setString:[_encode sgtin_hex]];
+            [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -661,19 +692,19 @@ extern CheckDataObject *checkData;
         
         //Unsupported barcode
         else {
-            [checkData.barcode setString:@"unsupported barcode"];
-            [checkData.encodedBarcode setString:@"unsupported barcode"];
-            [checkData.encodedBarcodeBin setString:@"unsupported barcode"];
+            [_validTag.barcode setString:@"unsupported barcode"];
+            [_validTag.encodedBarcode setString:@"unsupported barcode"];
+            [_validTag.encodedBarcodeBin setString:@"unsupported barcode"];
             
             // Log the unsupported barcode
             NSLog(@"\nUnsupported barcode: %@\n", barcode);
         }
         
         // Landscape labels
-        _dptLbl.text = [NSString stringWithFormat:@"Department: %@", checkData.dpt];
-        _clsLbl.text = [NSString stringWithFormat:@"Class: %@", checkData.cls];
-        _itmLbl.text = [NSString stringWithFormat:@"Item: %@", checkData.itm];
-        _encodedBarcodeLbl.text = checkData.encodedBarcode;
+        _dptLbl.text = [NSString stringWithFormat:@"Department: %@", _validTag.dpt];
+        _clsLbl.text = [NSString stringWithFormat:@"Class: %@", _validTag.cls];
+        _itmLbl.text = [NSString stringWithFormat:@"Item: %@", _validTag.itm];
+        _encodedBarcodeLbl.text = _validTag.encodedBarcode;
         _barcodeProcessed = TRUE;
     }
     
@@ -689,9 +720,9 @@ extern CheckDataObject *checkData;
     if (!_barcodeFound || !_rfidFound) return;
     
     // Compare the binary formats: SGTIN = 58, GID = 60
-    int length = ([[checkData.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
-    if ([checkData.rfidBin length] > length && [checkData.encodedBarcodeBin length] > length &&
-        [[checkData.rfidBin substringToIndex:(length-1)] isEqualToString:[checkData.encodedBarcodeBin substringToIndex:(length-1)]]) {
+    int length = ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
+    if ([_validTag.rfidBin length] > length && [_validTag.encodedBarcodeBin length] > length &&
+        [[_validTag.rfidBin substringToIndex:(length-1)] isEqualToString:[_validTag.encodedBarcodeBin substringToIndex:(length-1)]]) {
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
@@ -824,7 +855,7 @@ extern CheckDataObject *checkData;
             [_lastDetectionString setString:detectionString];
             
             // Save the (new) barcode
-            [checkData.barcode setString:detectionString];
+            [_validTag.barcode setString:detectionString];
             _barcodeProcessed = FALSE;
             _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", detectionString];
             _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
@@ -1084,7 +1115,7 @@ extern CheckDataObject *checkData;
                        [self checkEncodings];
                        
                        // Log the read tag
-                       NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
+                       NSLog(@"\nRFID tag read: %@\n", _validTag.rfid);
                    });
 }
 
@@ -1150,7 +1181,7 @@ extern CheckDataObject *checkData;
     [self checkEncodings];
     
     // Log the read tag
-    NSLog(@"\nRFID tag read: %@\n", checkData.rfid);
+    NSLog(@"\nRFID tag read: %@\n", _validTag.rfid);
 }
 
 /*!
@@ -1190,7 +1221,7 @@ extern CheckDataObject *checkData;
     }
     if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
         // With no reader, just ignore the RFID reads
-        [checkData.rfid setString:@"RFID: no reader found"];
+        [_validTag.rfid setString:@"RFID: no reader found"];
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         _rfidFound = TRUE;
         return;

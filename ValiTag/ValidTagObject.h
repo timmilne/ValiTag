@@ -1,14 +1,14 @@
 //
-//  CheckDataObject.h
+//  ValidTagObject.h
 //  ValiTag
 //
-//  Created by Tim.Milne on 12/16/18.
+//  Created by Tim.Milne on 12/30/18.
 //  Copyright © 2018 Tim.Milne. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
 
-@interface CheckDataObject : NSObject <NSCoding>
+@interface ValidTagObject : NSObject
 
 @property (nonatomic, retain) NSMutableString *barcode;
 @property (nonatomic, retain) NSMutableString *encodedBarcode;
@@ -19,7 +19,5 @@
 @property (nonatomic, retain) NSMutableString *cls;
 @property (nonatomic, retain) NSMutableString *itm;
 @property (nonatomic, retain) NSMutableString *ser;
-
-+(CheckDataObject*)singleton:(BOOL)reset;
 
 @end
