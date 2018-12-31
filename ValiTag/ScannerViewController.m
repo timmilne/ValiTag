@@ -204,11 +204,14 @@
     _zebraReaderID = -1;
     [self zebraInitializeRfidSdkWithAppSettings];
     
-    // OpenURL Update Notification support from delegate
+    // Register OpenURL Update Notification support from delegate for notifications after running
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(openURLUpdateNotification:)
                                                  name:@"openURLUpdateNotification"
                                                object:nil];
+    
+    // But if launching now, set it and check it
+    [self scanConfirmInit];
 }
 
 /*!
@@ -294,10 +297,7 @@
         NSLog(@"Product Details Showed");
         return YES;
     }
-    else {
-        NSLog(@"Product Details Not showed");
-        return NO;
-    }
+    return NO;
 }
 
 - (IBAction)unwindToContainerVC:(UIStoryboardSegue *)segue {
@@ -338,12 +338,37 @@
 - (BOOL)barcodeInit:(NSString *)barcode {
     if ([barcode length] == 12) barcode = [NSString stringWithFormat:@"0%@", barcode];
     [_validTag.barcode setString:barcode];
-    _barcodeProcessed = FALSE;
     _barcodeLbl.text = [NSString stringWithFormat:@"Barcode: %@", barcode];
     _barcodeLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     _barcodeFound = TRUE;
+    _barcodeProcessed = FALSE;
     
     return TRUE;
+}
+
+- (BOOL) scanConfirmInit {
+    if (MyAppDelegate.scanConfirm) {
+        if (MyAppDelegate.rfid) {
+            [self rfidInit:MyAppDelegate.rfid];
+        }
+        else {
+            [self rfidReset];
+        }
+        
+        if (MyAppDelegate.barcode) {
+            [self barcodeInit:MyAppDelegate.barcode];
+        }
+        else {
+            [self barcodeReset];
+        }
+        
+        if (MyAppDelegate.rfid || MyAppDelegate.barcode) {
+            // Check encodings
+            [self checkEncodings];
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 
 #pragma mark -
@@ -767,26 +792,7 @@
         NSLog (@"Notification update from openURL call");
         
         // If invoked from an openURL caller with scanConfirm
-        if (MyAppDelegate.scanConfirm) {
-            if (MyAppDelegate.rfid) {
-                [self rfidInit:MyAppDelegate.rfid];
-            }
-            else {
-                [self rfidReset];
-            }
-            
-            if (MyAppDelegate.barcode) {
-                [self barcodeInit:MyAppDelegate.barcode];
-            }
-            else {
-                [self barcodeReset];
-            }
-            
-            if (MyAppDelegate.rfid || MyAppDelegate.barcode) {
-                // Check encodings
-                [self checkEncodings];
-            }
-        }
+        [self scanConfirmInit];
     }
 }
 
