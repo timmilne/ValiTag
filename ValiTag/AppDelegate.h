@@ -14,7 +14,6 @@
 
 // OpenURL support
 // Scan Scan Save and Return
-@property                     BOOL      autoSaveAndExit;
 @property                     BOOL      scanScanSaveReturn;
 @property (strong, nonatomic) NSString  *dataFile;
 
