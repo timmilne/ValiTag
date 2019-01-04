@@ -246,6 +246,9 @@
                             <constraint firstItem="07F-Nh-sWc" firstAttribute="top" secondItem="k1o-rP-zCw" secondAttribute="bottom" constant="8" id="rfE-ZK-Sla"/>
                             <constraint firstItem="uqC-pr-d2f" firstAttribute="centerX" secondItem="PtX-XV-KdH" secondAttribute="centerX" id="yjX-8S-eoo"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="rfI-gL-aZK" appends="YES" id="wBt-1j-8Wq"/>
+                        </connections>
                     </view>
                     <navigationItem key="navigationItem" title="Details" id="nuU-yg-iYg"/>
                     <connections>
@@ -262,6 +265,11 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="H0a-T4-eGX" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="I6q-ON-eg7" userLabel="Exit" sceneMemberID="exit"/>
+                <swipeGestureRecognizer direction="right" id="rfI-gL-aZK">
+                    <connections>
+                        <segue destination="I6q-ON-eg7" kind="unwind" unwindAction="unwindToContainerVC:" id="gvy-Yd-IeZ"/>
+                    </connections>
+                </swipeGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="249" y="273"/>
         </scene>
