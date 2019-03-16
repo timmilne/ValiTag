@@ -15,14 +15,16 @@
 //  http://dev.ugrokit.com/ios.html
 
 #import "ScannerViewController.h"
-#import "DataViewController.h"          // Data details view controller
-#import <AVFoundation/AVFoundation.h>   // Barcode capture tools
-#import <EPCEncoder/EPCEncoder.h>       // To encode the scanned barcode for comparison
-#import <EPCEncoder/Converter.h>        // To convert to binary for comparison
-#import "ValidTagObject.h"              // Valid tag data object class
-#import "Ugi.h"                         // uGrokit reader
-#import "RfidSdkFactory.h"              // Zebra reader
-#import "AppDelegate.h"                 // The app delegate
+#import "DataViewController.h"        // Data details view controller
+#import <AVFoundation/AVFoundation.h> // Barcode capture tools
+#import <RFIDEncoder/EPCEncoder.h>    // To encode EPCs (GS1 compliant)
+#import <RFIDEncoder/TCINEncoder.h>   // To encode TCINs (Target internal)
+#import <RFIDEncoder/TIAIEncoder.h>   // To encode TIAIs (Non-Retail, Target internal)
+#import <RFIDEncoder/Converter.h>     // To convert to binary for comparison
+#import "ValidTagObject.h"            // Valid tag data object class
+#import "Ugi.h"                       // uGrokit reader
+#import "RfidSdkFactory.h"            // Zebra reader
+#import "AppDelegate.h"               // The app delegate
 
 #pragma mark -
 #pragma mark AVFoundationScanSetup
@@ -31,10 +33,14 @@
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
+    __weak IBOutlet UILabel     *_gtinLbl;
+    __weak IBOutlet UILabel     *_tcinLbl;
     __weak IBOutlet UILabel     *_dptLbl;
     __weak IBOutlet UILabel     *_clsLbl;
     __weak IBOutlet UILabel     *_itmLbl;
     __weak IBOutlet UILabel     *_serLbl;
+    __weak IBOutlet UILabel     *_tiaiLbl;
+    __weak IBOutlet UILabel     *_aidLbl;
     __weak IBOutlet UILabel     *_encodedBarcodeLbl;
     __weak IBOutlet UIButton    *_saveValidTagBtn;      // To save the validated tag
     
@@ -56,7 +62,9 @@
     UIProgressView              *_batteryLifeView;
     
     ValidTagObject              *_validTag;
-    EPCEncoder                  *_encode;
+    EPCEncoder                  *_encodeEPC;
+    TCINEncoder                 *_encodeTCIN;
+    TIAIEncoder                 *_encodeTIAI;
     Converter                   *_convert;
     
     BOOL                        _ugiReaderConnected;
@@ -174,8 +182,10 @@
     [self.view bringSubviewToFront:_highlightView];
     [self.view bringSubviewToFront:_barcodeLbl];
     
-    // Initialize the encoder and converter
-    if (_encode == nil) _encode = [EPCEncoder alloc];
+    // Initialize the encoders and converter
+    if (_encodeEPC == nil) _encodeEPC = [EPCEncoder alloc];
+    if (_encodeTCIN == nil) _encodeTCIN = [TCINEncoder alloc];
+    if (_encodeTIAI == nil) _encodeTIAI = [TIAIEncoder alloc];
     if (_convert == nil) _convert = [Converter alloc];
     
     // Register with the default NotificationCenter
@@ -321,12 +331,17 @@
     _rfidLbl.text = [NSString stringWithFormat:@"RFID: %@", _validTag.rfid];
     _rfidLbl.backgroundColor = UIColorFromRGB(0xA4CD39);
     _rfidFound = TRUE;
-    
+
     // Get the serial number from the tag read (assuming GID, and only used for national brand replacement tags)
-    [_validTag.ser setString:[_convert Bin2Dec:[_validTag.rfidBin substringFromIndex:60]]];
-    
-    // Landscape label
-    _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", _validTag.ser];
+    NSString *header = [_validTag.rfidBin substringToIndex:8];
+    if ([header isEqualToString:SGTIN_Bin_Prefix] ||
+        [header isEqualToString:GID_Bin_Prefix] ||
+        [header isEqualToString:TCIN_Bin_Prefix]){
+        [_validTag.ser setString:[_convert Bin2Dec:[_validTag.rfidBin substringFromIndex:60]]];
+        
+        // Landscape label
+        _serLbl.text = [NSString stringWithFormat:@"Serial Num: %@", _validTag.ser];
+    }
     
     return TRUE;
 }
@@ -445,12 +460,22 @@
     _barcodeProcessed = FALSE;
     
     // Landscape labels
+    _gtinLbl.text = @"GTIN: ";
+    _tcinLbl.text = @"TCIN: ";
     _dptLbl.text = @"Department: ";
     _clsLbl.text = @"Class: ";
     _itmLbl.text = @"Item: ";
     _serLbl.text = @"Serial Num: ";
+    _tiaiLbl.text = @"TIAI Ref: ";
+    _aidLbl.text = @"AID:";
     _encodedBarcodeLbl.text = @"(scanning for barcodes)";
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
+    
+    // Hide those not needed
+    _gtinLbl.hidden = YES;
+    _tcinLbl.hidden = YES;
+    _tiaiLbl.hidden = YES;
+    _aidLbl.hidden = YES;
     
     [self resetMatch];
     
@@ -505,7 +530,7 @@
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
                                          // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:_validTag
+                                         if ([NSKeyedArchiver archiveRootObject:self->_validTag
                                                                          toFile:[newURL path]]) {
                                              [self alertDialog:@"saveValidTag"
                                                    withMessage:[NSString stringWithFormat:@"File Saved: %@",
@@ -541,7 +566,7 @@
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
                                          // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:_validTag
+                                         if ([NSKeyedArchiver archiveRootObject:self->_validTag
                                                                          toFile:[newURL path]]) {
                                              NSLog(@"autoSaveValidTag File Saved: %@",[newURL path]);
                                              success = TRUE;
@@ -625,29 +650,130 @@
         barcode = _validTag.barcode;
         
         // Set the defaults
+        [_validTag.gtin setString:@""];
+        [_validTag.tcin setString:@""];
         [_validTag.dpt setString:@""];
         [_validTag.cls setString:@""];
         [_validTag.itm setString:@""];
+        //_validTag.ser set with RFID read
+        [_validTag.tiai setString:@""];
+        [_validTag.aid setString:@""];
+        _gtinLbl.hidden = YES;
+        _tcinLbl.hidden = YES;
+        _dptLbl.hidden = YES;
+        _clsLbl.hidden = YES;
+        _itmLbl.hidden = YES;
+        _serLbl.hidden = YES;
+        _tiaiLbl.hidden = YES;
+        _aidLbl.hidden = YES;
         
-        // Quick length checks, chop to 12 for now (remove leading zeros)
-        if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
-        if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
+        // If not TCIN or TIAI
+        if (!(([[_validTag.rfidBin substringToIndex:8] isEqualToString:TCIN_Bin_Prefix]) ||
+              ([[_validTag.rfidBin substringToIndex:8] isEqualToString:TIAI_A_Bin_Prefix]))) {
+            
+            // Quick length checks, chop to 12 for now (remove leading zeros)
+            if (barcode.length == 13) barcode = [barcode substringFromIndex:1];
+            if (barcode.length == 14) barcode = [barcode substringFromIndex:2];
+        }
+        
+        // TCIN
+        if ([[_validTag.rfidBin substringToIndex:8] isEqualToString:TCIN_Bin_Prefix]) {
+            
+            [_encodeTCIN withTCIN:barcode ser:@"0"];
+            
+            [_validTag.encodedBarcode setString:[_encodeTCIN tcin_hex]];
+            [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+            
+            [_validTag.tcin setString:[_encodeTCIN tcin]];
+            
+            // Set Landscape labels
+            _tcinLbl.hidden = NO;
+            _serLbl.hidden = NO;
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
+        
+        // TIAI
+        else if ([[_validTag.rfidBin substringToIndex:8] isEqualToString:TIAI_A_Bin_Prefix]) {
+            
+            // Ok, for TIAI's, we need to extract the Asset Ref from the RFID encoding
+            NSString *tiaiBin = [_validTag.rfidBin substringWithRange:NSMakeRange(11, 13)];
+            NSString *tiai = [_convert Bin2Dec:tiaiBin];
+            
+            // Determine if it's encoded with 21 digit dec, 12 digit 6-bit char, or 18 digit hex
+            BOOL isNumeric = [self isNumericOnly:barcode];
+            if ([tiai isEqualToString:@"5"] && isNumeric) { // 14 Digit decimal
+                [_encodeTIAI withAssetRef:tiai assetIDDec:barcode];
+                
+                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
+                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                
+                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
+                [_validTag.aid setString:[_encodeTIAI asset_id_dec]];
+            }
+            else if ([tiai isEqualToString:@"6"] && isNumeric) { // 6 digit decimal
+                [_encodeTIAI withAssetRef:tiai assetIDDec:barcode];
+                
+                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
+                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                
+                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
+                [_validTag.aid setString:[_encodeTIAI asset_id_dec]];
+            }
+            else if ([tiai isEqualToString:@"7"]) { // 4+ varchar
+                [_encodeTIAI withAssetRef:tiai assetIDChar:barcode];
+                
+                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
+                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                
+                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
+                [_validTag.aid setString:[_encodeTIAI asset_id_char]];
+            }
+            else if ([tiai isEqualToString:@"8"]) { // 18 char hex (64 bits)
+                [_encodeTIAI withAssetRef:tiai assetIDHex:barcode];
+                
+                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
+                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                
+                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
+                [_validTag.aid setString:[_encodeTIAI asset_id_hex]];
+            }
+            else {
+                [_validTag.barcode setString:@"unsupported barcode"];
+                [_validTag.encodedBarcode setString:@"unsupported barcode"];
+                [_validTag.encodedBarcodeBin setString:@"unsupported barcode"];
+            }
+            
+            // Set Landscape labels
+            _tiaiLbl.hidden = NO;
+            _aidLbl.hidden = NO;
+            
+            // Log the read barcode
+            NSLog(@"\nBar code read: %@\n", barcode);
+        }
         
         // Vendor provided owned brand DPCI encoded in an SGTIN
         // NOTE: this only works if the RFID tag has already been read
-        if ((barcode.length == 12) &&
+        else if ((barcode.length == 12) &&
             ([_validTag.rfidBin length] > 0) &&
             ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix]) &&
             ([[barcode substringToIndex:2] isEqualToString:@"49"])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encodeEPC withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [_validTag.encodedBarcode setString:[_encode sgtin_hex]];
+            [_validTag.encodedBarcode setString:[_encodeEPC sgtin_hex]];
             [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
             [_validTag.dpt setString:[barcode substringWithRange:NSMakeRange(2,3)]];
             [_validTag.cls setString:[barcode substringWithRange:NSMakeRange(5,2)]];
             [_validTag.itm setString:[barcode substringWithRange:NSMakeRange(7,4)]];
+            
+            // Set Landscape labels
+            _dptLbl.hidden = NO;
+            _clsLbl.hidden = NO;
+            _itmLbl.hidden = NO;
+            _serLbl.hidden = NO;
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -664,14 +790,20 @@
             NSString *cls = [barcode substringWithRange:NSMakeRange(5,2)];
             NSString *itm = [barcode substringWithRange:NSMakeRange(7,4)];
             
-            [_encode withDpt:dpt cls:cls itm:itm ser:@"0"];
+            [_encodeEPC withDpt:dpt cls:cls itm:itm ser:@"0"];
             
-            [_validTag.encodedBarcode setString:[_encode gid_hex]];
+            [_validTag.encodedBarcode setString:[_encodeEPC gid_hex]];
             [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
             
             [_validTag.dpt setString:dpt];
             [_validTag.cls setString:cls];
             [_validTag.itm setString:itm];
+            
+            // Set Landscape labels
+            _dptLbl.hidden = NO;
+            _clsLbl.hidden = NO;
+            _itmLbl.hidden = NO;
+            _serLbl.hidden = NO;
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -691,10 +823,16 @@
                   ([[_validTag.ser substringToIndex:1] isEqualToString:@"3"]) ||
                   ([[_validTag.ser substringToIndex:1] isEqualToString:@"4"]))) {
             
-            [_encode gidWithGTIN:barcode ser:@"0"];
+            [_encodeEPC gidWithGTIN:barcode ser:@"0"];
             
-            [_validTag.encodedBarcode setString:[_encode gid_hex]];
+            [_validTag.encodedBarcode setString:[_encodeEPC gid_hex]];
             [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                    
+            [_validTag.gtin setString:[_encodeEPC gtin]];
+                     
+             // Set Landscape labels
+             _gtinLbl.hidden = NO;
+             _serLbl.hidden = NO;
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -706,10 +844,16 @@
                  ([_validTag.rfidBin length] > 0) &&
                  ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])) {
             
-            [_encode withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
+            [_encodeEPC withGTIN:barcode ser:@"0" partBin:[_validTag.rfidBin substringWithRange:NSMakeRange(11,3)]];
             
-            [_validTag.encodedBarcode setString:[_encode sgtin_hex]];
+            [_validTag.encodedBarcode setString:[_encodeEPC sgtin_hex]];
             [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+            
+            [_validTag.gtin setString:[_encodeEPC gtin]];
+            
+            // Set Landscape labels
+            _gtinLbl.hidden = NO;
+            _serLbl.hidden = NO;
             
             // Log the read barcode
             NSLog(@"\nBar code read: %@\n", barcode);
@@ -726,9 +870,13 @@
         }
         
         // Landscape labels
+        _gtinLbl.text = [NSString stringWithFormat:@"GTIN: %@", _validTag.gtin];
+        _tcinLbl.text = [NSString stringWithFormat:@"TCIN: %@", _validTag.tcin];
         _dptLbl.text = [NSString stringWithFormat:@"Department: %@", _validTag.dpt];
         _clsLbl.text = [NSString stringWithFormat:@"Class: %@", _validTag.cls];
         _itmLbl.text = [NSString stringWithFormat:@"Item: %@", _validTag.itm];
+        _tiaiLbl.text = [NSString stringWithFormat:@"TIAI Ref: %@", _validTag.tiai];
+        _aidLbl.text = [NSString stringWithFormat:@"AID: %@", _validTag.aid];
         _encodedBarcodeLbl.text = _validTag.encodedBarcode;
         _barcodeProcessed = TRUE;
     }
@@ -744,10 +892,22 @@
     // Are we ready to check?
     if (!_barcodeFound || !_rfidFound) return;
     
-    // Compare the binary formats: SGTIN = 58, GID = 60
-    int length = ([[_validTag.rfidBin substringToIndex:8] isEqualToString:SGTIN_Bin_Prefix])?58:60;
-    if ([_validTag.rfidBin length] > length && [_validTag.encodedBarcodeBin length] > length &&
-        [[_validTag.rfidBin substringToIndex:(length-1)] isEqualToString:[_validTag.encodedBarcodeBin substringToIndex:(length-1)]]) {
+    // These are the only tags we recognize
+    NSString *header = [_validTag.rfidBin substringToIndex:8];
+    BOOL validHeader = ([header isEqualToString:SGTIN_Bin_Prefix] ||
+                        [header isEqualToString:GID_Bin_Prefix] ||
+                        [header isEqualToString:TCIN_Bin_Prefix] ||
+                        [header isEqualToString:TIAI_A_Bin_Prefix]);
+    
+    // Compare the binary formats: SGTIN = 58, GID = 60, TCIN = 46, TIAI = 96
+    int length = ([header isEqualToString:SGTIN_Bin_Prefix])?58:
+                 ([header isEqualToString:GID_Bin_Prefix])?60:
+                 ([header isEqualToString:TCIN_Bin_Prefix])?46:
+                 ([header isEqualToString:TIAI_A_Bin_Prefix])?96:96;
+        
+    if (validHeader &&
+        ([_validTag.rfidBin length] > (length-1) && [_validTag.encodedBarcodeBin length] > (length-1) &&
+        [[_validTag.rfidBin substringToIndex:(length-1)] isEqualToString:[_validTag.encodedBarcodeBin substringToIndex:(length-1)]])) {
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
@@ -777,6 +937,12 @@
         _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
         [self.view setBackgroundColor:UIColorFromRGB(0xCC0000)];
     }
+}
+
+- (BOOL)isNumericOnly:(NSString *)toCheck {
+    NSScanner* scan = [NSScanner scannerWithString:toCheck];
+    int val;
+    return [scan scanInt:&val] && [scan isAtEnd];
 }
 
 #pragma mark -
@@ -830,15 +996,15 @@
 //                              AVMetadataObjectTypeCode39Code,
 //                              AVMetadataObjectTypeCode39Mod43Code,
                               AVMetadataObjectTypeEAN13Code,
-//                              AVMetadataObjectTypeEAN8Code,
+                              AVMetadataObjectTypeEAN8Code,
 //                              AVMetadataObjectTypeCode93Code,
-//                              AVMetadataObjectTypeCode128Code,
+                              AVMetadataObjectTypeCode128Code,  // Alphanumeric
 //                              AVMetadataObjectTypePDF417Code,
 //                              AVMetadataObjectTypeQRCode,
 //                              AVMetadataObjectTypeAztecCode,
 //                              AVMetadataObjectTypeInterleaved2of5Code,
 //                              AVMetadataObjectTypeITF14Code,
-//                              AVMetadataObjectTypeDataMatrixCode
+                              AVMetadataObjectTypeDataMatrixCode
                               ];
     
     for (AVMetadataObject *metadata in metadataObjects) {
@@ -1074,7 +1240,7 @@
                 // Stop an operation after 1 minute
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(60 *
                                                                           NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                    [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+                    [self->_rfidSdkApi srfidStopRapidRead:self->_zebraReaderID aStatusMessage:nil];
                 });
             }
             else if (SRFID_RESULT_RESPONSE_ERROR == result) {
@@ -1100,28 +1266,28 @@
                        // tag was found for the first time
     
                        // Stop the RFID reader
-                       [_rfidSdkApi srfidStopRapidRead:readerID aStatusMessage:nil];
+                       [self->_rfidSdkApi srfidStopRapidRead:readerID aStatusMessage:nil];
                        
                        // Close the connection
-                       [_rfidSdkApi srfidTerminateCommunicationSession:readerID];
-                       if (readerID == _zebraReaderID) _zebraReaderID = -1;
+                       [self->_rfidSdkApi srfidTerminateCommunicationSession:readerID];
+                       if (readerID == self->_zebraReaderID) self->_zebraReaderID = -1;
                        
                        // Get the RFID tag
                        [self rfidInit:[tagData getTagId]];
     
                        // After the first read, we know which reader
-                       if (!_zebraReaderConnected) {
+                       if (!self->_zebraReaderConnected) {
                            [[Ugi singleton].activeInventory stopInventory];
                            [[Ugi singleton] closeConnection];
                        }
-                       _ugiReaderConnected = FALSE;
-                       _zebraReaderConnected = TRUE;
+                       self->_ugiReaderConnected = FALSE;
+                       self->_zebraReaderConnected = TRUE;
     
                        // Check encodings
                        [self checkEncodings];
                        
                        // Log the read tag
-                       NSLog(@"\nRFID tag read: %@\n", _validTag.rfid);
+                       NSLog(@"\nRFID tag read: %@\n", self->_validTag.rfid);
                    });
 }
 
@@ -1141,13 +1307,13 @@
     
     dispatch_async(dispatch_get_main_queue(),
                    ^{
-                       _batteryLifeView.progress = battery/100.;
-                       _batteryLifeLbl.backgroundColor =
+                       self->_batteryLifeView.progress = battery/100.;
+                       self->_batteryLifeLbl.backgroundColor =
                             (battery > 20)?UIColorFromRGB(0xA4CD39):
                             (battery > 5 )?UIColorFromRGB(0xCC9900):
                                            UIColorFromRGB(0xCC0000);
                        
-                       _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
+                       self->_batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
                    });
 }
 

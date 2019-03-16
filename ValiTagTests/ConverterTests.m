@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
-#import <EPCEncoder/Converter.h>        // To convert to binary for comparison
+#import <RFIDEncoder/Converter.h>  // To convert to binary for comparison
 
 @interface ConverterTests : XCTestCase
 {
