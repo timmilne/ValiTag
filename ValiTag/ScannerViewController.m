@@ -701,27 +701,10 @@
             NSString *tiaiBin = [_validTag.rfidBin substringWithRange:NSMakeRange(11, 13)];
             NSString *tiai = [_convert Bin2Dec:tiaiBin];
             
-            // Determine if it's encoded with 21 digit dec, 12 digit 6-bit char, or 18 digit hex
+            // Determine if it's encoded with 12 digit 6-bit char, or 18 digit hex (hard code exceptions)
+            // All others are decimal (default) or unknown.
             BOOL isNumeric = [self isNumericOnly:barcode];
-            if ([tiai isEqualToString:@"5"] && isNumeric) { // 14 Digit decimal
-                [_encodeTIAI withAssetRef:tiai assetIDDec:barcode];
-                
-                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
-                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
-                
-                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
-                [_validTag.aid setString:[_encodeTIAI asset_id_dec]];
-            }
-            else if ([tiai isEqualToString:@"6"] && isNumeric) { // 6 digit decimal
-                [_encodeTIAI withAssetRef:tiai assetIDDec:barcode];
-                
-                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
-                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
-                
-                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
-                [_validTag.aid setString:[_encodeTIAI asset_id_dec]];
-            }
-            else if ([tiai isEqualToString:@"7"]) { // 4+ varchar
+            if ([tiai isEqualToString:@"7"]) { // 4+ varchar
                 [_encodeTIAI withAssetRef:tiai assetIDChar:barcode];
                 
                 [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
@@ -738,6 +721,15 @@
                 
                 [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
                 [_validTag.aid setString:[_encodeTIAI asset_id_hex]];
+            }
+            else if (isNumeric) {
+                [_encodeTIAI withAssetRef:tiai assetIDDec:barcode];
+                
+                [_validTag.encodedBarcode setString:[_encodeTIAI tiai_hex]];
+                [_validTag.encodedBarcodeBin setString:[_convert Hex2Bin:_validTag.encodedBarcode]];
+                
+                [_validTag.tiai setString:[_encodeTIAI asset_ref_dec]];
+                [_validTag.aid setString:[_encodeTIAI asset_id_dec]];
             }
             else {
                 [_validTag.barcode setString:@"unsupported barcode"];
