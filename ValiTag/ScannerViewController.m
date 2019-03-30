@@ -898,8 +898,9 @@
                  ([header isEqualToString:TIAI_A_Bin_Prefix])?96:96;
         
     if (validHeader &&
-        ([_validTag.rfidBin length] > (length-1) && [_validTag.encodedBarcodeBin length] > (length-1) &&
-        [[_validTag.rfidBin substringToIndex:(length-1)] isEqualToString:[_validTag.encodedBarcodeBin substringToIndex:(length-1)]])) {
+        ([_validTag.rfidBin length] >= length && [_validTag.encodedBarcodeBin length] >= length &&
+        [[_validTag.rfidBin substringToIndex:(length)] isEqualToString:[_validTag.encodedBarcodeBin substringToIndex:(length)]])) {
+            
         // Match: hide the no match and show the match
         [self.view bringSubviewToFront:_matchView];
         [self.view sendSubviewToBack:_noMatchView];
