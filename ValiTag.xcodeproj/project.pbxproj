@@ -21,7 +21,6 @@
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
 		B799907E2235D92D0081E11F /* RFIDEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B799907D2235D92D0081E11F /* RFIDEncoder.framework */; };
-		B799907F2235D9410081E11F /* RFIDEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B799907D2235D92D0081E11F /* RFIDEncoder.framework */; };
 		B79990802235D9410081E11F /* RFIDEncoder.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B799907D2235D92D0081E11F /* RFIDEncoder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
 		B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C341AF425B100025761 /* AudioToolbox.framework */; };
@@ -146,7 +145,6 @@
 				B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */,
 				B799907E2235D92D0081E11F /* RFIDEncoder.framework in Frameworks */,
 				B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */,
-				B799907F2235D9410081E11F /* RFIDEncoder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,7 +361,7 @@
 		B71C5C4D1AF000C700D28341 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = Tim.Milne;
 				TargetAttributes = {
 					B71C5C541AF000C700D28341 = {
@@ -384,7 +382,7 @@
 			};
 			buildConfigurationList = B71C5C501AF000C700D28341 /* Build configuration list for PBXProject "ValiTag" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -480,6 +478,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -534,6 +533,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
