@@ -34,9 +34,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>$(PRODUCT_NAME) camera use</string>
+	<string>for barcode scanning</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>for accessories</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>$(PRODUCT_NAME) microphone use</string>
+	<string>for headphone accessories</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>
