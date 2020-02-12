@@ -252,16 +252,22 @@
 }
 
 - (void)alertDialog:(NSString *)title withMessage:(NSString *)message {
-    UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:title
-                          message:message
-                          delegate:nil
-                          cancelButtonTitle:@"OK"
-                          otherButtonTitles:nil];
-    
+    UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:title
+                                 message:message
+                                 preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction* ok = [UIAlertAction
+                         actionWithTitle:@"OK"
+                         style:UIAlertActionStyleDefault
+                         handler:^(UIAlertAction * action)
+                         {
+                             [alert dismissViewControllerAnimated:YES completion:nil];
+                         }];
+    [alert addAction:ok];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [alert show];
+        [self presentViewController:alert animated:YES completion:nil];
     });
+    
     NSLog (@"%@", message);
 }
 
@@ -953,21 +959,6 @@
         
         // If invoked from an openURL caller with scanConfirm
         [self scanConfirmInit];
-    }
-}
-
-- (void)returnToCaller {
-    NSString *customURL = @"FindaTag://";
-    
-    if ([[UIApplication sharedApplication]
-         canOpenURL:[NSURL URLWithString:customURL]])
-    {
-        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:customURL]];
-    }
-    else
-    {
-        [self alertDialog:@"URL Error"
-              withMessage:[NSString stringWithFormat: @"No custom URL defined for %@", customURL]];
     }
 }
 
