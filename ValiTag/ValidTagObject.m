@@ -61,21 +61,25 @@
 
 - (id)initWithCoder:(NSCoder *)decoder {
     if (self = [super init]) {
-        self.barcode            = [decoder decodeObjectForKey:@"barcode"];
-        self.encodedBarcode     = [decoder decodeObjectForKey:@"encodedBarcode"];
-        self.encodedBarcodeBin  = [decoder decodeObjectForKey:@"encodedBarcodeBin"];
-        self.rfid               = [decoder decodeObjectForKey:@"rfid"];
-        self.rfidBin            = [decoder decodeObjectForKey:@"rfidBin"];
-        self.gtin               = [decoder decodeObjectForKey:@"gtin"];
-        self.tcin               = [decoder decodeObjectForKey:@"tcin"];
-        self.dpt                = [decoder decodeObjectForKey:@"dpt"];
-        self.cls                = [decoder decodeObjectForKey:@"cls"];
-        self.itm                = [decoder decodeObjectForKey:@"itm"];
-        self.ser                = [decoder decodeObjectForKey:@"ser"];
-        self.tiai               = [decoder decodeObjectForKey:@"tiai"];
-        self.aid                = [decoder decodeObjectForKey:@"aid"];
+        self.barcode            = [decoder decodeObjectOfClass:[NSString class] forKey:@"barcode"];
+        self.encodedBarcode     = [decoder decodeObjectOfClass:[NSString class] forKey:@"encodedBarcode"];
+        self.encodedBarcodeBin  = [decoder decodeObjectOfClass:[NSString class] forKey:@"encodedBarcodeBin"];
+        self.rfid               = [decoder decodeObjectOfClass:[NSString class] forKey:@"rfid"];
+        self.rfidBin            = [decoder decodeObjectOfClass:[NSString class] forKey:@"rfidBin"];
+        self.gtin               = [decoder decodeObjectOfClass:[NSString class] forKey:@"gtin"];
+        self.tcin               = [decoder decodeObjectOfClass:[NSString class] forKey:@"tcin"];
+        self.dpt                = [decoder decodeObjectOfClass:[NSString class] forKey:@"dpt"];
+        self.cls                = [decoder decodeObjectOfClass:[NSString class] forKey:@"cls"];
+        self.itm                = [decoder decodeObjectOfClass:[NSString class] forKey:@"itm"];
+        self.ser                = [decoder decodeObjectOfClass:[NSString class] forKey:@"ser"];
+        self.tiai               = [decoder decodeObjectOfClass:[NSString class] forKey:@"tiai"];
+        self.aid                = [decoder decodeObjectOfClass:[NSString class] forKey:@"aid"];
     }
     return self;
+}
+
++ (BOOL)supportsSecureCoding {
+   return YES;
 }
 
 @end

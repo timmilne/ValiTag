@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ValidTagObject : NSObject
+@interface ValidTagObject : NSObject <NSSecureCoding>
 
 @property (nonatomic, retain) NSMutableString *barcode;
 @property (nonatomic, retain) NSMutableString *encodedBarcode;

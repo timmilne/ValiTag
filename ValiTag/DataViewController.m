@@ -36,9 +36,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    // Set the status bar to white (iOS bug)
-    // Also had to add the statusBarStyle entry to info.plist
-    self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
+    // Set the navigation bar background color to gray
+    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     
     // Do any additional setup after loading the view.
     _scannedBarcodeLbl.text = validTag.barcode;

@@ -93,9 +93,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Set the status bar to white (iOS bug)
-    // Also had to add the statusBarStyle entry to info.plist
-    self.navigationController.navigationBar.barStyle = UIStatusBarStyleLightContent;
+    // Set the navigation bar background color to gray
+    self.navigationController.navigationBar.backgroundColor = [UIColor colorWithWhite:0.15 alpha:0.65];
     
     // Set the default background color
     [self.view setBackgroundColor:UIColorFromRGB(0x000000)];
@@ -536,18 +535,25 @@
                                         options:NSFileCoordinatorWritingForReplacing
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
-                                         // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:self->_validTag
-                                                                         toFile:[newURL path]]) {
-                                             [self alertDialog:@"saveValidTag"
-                                                   withMessage:[NSString stringWithFormat:@"File Saved: %@",
-                                                                [newURL path]]];
-                                         }
-                                         else {
-                                             // Error!
-                                             [self alertDialog:@"saveValidTag"
-                                                   withMessage:[NSString stringWithFormat:@"File Save Error"]];
-                                         }
+                                        // Archive using iOS 12 compliant NSSecureCoding
+                                        NSError *error = nil;
+                                        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self->_validTag
+                                                                             requiringSecureCoding:NO
+                                                                                             error:&error];
+                                        [data writeToFile:[newURL path]
+                                                  options:NSDataWritingAtomic
+                                                    error:&error];
+                                        if (error == nil) {
+                                            [self alertDialog:@"saveValidTag"
+                                                  withMessage:[NSString stringWithFormat:@"File Saved: %@",
+                                                               [newURL path]]];
+                                        }
+                                        else {
+                                            [self alertDialog:@"saveValidTag"
+                                            withMessage:[NSString stringWithFormat:@"File Save Failed: %@ With Error: %@",
+                                                    [newURL path],
+                                                    [error description]]];
+                                        }
                                      }];
 
 }
@@ -572,16 +578,24 @@
                                         options:NSFileCoordinatorWritingForReplacing
                                           error:&fileCoordinatorError
                                      byAccessor:^(NSURL *newURL) {
-                                         // Save to a file
-                                         if ([NSKeyedArchiver archiveRootObject:self->_validTag
-                                                                         toFile:[newURL path]]) {
-                                             NSLog(@"autoSaveValidTag File Saved: %@",[newURL path]);
-                                             success = TRUE;
-                                         }
-                                         else {
-                                             // Error!
-                                             NSLog(@"autoSaveValidTag: File Save Error");
-                                         }
+                                        // Archive using iOS 12 compliant NSSecureCoding
+                                        NSError *error = nil;
+                                        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self->_validTag
+                                                                             requiringSecureCoding:NO
+                                                                                             error:&error];
+                                        [data writeToFile:[newURL path]
+                                                  options:NSDataWritingAtomic
+                                                    error:&error];
+                                        if (error == nil) {
+                                            NSLog(@"autoSaveValidTag File Saved: %@",
+                                                  [newURL path]);
+                                            success = TRUE;
+                                        }
+                                        else {
+                                            NSLog(@"autoSaveValidTag File Save Failed: %@ With Error: %@",
+                                                  [newURL path],
+                                                  [error localizedDescription]);
+                                        }
                                      }];
     return success;
 }
@@ -607,15 +621,19 @@
                                             options:0
                                               error:&fileCoordinatorError
                                          byAccessor:^(NSURL *newURL) {
-                                             // Load from file
-                                             NSData *validTagData = [NSData dataWithContentsOfURL:newURL];
-                                             
-                                             if (validTagData != nil) {
-                                                 // Because this is a singleton, I don't
-                                                 // need to catch the return value...
-                                                 [NSKeyedUnarchiver unarchiveObjectWithData:validTagData];
-                                                 loaded = TRUE;
-                                             }
+                                            //Unarchive using iOS 12 compliant coding:
+                                            NSData *validTagData = [NSData dataWithContentsOfURL:newURL];
+
+                                            if (validTagData != nil) {
+                                                NSError *error = nil;
+                                                // Because this is a singleton, I don't
+                                                // need to catch the return value...
+                                                [NSKeyedUnarchiver unarchivedObjectOfClass:[ValidTagObject class]
+                                                                                  fromData:validTagData
+                                                                                     error:&error];
+                                                if (error == nil)
+                                                    loaded = TRUE;
+                                            }
                                          }];
         if (loaded) {
             return TRUE;

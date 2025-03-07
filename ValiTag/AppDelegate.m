@@ -115,7 +115,7 @@
     if (!callBackApp) return;
    
     if (scanScanSaveReturn || scanConfirm) {
-        // iOS 10 +
+        // iOS 12 +
         if ([[UIApplication sharedApplication] respondsToSelector:@selector(openURL:options:completionHandler:)]) {
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]
                                                options:@{}
@@ -128,20 +128,6 @@
             [self setRfid:nil];
             [self setBarcode:nil];
             [self setCallBackApp:nil];
-        }
-        else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:callBackApp]]) {
-            if ([[UIApplication sharedApplication] openURL:[NSURL URLWithString:callBackApp]]) {
-                NSLog(@"returnToCaller Success.");
-                [self setScanScanSaveReturn:NO];
-                [self setDataFile:nil];
-                [self setScanConfirm:NO];
-                [self setRfid:nil];
-                [self setBarcode:nil];
-                [self setCallBackApp:nil];
-            }
-            else {
-                NSLog(@"returnToCaller Failure.");
-            }
         }
         else {
             NSLog(@"URL Error: No call back app found for: %@", callBackApp);
