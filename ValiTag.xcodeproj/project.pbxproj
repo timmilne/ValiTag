@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -20,9 +20,9 @@
 		B727E87A21D963D20054B064 /* ValidTagObject.m in Sources */ = {isa = PBXBuildFile; fileRef = B727E87921D963D20054B064 /* ValidTagObject.m */; };
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
-		B799907E2235D92D0081E11F /* RFIDEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B799907D2235D92D0081E11F /* RFIDEncoder.framework */; };
-		B79990802235D9410081E11F /* RFIDEncoder.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B799907D2235D92D0081E11F /* RFIDEncoder.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
+		B7A05FC72F5CD89D00639B4B /* RFIDEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7A05FC62F5CD89D00639B4B /* RFIDEncoder.framework */; };
+		B7A05FC82F5CD89D00639B4B /* RFIDEncoder.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7A05FC62F5CD89D00639B4B /* RFIDEncoder.framework */; };
 		B7B18C351AF425B100025761 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C341AF425B100025761 /* AudioToolbox.framework */; };
 		B7B18C371AF425BC00025761 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C361AF425BC00025761 /* MediaPlayer.framework */; };
 		B7B18C391AF425C900025761 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7B18C381AF425C900025761 /* SystemConfiguration.framework */; };
@@ -50,7 +50,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				B79990802235D9410081E11F /* RFIDEncoder.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -116,9 +115,9 @@
 		B77B320F1BBC0C950017348E /* RfidStopTriggerConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RfidStopTriggerConfig.h; sourceTree = "<group>"; };
 		B77B32101BBC0C950017348E /* RfidTagData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RfidTagData.h; sourceTree = "<group>"; };
 		B77B32111BBC0C950017348E /* RfidTagReportConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RfidTagReportConfig.h; sourceTree = "<group>"; };
-		B799907D2235D92D0081E11F /* RFIDEncoder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = RFIDEncoder.framework; sourceTree = "<group>"; };
 		B79B20111AFA6FD800B7900D /* DataViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataViewController.h; sourceTree = "<group>"; };
 		B79B20121AFA6FD800B7900D /* DataViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataViewController.m; sourceTree = "<group>"; };
+		B7A05FC62F5CD89D00639B4B /* RFIDEncoder.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = RFIDEncoder.framework; sourceTree = "<group>"; };
 		B7A733C51C0396E9008F2030 /* ValiTag.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = ValiTag.entitlements; sourceTree = "<group>"; };
 		B7B18C341AF425B100025761 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		B7B18C361AF425BC00025761 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
@@ -143,7 +142,7 @@
 				B7B18C3B1AF425D900025761 /* libz.1.2.5.dylib in Frameworks */,
 				B7DA2FC81B7994FB00F4C2FC /* libsymbolrfid-sdk.a in Frameworks */,
 				B7DA2FCC1B79977500F4C2FC /* CoreBluetooth.framework in Frameworks */,
-				B799907E2235D92D0081E11F /* RFIDEncoder.framework in Frameworks */,
+				B7A05FC82F5CD89D00639B4B /* RFIDEncoder.framework in Frameworks */,
 				B7DA2FCE1B79978200F4C2FC /* ExternalAccessory.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -152,6 +151,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B7A05FC72F5CD89D00639B4B /* RFIDEncoder.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,7 +177,7 @@
 			children = (
 				B71C5C571AF000C700D28341 /* ValiTag */,
 				B71C5C711AF000C700D28341 /* ValiTagTests */,
-				B7EC32B4222CDE6300489436 /* RFIDEncoder */,
+				B7A05FC62F5CD89D00639B4B /* RFIDEncoder.framework */,
 				B7DA2FC61B7994D100F4C2FC /* Zebra */,
 				B7117D411B38920E00968426 /* uGrokit */,
 				B71C5C561AF000C700D28341 /* Products */,
@@ -308,14 +308,6 @@
 			name = Zebra;
 			sourceTree = "<group>";
 		};
-		B7EC32B4222CDE6300489436 /* RFIDEncoder */ = {
-			isa = PBXGroup;
-			children = (
-				B799907D2235D92D0081E11F /* RFIDEncoder.framework */,
-			);
-			path = RFIDEncoder;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -381,7 +373,7 @@
 				};
 			};
 			buildConfigurationList = B71C5C501AF000C700D28341 /* Build configuration list for PBXProject "ValiTag" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -591,12 +583,14 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/RFIDEncoder",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = ValiTag/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -606,7 +600,10 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
+				USER_HEADER_SEARCH_PATHS = (
+					"uGrokit/include/**",
+					"Zebra/include/**",
+				);
 			};
 			name = Debug;
 		};
@@ -624,12 +621,14 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/RFIDEncoder",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				INFOPLIST_FILE = ValiTag/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -639,7 +638,10 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = "uGrokit/include/** Zebra/include/**";
+				USER_HEADER_SEARCH_PATHS = (
+					"uGrokit/include/**",
+					"Zebra/include/**",
+				);
 			};
 			name = Release;
 		};
@@ -651,15 +653,18 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/RFIDEncoder",
 				);
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = ValiTagTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.target.stores.$(PRODUCT_NAME:rfc1034identifier:lower)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ValiTag.app/ValiTag";
@@ -674,11 +679,14 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/RFIDEncoder",
 				);
 				INFOPLIST_FILE = ValiTagTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.target.stores.$(PRODUCT_NAME:rfc1034identifier:lower)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ValiTag.app/ValiTag";
