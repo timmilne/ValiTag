@@ -22,14 +22,13 @@
 #import <RFIDEncoder/TIAIEncoder.h>   // To encode TIAIs (Non-Retail, Target internal)
 #import <RFIDEncoder/Converter.h>     // To convert to binary for comparison
 #import "ValidTagObject.h"            // Valid tag data object class
-#import "Ugi.h"                       // uGrokit reader
 #import "RfidSdkFactory.h"            // Zebra reader
 #import "AppDelegate.h"               // The app delegate
 
 #pragma mark -
 #pragma mark AVFoundationScanSetup
 
-@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, UgiInventoryDelegate, srfidISdkApiDelegate, NSFilePresenter>
+@interface ScannerViewController ()<AVCaptureMetadataOutputObjectsDelegate, srfidISdkApiDelegate, NSFilePresenter>
 {
     __weak IBOutlet UIImageView *_matchView;
     __weak IBOutlet UIImageView *_noMatchView;
@@ -67,10 +66,6 @@
     TIAIEncoder                 *_encodeTIAI;
     Converter                   *_convert;
     
-    BOOL                        _ugiReaderConnected;
-    UgiRfidConfiguration        *_ugiConfig;
-    
-    BOOL                        _zebraReaderConnected;
     id <srfidISdkApi>           _rfidSdkApi;
     int                         _zebraReaderID;
     srfidStartTriggerConfig     *_startTriggerConfig;
@@ -188,29 +183,12 @@
     if (_encodeTIAI == nil) _encodeTIAI = [TIAIEncoder alloc];
     if (_convert == nil) _convert = [Converter alloc];
     
-    // Register with the default NotificationCenter
-    // TPM there was a typo in the online documentation fixed here
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(connectionStateChanged:)
-                                                 name:[Ugi singleton].NOTIFICAION_NAME_CONNECTION_STATE_CHANGED
-                                               object:nil];
-    
-    // Connect to the scanner
-    // When notified that the connection is established, get the battery life, and start a scan
-    [[Ugi singleton] openConnection];
-    
     // Pop the subviews to the front
     [self.view bringSubviewToFront:_rfidLbl];
     [self.view bringSubviewToFront:_batteryLifeLbl];
     [self.view bringSubviewToFront:_batteryLifeView];
     
-    // Set uGrokit scanner configuration used in startInventory
-    _ugiReaderConnected = FALSE;
-    _ugiConfig = [UgiRfidConfiguration configWithInventoryType:UGI_INVENTORY_TYPE_INVENTORY_SHORT_RANGE];
-    [_ugiConfig setVolume:.2];
-    
     // Set Zebra scanner configurations used in srfidStartRapidRead
-    _zebraReaderConnected = FALSE;
     _zebraReaderID = -1;
     [self zebraInitializeRfidSdkWithAppSettings];
     
@@ -454,29 +432,12 @@
     
     [self resetMatch];
     
-    // TPM - This logic assumes that once you've read a tag with one type of reader, you won't switch
-    // to another.  If you change readers, restart the app.  The first reader to scan a tag sets the
-    // reader flags for that session.  Until then, all protocols are attempted until a tag is found.
-    
     // If no connection open, open it now and start scanning for RFID tags
-    // Before we know what reader, we try all, so test the negative
-    
-    // uGrokit Reader
-    if (!_zebraReaderConnected) {
-        [[Ugi singleton].activeInventory stopInventory];
-        [[Ugi singleton] closeConnection];
-        [[Ugi singleton] openConnection];  // Once the reader is connected, this triggers the tag reads
-        _rfidLbl.text = @"RFID: (connecting to reader)";
-    }
-    
-    // Zebra Reader
-    if (!_ugiReaderConnected) {
-        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
-        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
-        _zebraReaderID = -1;
-        _rfidLbl.text = @"RFID: (connecting to reader)";
-        [self zebraRapidRead];
-    }
+    [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
+    [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
+    _zebraReaderID = -1;
+    _rfidLbl.text = @"RFID: (connecting to reader)";
+    [self zebraRapidRead];
     
     return TRUE;
 }
@@ -1311,14 +1272,6 @@
                        // Get the RFID tag
                        [self rfidInit:[tagData getTagId]];
     
-                       // After the first read, we know which reader
-                       if (!self->_zebraReaderConnected) {
-                           [[Ugi singleton].activeInventory stopInventory];
-                           [[Ugi singleton] closeConnection];
-                       }
-                       self->_ugiReaderConnected = FALSE;
-                       self->_zebraReaderConnected = TRUE;
-    
                        // Check encodings
                        [self checkEncodings];
                        
@@ -1352,136 +1305,5 @@
                        self->_batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", battery];
                    });
 }
-
-#pragma mark -
-#pragma mark - uGrokit Reader Support
-#pragma mark -
-
-/*!
- * @discussion New tag found with uGrokit reader.
- * Display the tag, stop the reader, disable the other readers, and check for a match.
- * @param tag The RFID tag
- * @param detailedPerReadData The detailed data about the RFID tag
- */
-- (void) inventoryTagFound:(UgiTag *)tag
-   withDetailedPerReadData:(NSArray *)detailedPerReadData {
-    // tag was found for the first time
-    
-    // Stop the RFID reader
-    [[Ugi singleton].activeInventory stopInventory];
-    
-    // Initialize the RFID tag
-    [self rfidInit:[tag.epc toString]];
-    
-    // Close the connection
-    [[Ugi singleton] closeConnection];
-    
-    // After the first read, we know which reader
-    if (!_ugiReaderConnected) {
-        [_rfidSdkApi srfidStopRapidRead:_zebraReaderID aStatusMessage:nil];
-        [_rfidSdkApi srfidTerminateCommunicationSession:_zebraReaderID];
-        _zebraReaderID = -1;
-    }
-    _ugiReaderConnected = TRUE;
-    _zebraReaderConnected = FALSE;
-    
-    // Check encodings
-    [self checkEncodings];
-    
-    // Log the read tag
-    NSLog(@"\nRFID tag read: %@\n", _validTag.rfid);
-}
-
-/*!
- * @discussion State changed with uGrokit reader - Adjust to the new state, ignore if Arete reader being used.
- * Listen for one of the following:
- *    UGI_CONNECTION_STATE_NOT_CONNECTED -          Nothing connected to audio port
- *    UGI_CONNECTION_STATE_CONNECTING -             Something connected to audio port, trying to connect
- *    UGI_CONNECTION_STATE_INCOMPATIBLE_READER -    Connected to an reader with incompatible firmware
- *    UGI_CONNECTION_STATE_CONNECTED -              Connected to reader
- * @param notification The notification info
- */
-- (void)connectionStateChanged:(NSNotification *) notification {
-    NSNumber *n = notification.object;
-    
-    UgiConnectionStates connectionState = n.intValue;
-    if (connectionState == UGI_CONNECTION_STATE_CONNECTED) {
-        // Update the battery life with a new connection before starting an inventory
-        UgiBatteryInfo batteryInfo;
-        if ([[Ugi singleton] getBatteryInfo:&batteryInfo]) {
-            _batteryLifeView.progress = (batteryInfo.percentRemaining)/100.;
-            _batteryLifeLbl.backgroundColor =
-            (batteryInfo.percentRemaining > 20)?UIColorFromRGB(0xA4CD39):
-            (batteryInfo.percentRemaining > 5 )?UIColorFromRGB(0xCC9900):
-            UIColorFromRGB(0xCC0000);
-            
-            _batteryLifeLbl.text = [NSString stringWithFormat:@"RFID Battery Life: %d%%", batteryInfo.percentRemaining];
-        }
-        
-        // Start scanning for RFID tags - when a tag is found, the inventoryTagFound delegate will be called
-        _rfidLbl.text = @"RFID: (scanning for tags)";
-        [[Ugi singleton] startInventory:self withConfiguration:_ugiConfig];
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_CONNECTING) {
-        _rfidLbl.text = @"RFID: (connecting to reader)";
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_INCOMPATIBLE_READER) {
-        // With no reader, just ignore the RFID reads
-        [_validTag.rfid setString:@"RFID: no reader found"];
-        _rfidLbl.backgroundColor = UIColorFromRGB(0xCC0000);
-        _rfidFound = TRUE;
-        return;
-    }
-    if (connectionState == UGI_CONNECTION_STATE_NOT_CONNECTED ) {
-        // This gets called after a tag is read and the connection closed
-        // The label and the rfid flag have already been set in inventoryTagFound
-        // Don't do anything here
-        return;
-    }
-}
-
-/*
- // Subsequent finds of previously found tag
- - (void) inventoryTagSubsequentFinds:(UgiTag *)tag numFinds:(int)num
- withDetailedPerReadData:(NSArray *)detailedPerReadData {
- // tag found count more times
- }
- */
-
-/*
- // Tag visibility changed
- - (void) inventoryTagChanged:(UgiTag *)tag isFirstFind:(BOOL)firstFind {
- if (firstFind) {
- // tag was found for the first time
- } else if (tag.isVisible) {
- // tag was not visible, is now visible again
- } else {
- // tag is no longer visible
- }
- }
- */
-
-/*
- // Tag filtering
- - (BOOL) inventoryFilterTag:(UgiTag *)tag {
- if (this tag should be ignored) {
- return YES;
- } else {
- return NO;
- }
- }
- */
-
-/*
- // List of found tags
- // While inventory is running, the app can access the list of found tags via the tags property of the UgiInventory object.
- // @property (readonly, retain) NSArray *tags;
- // Usage is typically:
- for (UgiTag *tag in [Ugi singleton].activeInventory.tags) {
- // do something with tag
- }
- */
 
 @end

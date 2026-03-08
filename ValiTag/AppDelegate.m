@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "Ugi.h"
 
 @interface AppDelegate ()
 
@@ -24,13 +23,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-    
-    // Explicitly create the singleton for the uGrokit reader
-    // We'll open the connection when the ScannerViewController is active
-    [Ugi createSingleton];
-    
-// TPM - uncomment this for useful debugging info
-//    [Ugi singleton].loggingStatus |= UGI_LOGGING_INTERNAL_PACKET_PROTOCOL;
     
     // Only true or set if invoked from another app
     [self setScanScanSaveReturn:NO];
@@ -63,9 +55,6 @@
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    
-    // Release the uGrokit reader
-    [Ugi releaseSingleton];
 }
     
 - (BOOL)application:(UIApplication *)application openURL:(NSURL *)url
