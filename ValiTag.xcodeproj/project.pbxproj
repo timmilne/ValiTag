@@ -16,6 +16,7 @@
 		B71C5C751AF000C700D28341 /* ValiTagTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C741AF000C700D28341 /* ValiTagTests.m */; };
 		B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B71C5C811AF0108C00D28341 /* ScannerViewController.m */; };
 		B727E87A21D963D20054B064 /* ValidTagObject.m in Sources */ = {isa = PBXBuildFile; fileRef = B727E87921D963D20054B064 /* ValidTagObject.m */; };
+		B753D8CA2F5E309B0036BBC5 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = B753D8C92F5E30990036BBC5 /* SceneDelegate.m */; };
 		B76E24B61B7E4CAF004E8F73 /* EPCEncoderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */; };
 		B76E24BC1B7E4D71004E8F73 /* ScannerVCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */; };
 		B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B79B20121AFA6FD800B7900D /* DataViewController.m */; };
@@ -68,6 +69,8 @@
 		B71C5C811AF0108C00D28341 /* ScannerViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerViewController.m; sourceTree = "<group>"; };
 		B727E87821D963D20054B064 /* ValidTagObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ValidTagObject.h; sourceTree = "<group>"; };
 		B727E87921D963D20054B064 /* ValidTagObject.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ValidTagObject.m; sourceTree = "<group>"; };
+		B753D8C82F5E30900036BBC5 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		B753D8C92F5E30990036BBC5 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
 		B76E24B51B7E4CAF004E8F73 /* EPCEncoderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EPCEncoderTests.m; sourceTree = "<group>"; };
 		B76E24BB1B7E4D71004E8F73 /* ScannerVCTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScannerVCTests.m; sourceTree = "<group>"; };
 		B77B31FC1BBC0C950017348E /* AccessOperationCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessOperationCode.h; sourceTree = "<group>"; };
@@ -151,6 +154,8 @@
 				B7A733C51C0396E9008F2030 /* ValiTag.entitlements */,
 				B71C5C5C1AF000C700D28341 /* AppDelegate.h */,
 				B71C5C5D1AF000C700D28341 /* AppDelegate.m */,
+				B753D8C82F5E30900036BBC5 /* SceneDelegate.h */,
+				B753D8C92F5E30990036BBC5 /* SceneDelegate.m */,
 				B727E87821D963D20054B064 /* ValidTagObject.h */,
 				B727E87921D963D20054B064 /* ValidTagObject.m */,
 				B79B20111AFA6FD800B7900D /* DataViewController.h */,
@@ -348,6 +353,7 @@
 				B71C5C5E1AF000C700D28341 /* AppDelegate.m in Sources */,
 				B79B20131AFA6FD800B7900D /* DataViewController.m in Sources */,
 				B7117D3D1B31FFF900968426 /* NavigationController.m in Sources */,
+				B753D8CA2F5E309B0036BBC5 /* SceneDelegate.m in Sources */,
 				B71C5C5B1AF000C700D28341 /* main.m in Sources */,
 				B727E87A21D963D20054B064 /* ValidTagObject.m in Sources */,
 				B71C5C821AF0108C00D28341 /* ScannerViewController.m in Sources */,
@@ -523,16 +529,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = (
-					"uGrokit/include/**",
-					"Zebra/include/**",
-				);
+				USER_HEADER_SEARCH_PATHS = "Zebra/include/**";
 			};
 			name = Debug;
 		};
@@ -561,16 +563,12 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/uGrokit",
 					"$(PROJECT_DIR)/Zebra",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = com.timmilne.valitag;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				USER_HEADER_SEARCH_PATHS = (
-					"uGrokit/include/**",
-					"Zebra/include/**",
-				);
+				USER_HEADER_SEARCH_PATHS = "Zebra/include/**";
 			};
 			name = Release;
 		};

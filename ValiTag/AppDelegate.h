@@ -10,8 +10,6 @@
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
-@property (strong, nonatomic) UIWindow  *window;
-
 // OpenURL support
 // Scan Scan Save and Return
 @property                     BOOL      scanScanSaveReturn;
